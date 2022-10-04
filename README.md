@@ -10,7 +10,9 @@ https://tocotea.software
 #### hoặc:  
     sh script.sh
 
-Ngồi đợi! Sau đó project sẽ chạy ở localhost:3000
+#### sau đó
+    npm start
+App chạy ở localhost:3000
 
 ### Nếu bạn không biết bash script
 #### 1. Clone project  
