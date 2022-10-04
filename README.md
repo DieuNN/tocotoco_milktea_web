@@ -1,21 +1,37 @@
-#Web app Đặt trà sữa Tocotoco dành cho admin
+# Web app Đặt trà sữa Tocotoco dành cho admin
+https://tocotea.software
 
-Để chạy trên local:
 
-1. Clone project
-  
-   `git clone https://github.com/DieuNN/tocotoco_milktea_web.git`
 
-   `cd tocotoco_milktea_web`
+## Để chạy trên local:  
 
-2.  Install dependencies using npm
+### Nếu bạn biết sử dụng bash script:
+    bash script.sh
+#### hoặc:  
+    sh script.sh
 
-    `npm i`
+Ngồi đợi! Sau đó project sẽ chạy ở localhost:3000
 
-3. Run app in browser
+### Nếu bạn không biết bash script
+#### 1. Clone project  
+    git clone https://github.com/DieuNN/tocotoco_milktea_web.git
 
-   `npm start`
+    cd tocotoco_milktea_web
 
-4. Check if app is running:
-- Open link in any browser
-  `localhost:3000`
+#### 2.  Cài đặt các thư viện cần thiết
+
+    npm i
+
+#### 3. Project sử dụng typescript, nên một số type phải cài thêm
+
+     types install --save mysql2
+
+#### 4. Chạy project:  
+    npm run dev
+
+#### 5. Xem kết quả:
+    localhost:3000
+
+
+
+    
