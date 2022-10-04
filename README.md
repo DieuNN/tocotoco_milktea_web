@@ -11,7 +11,7 @@ https://tocotea.software
     sh script.sh
 
 #### sau đó
-    npm start
+    npm run start:gulp
 App chạy ở localhost:3000
 
 ### Nếu bạn không biết bash script

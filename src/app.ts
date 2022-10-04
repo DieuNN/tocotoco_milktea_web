@@ -37,10 +37,9 @@ const connection = mysql.createConnection(mySQLConfig)
 connection.connect((error) => {
     if (error)
         throw error
-    console.log("Connected to online MySQL")
 })
 
 
 server.listen(port, () => {
-    console.log(`SERVER RUNNING ON ${port}`);
+
 });
