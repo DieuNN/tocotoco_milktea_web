@@ -8,6 +8,10 @@ import dotenv from 'dotenv'
 import mysql from 'mysql2'
 import {mySQLConfig} from "./config/debug";
 import bodyParser from 'body-parser'
+import {adminLoginLogRoute, loginPostRoute, loginRoute} from "./routes";
+import {homeRoute} from "./routes";
+import {logoutRoute} from "./routes";
+import requestIp from 'request-ip'
 
 
 export const app: Application = express();
@@ -46,44 +50,39 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(cookie_parser())
+app.use(requestIp.mw())
 
-/* Sample admin login */
-const adminUsername = "admin"
-const adminPassword = "admin"
-
-var session;
+var session : any;
 
 /*Login route*/
-app.get("/login", (req: Request, res: Response) => {
-    res.render("login", {isError : false})
-});
+loginRoute(app)
 
 /* Home route */
-app.get("/", (req: Request, res: Response) => {
-    res.render("index")
-});
+homeRoute(app)
 
 /*Login  POST route */
-app.post("/login", (req: Request, res: Response) => {
-    const {username, password} = req.body
-    if (username == adminUsername && password == adminPassword) {
-        session = req.session
-        //@ts-ignore
-        session.userid = username
-        res.redirect("/")
-    } else {
-        res.render("login", {isError : true})
-    }
+loginPostRoute(app, session)
+
+/* Logout route */
+logoutRoute(app)
+
+
+
+/* Login logs route */
+adminLoginLogRoute(app)
+
+/* 404 page */
+app.use((req, res)=> {
+    res.status(404).render('404')
 })
 
+const connection = mysql.createConnection(mySQLConfig)
 
-// const connection = mysql.createConnection(mySQLConfig)
-//
-// connection.connect((error) => {
-//     if (error)
-//         throw error
-// })
-
+connection.connect((error) => {
+    if (error)
+        throw error
+    console.log("Connected")
+})
 
 server.listen(port, () => {
 
