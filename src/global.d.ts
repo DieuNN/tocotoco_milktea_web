@@ -5,7 +5,19 @@ declare module 'express-session' {
 }
 declare namespace NodeJS {
     interface ProcessEnv {
-        ADMIN_USERNAME : string
+        ADMIN_USERNAME: string
+    }
+}
+
+declare global {
+    interface MySQLResult {
+        fieldCount?: number,
+        affectedRows?: number,
+        insertId?: number,
+        info?: string,
+        serverStatus?: number,
+        warningStatus?: number,
+        changedRows?: number,
     }
 }
 

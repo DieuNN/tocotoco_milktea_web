@@ -8,10 +8,17 @@ import dotenv from 'dotenv'
 import mysql from 'mysql2'
 import {mySQLConfig} from "./config/debug";
 import bodyParser from 'body-parser'
-import {adminLoginLogRoute, loginPostRoute, loginRoute} from "./routes";
+import {adminLoginLogRoute, API, loginPostRoute, loginRoute, productCategoryRoute} from "./routes";
 import {homeRoute} from "./routes";
 import {logoutRoute} from "./routes";
 import requestIp from 'request-ip'
+import {
+    addProductCategory,
+    createDiscount,
+    deleteProductCategory,
+    editProductCategory,
+    getProductCategories, getProductCategory, getUser, getUsers
+} from "./mysql";
 
 
 export const app: Application = express();
@@ -52,7 +59,7 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(cookie_parser())
 app.use(requestIp.mw())
 
-var session : any;
+var session: any;
 
 /*Login route*/
 loginRoute(app)
@@ -66,23 +73,40 @@ loginPostRoute(app, session)
 /* Logout route */
 logoutRoute(app)
 
-
-
 /* Login logs route */
 adminLoginLogRoute(app)
 
+/* Product categories route */
+productCategoryRoute(app)
+
+/* API Route */
+API(app)
 /* 404 page */
-app.use((req, res)=> {
+app.use((req, res) => {
     res.status(404).render('404')
 })
 
-const connection = mysql.createConnection(mySQLConfig)
+let connection;
 
-connection.connect((error) => {
-    if (error)
-        throw error
-    console.log("Connected")
-})
+function handleDisconnect() {
+    connection = mysql.createConnection(mySQLConfig)
+    connection.connect((error) => {
+        if (error)
+            setTimeout(handleDisconnect, 2000)
+        console.log("Connected")
+    })
+
+    connection.on('error', (error: any) => {
+        console.log("Database error : ", error);
+        if (error.code === "PROTOCOL_CONNECTION_LOST") {
+            handleDisconnect()
+        } else {
+            throw error
+        }
+    })
+}
+
+handleDisconnect()
 
 server.listen(port, () => {
 

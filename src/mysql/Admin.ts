@@ -1,7 +1,6 @@
 import {mySQLConfig} from "../config/debug";
 import mySQL from "mysql2/promise"
 import {FieldPacket, OkPacket} from 'mysql2'
-import moment from 'moment';
 
 
 export async function isAdminLogin(username: string, password: string, ip : string | undefined): Promise<boolean> {
