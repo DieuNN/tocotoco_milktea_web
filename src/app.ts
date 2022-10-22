@@ -12,13 +12,6 @@ import {adminLoginLogRoute, API, loginPostRoute, loginRoute, productCategoryRout
 import {homeRoute} from "./routes";
 import {logoutRoute} from "./routes";
 import requestIp from 'request-ip'
-import {
-    addProductCategory,
-    createDiscount,
-    deleteProductCategory,
-    editProductCategory,
-    getProductCategories, getProductCategory, getUser, getUsers
-} from "./mysql";
 
 
 export const app: Application = express();
@@ -105,6 +98,7 @@ function handleDisconnect() {
         }
     })
 }
+
 
 handleDisconnect()
 

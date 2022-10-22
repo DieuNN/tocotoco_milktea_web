@@ -46,9 +46,22 @@ declare type User = {
     password: string | null,
     name: string,
     phoneNumber: string,
-    createAt: string,
-    modifiedAt: string
+    createAt: string | null,
+    modifiedAt: string | null
+}
 
+
+declare type UserAddress = {
+    id: number | null,
+    userId: number | null,
+    address: string,
+    phoneNumber: string
+}
+
+declare type APIResponse = {
+    isSuccess: boolean
+    result: null | any,
+    errorMessage: null | any
 }
 
 
