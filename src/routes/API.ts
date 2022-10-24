@@ -16,8 +16,12 @@ export function API(app: Application) {
         res.json(result)
     })
     app.get("/api/users", async (req: Request, res: Response) => {
-        const result = await getUsers()
-        res.json(result)
+        const result = getUsers()
+        result.then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e)
+        })
     })
     app.get("/api/user_info", async (req: Request, res: Response) => {
         const {id} = req.body

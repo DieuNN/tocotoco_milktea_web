@@ -38,12 +38,6 @@ export function loginPostRoute(app: Application, session: any) {
             }).catch(e => {
                 console.log(e)
             })
-            // await updateAdminLastLogin()
-            // if (isLoginValid) {
-
-            // } else {
-            //     res.render("login", {isError: true})
-            // }
         }
     )
 }
