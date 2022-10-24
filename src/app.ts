@@ -67,8 +67,7 @@ loginPostRoute(app, session)
 logoutRoute(app)
 
 /* Login logs route */
-// adminLoginLogRoute(app)
-isAdminLogin('admin', 'admin', '123')
+adminLoginLogRoute(app)
 
 /* Product categories route */
 productCategoryRoute(app)
@@ -100,17 +99,6 @@ function handleDisconnect() {
         }
     })
 }
-
-updateUser(1, {
-    id : null,
-    phoneNumber : '',
-    email : "",
-    password : " ",
-    createAt : null,
-    modifiedAt : null,
-    name : "ma",
-    username : 'gamin'
-})
 
 handleDisconnect()
 
