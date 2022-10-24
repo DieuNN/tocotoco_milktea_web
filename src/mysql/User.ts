@@ -1,19 +1,18 @@
-import {mySQLConfig} from "../config/debug";
-import mySQL, {OkPacket, FieldPacket, RowDataPacket,} from 'mysql2/promise'
+import {PostgreSQLConfig} from "../config/debug";
 import md5 from 'md5'
 import {createException, createResult} from "./index";
+import {Pool} from "pg";
 
 async function isUsernameHasTaken(username: string): Promise<boolean> {
-    const connection = await mySQL.createConnection(mySQLConfig)
+    const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`select count(*)
-                                         from User
+                                         from "User"
                                          where username = '${username}'`)
-    // @ts-ignore
-    return result[0][0]['count(*)'] === 1;
+    return result.rowCount === 1
 }
 
 export async function createUser(user: User): Promise<APIResponse> {
-    const connection = await mySQL.createConnection(mySQLConfig)
+    const connection = await new Pool(PostgreSQLConfig)
     const encryptedPassword = md5(user.password!)
 
     const isUsernameExist = await isUsernameHasTaken(user.username)
@@ -22,23 +21,23 @@ export async function createUser(user: User): Promise<APIResponse> {
         return createException("Tên người dùng đã được sử dụng")
     }
 
-    let insertNewUserResult = await connection.execute(`insert into User
-                                                        values (0,
-                                                                '${user.username}',
-                                                                '${user.email}',
-                                                                '${encryptedPassword}',
-                                                                '${user.name}',
-                                                                '${user.phoneNumber}',
-                                                                now(),
-                                                                now())`)
-    let insertIndex = (insertNewUserResult as unknown as MySQLResult[])[0].insertId
-    let insertUserAddressResult = await connection.execute(`insert into UserAddress
-                                                            values (0,
-                                                                    ${insertIndex},
-                                                                    '',
-                                                                    '')`)
-    if ((insertNewUserResult as unknown as MySQLResult[])[0].affectedRows === 1
-        && (insertUserAddressResult as unknown as MySQLResult[])[0].affectedRows === 1) {
+    let insertNewUserId = await connection.query(`insert into "User"
+                                                      values (DEFAULT,
+                                                              '${user.username}',
+                                                              '${user.email}',
+                                                              '${encryptedPassword}',
+                                                              '${user.name}',
+                                                              '${user.phoneNumber}',
+                                                              now(),
+                                                              now()) returning id`)
+    let insertIndex = insertNewUserId.rows[0].id
+    let insertUserAdress = await connection.query(`insert into "UserAddress"
+                                                   values (DEFAULT,
+                                                           ${insertIndex},
+                                                           '',
+                                                           '')`)
+    if ((insertNewUserId.rowCount === 1
+        && (insertUserAdress.rowCount === 1))) {
         return {
             isSuccess: true,
             result: true,
@@ -54,148 +53,109 @@ export async function createUser(user: User): Promise<APIResponse> {
 
 }
 
-export async function getUsers(): Promise<APIResponse> {
-    const connection = await mySQL.createConnection(mySQLConfig)
-    let [rows, _] = await connection.execute(`select User.id,
-                                                     User.name,
-                                                     User.email,
-                                                     User.phoneNumber,
-                                                     User.createAt,
-                                                     UserAddress.address
-                                              from User
-                                                       inner join UserAddress on User.id = UserAddress.userId;`)
-    let result = [];
-    // @ts-ignore
-    for (let element of rows) {
-        result.push({
-            // @ts-ignore
-            name: element.name,
-            // @ts-ignore
-            email: element.email,
-            // @ts-ignore
-            phoneNumber: element.phoneNumber,
-            // @ts-ignore
-            address: element.address,
-            // @ts-ignore
-            createAt: element.createAt
-        })
-    }
-    if (result.length === 0) {
-        return {
-            isSuccess: false,
-            result: null,
-            errorMessage: "Lỗi server!"
-        }
-    }
+export async function getUsers() {
+    const connection = await new Pool(PostgreSQLConfig)
+    let result = await connection.query(`select "User".id, name, email, "User".phoneNumber, createAt, address
+                                         from "User"
+                                                  inner join "UserAddress" on "User".id = "UserAddress".userId`)
+
+
     return {
         isSuccess: true,
-        result: result,
+        result: result.rows,
         errorMessage: null
     }
 }
 
-export async function getUser(id: number): Promise<any> {
-    const connection = await mySQL.createConnection(mySQLConfig)
-    let [rows, _]: [OkPacket[], FieldPacket[]] = await connection.execute(`select User.id,
-                                                                                  User.username,
-                                                                                  User.name,
-                                                                                  User.email,
-                                                                                  User.phoneNumber,
-                                                                                  User.createAt,
-                                                                                  UserAddress.address
-                                                                           from User
-                                                                                    inner join UserAddress on User.id = UserAddress.userId
-                                                                           where User.id = ${id};`)
-    if (rows.length === 0) {
+export async function getUser(id: number): Promise<APIResponse> {
+    const connection = await new Pool(PostgreSQLConfig)
+    let result = await connection.query(`select "User".id,
+                                                "User".username,
+                                                "User".name,
+                                                "User".email,
+                                                "User".phoneNumber,
+                                                "User".createAt,
+                                                "UserAddress".address
+                                         from "User"
+                                                  inner join "UserAddress" on "User".id = "UserAddress".userId
+                                         where "User".id = ${id};`)
+
+    if (result.rows[0] == undefined) {
         return {
             isSuccess: false,
             result: null,
-            errorMessage: "Lỗi server!"
+            errorMessage: "Khong tim thay user nay"
         }
     } else {
         return {
             isSuccess: true,
-            result: rows[0],
+            result: result.rows[0],
             errorMessage: null
         }
     }
+
 }
 
 export async function updateUser(oldId: number, user: User): Promise<APIResponse> {
-    const connection = await mySQL.createConnection(mySQLConfig)
-    let encryptedPassword = md5(user.password!)
-    let row = await connection.execute(`update User
-                                        set name        = '${user.name}',
-                                            password    = '${user.password}',
-                                            username    = '${user.username}',
-                                            email       = '${user.email}',
-                                            phoneNumber = '${user.phoneNumber}',
-                                            modifiedAt  = now()
-                                        where id = ${oldId}
-    `)
-    if ((row as unknown as MySQLResult).affectedRows === 1) {
-        return {
-            isSuccess: true,
-            result: true,
-            errorMessage: null
-        }
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let encryptedPassword = md5(user.password!)
+        let result = await connection.query(`update "User"
+                                             set name        = '${user.name}',
+                                                 password    = '${user.password}',
+                                                 username    = '${user.username}',
+                                                 email       = '${user.email}',
+                                                 phoneNumber = '${user.phoneNumber}',
+                                                 modifiedAt  = now()
+                                             where id = ${oldId}
+        `)
+        return createResult(result.rowCount == 1)
+    } catch (e) {
+        return createException("Loi server!")
     }
-    return {
-        isSuccess: false,
-        result: false,
-        errorMessage: "Lỗi server!"
-    }
+
 }
 
 
 export async function deleteUser(id: number): Promise<APIResponse> {
-    const connection = await mySQL.createConnection(mySQLConfig)
-    let result = await connection.execute(`delete
-                                           from User
-                                           where id = ${id}`)
-    if ((result as unknown as MySQLResult).affectedRows === 1) {
-        return {
-            isSuccess: true,
-            result: true,
-            errorMessage: null
-        }
-    }
-    return {
-        isSuccess: false,
-        result: false,
-        errorMessage: "Lỗi server!"
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`delete
+                                             from "User"
+                                             where id = ${id}`)
+        return createResult(result.rowCount == 1)
+
+    } catch (e) {
+        return createException("Loi server!")
     }
 }
 
 export async function updateUserAddress(id: number, userAddress: UserAddress): Promise<APIResponse> {
-    const connection = await mySQL.createConnection(mySQLConfig)
-    let result = await connection.execute(`update UserAddress
-                                           set phoneNumber = '${userAddress.phoneNumber}',
-                                               address     = '${userAddress.address}'
-                                           where id = ${id}
-    `)
-    if ((result as unknown as MySQLResult).affectedRows === 1) {
-        return {
-            isSuccess: true,
-            result: true,
-            errorMessage: null
-        }
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`update "UserAddress"
+                                             set phoneNumber = '${userAddress.phoneNumber}',
+                                                 address     = '${userAddress.address}'
+                                             where id = ${id}
+        `)
+        return createResult(result.rowCount === 1)
+    } catch (e) {
+        return createException("Loi server!");
     }
-    return {
-        isSuccess: false,
-        result: false,
-        errorMessage: "Lỗi server!"
-    }
+
 }
 
 export async function getUserId(username: string): Promise<APIResponse> {
     try {
-        const connection = await mySQL.createConnection(mySQLConfig)
+        const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select id
-                                             from User
+                                             from "User"
                                              where username = '${username}'`)
-        // @ts-ignore
-        return createResult(result[0][0].id)
+        if (result.rows.length === 0) {
+            return createException("Khong tim thay ID")
+        } else {
+            return createResult(result.rows[0])
+        }
     } catch (e) {
         return createException(e)
     }
@@ -204,31 +164,31 @@ export async function getUserId(username: string): Promise<APIResponse> {
 
 export async function getUserLoginInfo(username: string, password: string, usernameType: string): Promise<APIResponse> {
     let encryptedPassword: string = md5(password)
-    const connection = await mySQL.createConnection(mySQLConfig)
+    const connection = await new Pool(PostgreSQLConfig)
     let result;
     switch (usernameType) {
         case "email" : {
             let sqlQuery = `Select count(*)
-                            from User
+                            from "User"
                             where email = '${username}'
                               and password = '${encryptedPassword}'`
-            result = await connection.execute(sqlQuery)
+            result = await connection.query(sqlQuery)
             break
         }
         case "phoneNumber" : {
             let sqlQuery = `Select count(*)
-                            from User
+                            from "User"
                             where phoneNumber = '${username}'
                               and password = '${encryptedPassword}'`
-            result = await connection.execute(sqlQuery)
+            result = await connection.query(sqlQuery)
             break
         }
         case "username" : {
             let sqlQuery = `Select count(*)
-                            from User
+                            from "User"
                             where username = '${username}'
                               and password = '${encryptedPassword}'`
-            result = await connection.execute(sqlQuery)
+            result = await connection.query(sqlQuery)
             break
         }
         default : {
@@ -240,8 +200,8 @@ export async function getUserLoginInfo(username: string, password: string, usern
         }
     }
 
-    // @ts-ignore
-    if (result[0][0]['count(*)'] === 1) {
+
+    if (result.rowCount === 1) {
         return {
             isSuccess: true,
             result: true,
@@ -254,6 +214,26 @@ export async function getUserLoginInfo(username: string, password: string, usern
             errorMessage: "Thông tin đăng nhập không đúng!"
         }
     }
+}
+
+export async function updateUserPassword(id: number, oldPassword: string, newPassword: string): Promise<APIResponse> {
+    try {
+        let encryptedOldPassword: string = md5(oldPassword)
+        let encryptedNewPassword: string = md5(newPassword)
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`update "User"
+                                             set password = ${encryptedNewPassword}
+                                             where id = ${id}
+                                               and password = '${encryptedOldPassword}'`)
+        if (result.rowCount === 1) {
+            return createResult(true)
+        } else {
+            return createException("Khong tim thay thong tin");
+        }
+    } catch (e) {
+        return createException(e)
+    }
+
 }
 
 

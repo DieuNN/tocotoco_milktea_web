@@ -1,20 +1,20 @@
-import express, {Application, Request, Response} from "express";
+import express, {Application} from "express";
 import path from "path";
 import http from "http";
 import expressLayouts from 'express-ejs-layouts';
 import cookie_parser from 'cookie-parser'
 import sessions from 'express-session'
 import dotenv from 'dotenv'
-import mysql from 'mysql2'
-import {mySQLConfig} from "./config/debug";
+import {PostgreSQLConfig} from "./config/debug";
 import bodyParser from 'body-parser'
-import {adminLoginLogRoute, API, loginPostRoute, loginRoute, productCategoryRoute} from "./routes";
-import {homeRoute} from "./routes";
-import {logoutRoute} from "./routes";
+import {API, homeRoute, loginPostRoute, loginRoute, logoutRoute, productCategoryRoute} from "./routes";
 import requestIp from 'request-ip'
+import {Client} from 'pg';
+import {isAdminLogin, updateUser} from "./mysql";
 
 
 export const app: Application = express();
+
 const server: http.Server = http.createServer(app);
 dotenv.config({
     path: "process.env"
@@ -44,7 +44,7 @@ app.use(sessions({
     secret: process.env.SESSION_SECRET_KEY,
     saveUninitialized: true,
     cookie: {maxAge: 1000 * 60 * 60 * 24},
-    resave: true
+    resave: true,
 }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded())
@@ -67,7 +67,8 @@ loginPostRoute(app, session)
 logoutRoute(app)
 
 /* Login logs route */
-adminLoginLogRoute(app)
+// adminLoginLogRoute(app)
+isAdminLogin('admin', 'admin', '123')
 
 /* Product categories route */
 productCategoryRoute(app)
@@ -79,19 +80,20 @@ app.use((req, res) => {
     res.status(404).render('404')
 })
 
-let connection;
+let client;
 
 function handleDisconnect() {
-    connection = mysql.createConnection(mySQLConfig)
-    connection.connect((error) => {
+    client = new Client(PostgreSQLConfig)
+    client.connect((error) => {
         if (error)
-            setTimeout(handleDisconnect, 2000)
-        console.log("Connected")
+            console.log(error)
+        else
+            console.log("Connected")
     })
 
-    connection.on('error', (error: any) => {
+    client.on('error', (error: any) => {
         console.log("Database error : ", error);
-        if (error.code === "PROTOCOL_CONNECTION_LOST") {
+        if (error) {
             handleDisconnect()
         } else {
             throw error
@@ -99,6 +101,16 @@ function handleDisconnect() {
     })
 }
 
+updateUser(1, {
+    id : null,
+    phoneNumber : '',
+    email : "",
+    password : " ",
+    createAt : null,
+    modifiedAt : null,
+    name : "ma",
+    username : 'gamin'
+})
 
 handleDisconnect()
 

@@ -6,16 +6,8 @@ import {
     getProductCategories,
     getProductCategory
 } from "./ProductCategory";
-import {createDiscount, getDiscounts, deleteDiscount, updateDiscount, getDiscount} from "./Discount";
-import {
-    createUser,
-    getUsers,
-    getUser,
-    updateUserAddress,
-    deleteUser,
-    updateUser,
-    getUserLoginInfo,
-} from "./User";
+import {createDiscount, deleteDiscount, getDiscount, getDiscounts, updateDiscount} from "./Discount";
+import {createUser, deleteUser, getUser, getUserLoginInfo, getUsers, updateUser, updateUserAddress} from "./User";
 
 export {
     isAdminLogin,

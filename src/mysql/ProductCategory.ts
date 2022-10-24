@@ -1,22 +1,22 @@
-import {mySQLConfig} from "../config/debug";
-import mySQL, {OkPacket, FieldPacket, RowDataPacket,} from 'mysql2/promise'
+import {PostgreSQLConfig} from "../config/debug";
 import {createException, createResult} from "./index";
+import {Pool} from "pg";
 
 
 export async function addProductCategory(productCategory: ProductCategory): Promise<APIResponse> {
     try {
-        const connection = await mySQL.createConnection(mySQLConfig)
-        let [row] = await connection.execute(`INSERT INTO ProductCategory
-                                              values (0,
-                                                      '${productCategory.name}',
-                                                      '${productCategory.description}',
-                                                      '${productCategory.displayImage}',
-                                                      now(),
-                                                      now())`)
-        const result = row as MySQLResult
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`INSERT INTO "ProductCategory"
+                                             values (0,
+                                                     '${productCategory.name}',
+                                                     '${productCategory.description}',
+                                                     '${productCategory.displayImage}',
+                                                     now(),
+                                                     now())`)
+
         return {
             isSuccess: true,
-            result: result.affectedRows === 1,
+            result: result.rowCount === 1,
             errorMessage: null
         }
     } catch (e) {
@@ -31,12 +31,11 @@ export async function addProductCategory(productCategory: ProductCategory): Prom
 
 export async function getProductCategories(): Promise<APIResponse> {
     try {
-        const connection = await mySQL.createConnection(mySQLConfig)
-        let [rows, columns]: [OkPacket[], FieldPacket[]] = await connection.execute('select * from ProductCategory')
-        let result = rows as unknown as ProductCategory[]
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query('select * from "ProductCategory"')
         return {
             isSuccess: true,
-            result: result,
+            result: result.rows,
             errorMessage: null
         }
     } catch (e) {
@@ -51,15 +50,15 @@ export async function getProductCategories(): Promise<APIResponse> {
 
 export async function editProductCategory(oldId: number, productCategory: ProductCategory): Promise<APIResponse> {
     try {
-        const connection = await mySQL.createConnection(mySQLConfig);
-        let [row] = await connection.execute(`update ProductCategory
-                                              set name         = '${productCategory.name}',
-                                                  description  = '${productCategory.description}',
-                                                  displayImage = '${productCategory.displayImage}',
-                                                  modifiedAt   = now()
-                                              where id = ${oldId} `);
-        const result = row as MySQLResult
-        return createResult(result.affectedRows === 1)
+        const connection = await new Pool(PostgreSQLConfig);
+        let result = await connection.query(`update "ProductCategory"
+                                             set name         = '${productCategory.name}',
+                                                 description  = '${productCategory.description}',
+                                                 displayImage = '${productCategory.displayImage}',
+                                                 modifiedAt   = now()
+                                             where id = ${oldId} `);
+
+        return createResult(result.rowCount === 1)
     } catch (e) {
         return createException(e)
     }
@@ -68,11 +67,15 @@ export async function editProductCategory(oldId: number, productCategory: Produc
 
 export async function getProductCategory(id: number): Promise<APIResponse> {
     try {
-        const connection = await mySQL.createConnection(mySQLConfig)
-        let [rows, columns]: [OkPacket[], FieldPacket[]] = await connection.execute(`select *
-                                                                                     from ProductCategory
-                                                                                     where id = ${id}`)
-        return createResult((rows[0] as unknown as ProductCategory))
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select *
+                                             from "ProductCategory"
+                                             where id = ${id}`)
+        if (result.rowCount === 1) {
+            return createResult(result.rows[0])
+        } else {
+            return createException("Khong tim thay ID");
+        }
     } catch (e) {
         return createException(e)
     }
@@ -80,11 +83,11 @@ export async function getProductCategory(id: number): Promise<APIResponse> {
 
 export async function deleteProductCategory(id: number): Promise<APIResponse> {
     try {
-        const connection = await mySQL.createConnection(mySQLConfig);
-        const [row] = await connection.execute(` delete
-                                                 FROM ProductCategory
-                                                 where id = ${id}  `)
-        return createResult((row as MySQLResult).affectedRows === 1)
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(` delete
+                                                FROM "ProductCategory"
+                                                where id = ${id}  `)
+        return createResult(result.rowCount === 1)
     } catch (e) {
         return createException(e)
     }

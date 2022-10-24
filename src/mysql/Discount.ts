@@ -1,20 +1,20 @@
-import {mySQLConfig} from "../config/debug";
-import mySQL, {OkPacket, FieldPacket, RowDataPacket,} from 'mysql2/promise'
+import {PostgreSQLConfig} from "../config/debug";
 import {createException, createResult} from "./index";
+import {Pool} from "pg";
 
 export async function createDiscount(discount: Discount): Promise<APIResponse> {
     try {
-        const connect = await mySQL.createConnection(mySQLConfig)
-        let [row] = await connect.query(`insert into Discount
-                                         values (0,
-                                                 '${discount.name}',
-                                                 '${discount.description}',
-                                                 ${discount.discountPercent},
-                                                 ${discount.active ? 1 : 0},
-                                                 now(),
-                                                 now(),
-                                                 '${discount.displayImage}')`)
-        return createResult((row as unknown as MySQLResult).affectedRows === 1)
+        const connect = await new Pool(PostgreSQLConfig)
+        let result = await connect.query(`insert into "Discount"
+                                          values (0,
+                                                  '${discount.name}',
+                                                  '${discount.description}',
+                                                  ${discount.discountPercent},
+                                                  ${discount.active ? 1 : 0},
+                                                  now(),
+                                                  now(),
+                                                  '${discount.displayImage}')`)
+        return createResult(result.rowCount === 1)
     } catch (e) {
         return createException(e)
     }
@@ -22,8 +22,8 @@ export async function createDiscount(discount: Discount): Promise<APIResponse> {
 
 export async function updateDiscount(oldId: number, discount: Discount): Promise<APIResponse> {
     try {
-        const connect = await mySQL.createConnection(mySQLConfig)
-        let [rows] = await connect.query(` update Discount
+        const connect = await new Pool(PostgreSQLConfig)
+        let result = await connect.query(` update "Discount"
                                            set name            = '${discount.name}',
                                                description     = '${discount.description}',
                                                discountPercent = '${discount.discountPercent}',
@@ -31,7 +31,7 @@ export async function updateDiscount(oldId: number, discount: Discount): Promise
                                                modifiedAt      = now(),
                                                displayImage    = '${discount.displayImage}'
                                            where id = ${oldId}`)
-        return createResult((rows as unknown as MySQLResult).affectedRows === 1)
+        return createResult(result.rowCount === 1)
     } catch (e) {
         return createException(e)
     }
@@ -39,11 +39,15 @@ export async function updateDiscount(oldId: number, discount: Discount): Promise
 
 export async function getDiscount(id: number): Promise<APIResponse> {
     try {
-        const connect = await mySQL.createConnection(mySQLConfig)
-        let [row, _]: [OkPacket[], FieldPacket[]] = await connect.query(`select *
-                                                                         from Discount
-                                                                         where id = ${id}`)
-        return createResult((row[0] as unknown as Discount))
+        const connect = await new Pool(PostgreSQLConfig)
+        let result = await connect.query(`select *
+                                          from "Discount"
+                                          where id = ${id}`)
+        if (result.rowCount === 1) {
+            return createResult(result.rows[0])
+        } else {
+            return createException("Khong tim thay ma giam gia");
+        }
     } catch (e) {
         return createException(e)
     }
@@ -51,11 +55,11 @@ export async function getDiscount(id: number): Promise<APIResponse> {
 
 export async function deleteDiscount(id: number): Promise<APIResponse> {
     try {
-        const connect = await mySQL.createConnection(mySQLConfig)
-        let row = await connect.query(`delete
-                                       from Discount
-                                       where id = ${id}`)
-        return createResult((row as unknown as MySQLResult).affectedRows === 1)
+        const connect = await new Pool(PostgreSQLConfig)
+        let result = await connect.query(`delete
+                                          from "Discount"
+                                          where id = ${id}`)
+        return createResult(result.rowCount === 1)
     } catch (e) {
         return createException(e)
     }
@@ -63,10 +67,10 @@ export async function deleteDiscount(id: number): Promise<APIResponse> {
 
 export async function getDiscounts(): Promise<APIResponse> {
     try {
-        const connect = await mySQL.createConnection(mySQLConfig)
-        let [rows, _] = await connect.query(`select *
-                                             from Discount`)
-        return createResult(rows as unknown as Discount[])
+        const connect = await new Pool(PostgreSQLConfig)
+        let result = await connect.query(`select *
+                                          from "Discount"`)
+        return createResult(result.rows)
     } catch (e) {
         return createException(e)
     }
