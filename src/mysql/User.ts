@@ -59,7 +59,7 @@ export async function getUsers() {
                                          from "User"
                                                   inner join "UserAddress" on "User".id = "UserAddress".userId`)
 
-
+    // let result = await connection.query(`select * from "User"`)
     return {
         isSuccess: true,
         result: result.rows,

@@ -7,15 +7,30 @@ import sessions from 'express-session'
 import dotenv from 'dotenv'
 import {PostgreSQLConfig} from "./config/debug";
 import bodyParser from 'body-parser'
-import {adminLoginLogRoute, API, homeRoute, loginPostRoute, loginRoute, logoutRoute, productCategoryRoute} from "./routes";
+import {
+    adminLoginLogRoute,
+    API,
+    homeRoute,
+    loginPostRoute,
+    loginRoute,
+    logoutRoute,
+    productCategoryRoute
+} from "./routes";
 import requestIp from 'request-ip'
 import {Client} from 'pg';
-import {isAdminLogin, updateUser} from "./mysql";
+import {getUsers, isAdminLogin, updateUser} from "./mysql";
+import * as fs from "fs";
 
 
 export const app: Application = express();
+const credentials = {
+    key: fs.readFileSync('./cert/server.key', 'utf-8'),
+    cert : fs.readFileSync('./cert/server.cer', 'utf-8')
+}
 
 const server: http.Server = http.createServer(app);
+// @ts-ignore
+const httpsServer = http.createServer(credentials, app);
 dotenv.config({
     path: "process.env"
 })
@@ -103,8 +118,14 @@ function handleDisconnect() {
 
 handleDisconnect()
 
+getUsers().then(r=> {
+    console.log(r)})
+
 server.listen(port, () => {
 
 });
+httpsServer.listen(3443,()=> {
+
+})
 
 
