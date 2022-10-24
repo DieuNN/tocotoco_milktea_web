@@ -7,7 +7,15 @@ import sessions from 'express-session'
 import dotenv from 'dotenv'
 import {PostgreSQLConfig} from "./config/debug";
 import bodyParser from 'body-parser'
-import {adminLoginLogRoute, API, homeRoute, loginPostRoute, loginRoute, logoutRoute, productCategoryRoute} from "./routes";
+import {
+    adminLoginLogRoute,
+    API,
+    homeRoute,
+    loginPostRoute,
+    loginRoute,
+    logoutRoute,
+    productCategoryRoute
+} from "./routes";
 import requestIp from 'request-ip'
 import {Client} from 'pg';
 import {isAdminLogin, updateUser} from "./mysql";
@@ -85,7 +93,7 @@ function handleDisconnect() {
     client = new Client(PostgreSQLConfig)
     client.connect((error) => {
         if (error)
-            console.log(error)
+            console.log("Server error: " + error)
         else
             console.log("Connected")
     })
