@@ -89,6 +89,7 @@ function handleDisconnect() {
         else
             console.log("Connected")
     })
+    client.end()
 
     client.on('error', (error: any) => {
         console.log("Database error : ", error);
