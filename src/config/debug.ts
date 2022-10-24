@@ -19,7 +19,7 @@ export const PostgreSQLConfig: PoolConfig = {
         key: fs.readFileSync('./cert/key.key').toString(),
         ca: fs.readFileSync('./cert/crt.crt').toString()
     },
-    query_timeout: 10000,
-    connectionTimeoutMillis: 10000,
-    idleTimeoutMillis: 30000,
+    query_timeout: 60000,
+    connectionTimeoutMillis: 60000,
+    idleTimeoutMillis: 60000,
 }

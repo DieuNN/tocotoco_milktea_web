@@ -15,7 +15,7 @@ export function API(app: Application) {
         const result = await getProductCategories()
         res.json(result)
     })
-    app.get("/api/users", async (req: Request, res: Response) => {
+    app.get("/api/users", (req: Request, res: Response) => {
         const result = getUsers()
         result.then(r => {
             res.json(r)
