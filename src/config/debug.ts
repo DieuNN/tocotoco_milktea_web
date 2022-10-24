@@ -21,5 +21,5 @@ export const PostgreSQLConfig: PoolConfig = {
     },
     query_timeout: 10000,
     connectionTimeoutMillis: 10000,
-    idleTimeoutMillis: 30000
+    idleTimeoutMillis: 30000,
 }
