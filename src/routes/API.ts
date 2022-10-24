@@ -20,7 +20,7 @@ export function API(app: Application) {
         result.then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e)
+            res.end(e.toString())
         })
     })
     app.get("/api/user_info", async (req: Request, res: Response) => {
