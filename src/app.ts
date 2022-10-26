@@ -18,7 +18,7 @@ import {
 } from "./routes";
 import requestIp from 'request-ip'
 import {Client} from 'pg';
-import {getUsers, isAdminLogin, updateUser} from "./postgre";
+import {getUsers, isAdminLogin, updateUserInfo} from "./postgre";
 import * as fs from "fs";
 import {addItemToCart} from "./postgre/CartItem";
 
@@ -119,9 +119,6 @@ function handleDisconnect() {
 
 handleDisconnect()
 
-addItemToCart(1, 5, 1).then(r=> {
-    console.log(r)
-})
 
 server.listen(port, () => {
 

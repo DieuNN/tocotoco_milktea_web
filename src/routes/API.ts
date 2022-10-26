@@ -6,9 +6,9 @@ import {
     getProductCategory,
     getUsers,
     getUserLoginInfo,
-    getUser, getProducts, getProduct, getDiscount
+    getUser, getProducts, getProduct, getDiscount, updateUserInfo, updateUserPassword, updateUserAddress
 } from "../postgre";
-import {getUserId} from "../postgre/User";
+import {getUserAddress, getUserId} from "../postgre/User";
 
 export function API(app: Application) {
     app.get("/api/product_categories", async (req: Request, res: Response) => {
@@ -34,9 +34,55 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
+    app.post("/api/update_user_info", (req: Request, res: Response) => {
+        const {id, name, username, email, phoneNumber} = req.body
+        updateUserInfo(id, {
+            id: null,
+            username: username,
+            name: name,
+            email: email,
+            phoneNumber: phoneNumber,
+            password: null,
+            modifiedAt: null,
+            createAt: null
+        }).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/update_user_password", (req: Request, res: Response) => {
+        const {id, oldPassword, newPassword} = req.body
+        updateUserPassword(id, oldPassword, newPassword).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e)
+        })
+    })
+    app.post("/api/update_user_address", (req: Request, res: Response) => {
+        const {id, address, phoneNumber} = req.body
+        updateUserAddress(id, {
+            id: null,
+            address: address,
+            phoneNumber: phoneNumber,
+            userId: null
+        }).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
     app.get("/api/user_id", async (req: Request, res: Response) => {
         const {username} = req.body
         getUserId(username).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.get("/api/user_address", (req: Request, res: Response) => {
+        const {id} = req.body
+        getUserAddress(id).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())

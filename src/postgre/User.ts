@@ -80,7 +80,7 @@ export async function getUser(id: number): Promise<APIResponse> {
                                                   inner join "UserAddress" on "User".id = "UserAddress".userId
                                          where "User".id = ${id};`)
 
-    if (result.rows[0] == undefined) {
+    if (result.rows.length == 0) {
         return {
             isSuccess: false,
             result: null,
@@ -96,24 +96,25 @@ export async function getUser(id: number): Promise<APIResponse> {
 
 }
 
-export async function updateUser(oldId: number, user: User): Promise<APIResponse> {
+export async function updateUserInfo(oldId: number, user: User): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        let encryptedPassword = md5(user.password!)
         let result = await connection.query(`update "User"
                                              set name        = '${user.name}',
-                                                 password    = '${user.password}',
                                                  username    = '${user.username}',
                                                  email       = '${user.email}',
                                                  phoneNumber = '${user.phoneNumber}',
                                                  modifiedAt  = now()
                                              where id = ${oldId}
         `)
-        return createResult(result.rowCount == 1)
+        if (result.rowCount == 1) {
+            return createResult(true)
+        } else {
+            return createException("Khong tim thay user voi ID " + oldId)
+        }
     } catch (e) {
-        return createException("Loi server!")
+        return createException(e)
     }
-
 }
 
 
@@ -126,7 +127,7 @@ export async function deleteUser(id: number): Promise<APIResponse> {
         return createResult(result.rowCount == 1)
 
     } catch (e) {
-        return createException("Loi server!")
+        return createException(e)
     }
 }
 
@@ -138,11 +139,30 @@ export async function updateUserAddress(id: number, userAddress: UserAddress): P
                                                  address     = '${userAddress.address}'
                                              where id = ${id}
         `)
-        return createResult(result.rowCount === 1)
+        if (result.rowCount === 1) {
+            return createResult(true)
+        } else {
+            return createException("Khong co nguoi dung voi ID " + id);
+        }
     } catch (e) {
-        return createException("Loi server!");
+        return createException(e);
     }
+}
 
+export async function getUserAddress(id: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`select *
+                                               from "UserAddress"
+                                               where id = ${id}`)
+        if (result.rows.length === 0) {
+            return createException("Khong tim thay thong tin voi ID " + id)
+        } else {
+            return createResult(result.rows[0])
+        }
+    } catch (e) {
+        return createException(e)
+    }
 }
 
 export async function getUserId(username: string): Promise<APIResponse> {
@@ -154,7 +174,7 @@ export async function getUserId(username: string): Promise<APIResponse> {
         if (result.rows.length === 0) {
             return createException("Khong tim thay ID")
         } else {
-            return createResult(result.rows[0])
+            return createResult(result.rows[0].id)
         }
     } catch (e) {
         return createException(e)
@@ -164,6 +184,9 @@ export async function getUserId(username: string): Promise<APIResponse> {
 
 export async function getUserLoginInfo(username: string, password: string, usernameType: string): Promise<APIResponse> {
     let encryptedPassword: string = md5(password)
+    console.log(username)
+    console.log(encryptedPassword)
+    console.log(usernameType)
     const connection = await new Pool(PostgreSQLConfig)
     let result;
     switch (usernameType) {
@@ -200,7 +223,8 @@ export async function getUserLoginInfo(username: string, password: string, usern
         }
     }
 
-    if (result.rowCount === 1) {
+    // console.log(result)
+    if (result.rows[0].count != 0) {
         return {
             isSuccess: true,
             result: true,
@@ -221,7 +245,7 @@ export async function updateUserPassword(id: number, oldPassword: string, newPas
         let encryptedNewPassword: string = md5(newPassword)
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`update "User"
-                                             set password = ${encryptedNewPassword}
+                                             set password = '${encryptedNewPassword}'
                                              where id = ${id}
                                                and password = '${encryptedOldPassword}'`)
         if (result.rowCount === 1) {
