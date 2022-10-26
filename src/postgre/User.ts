@@ -8,7 +8,7 @@ async function isUsernameHasTaken(username: string): Promise<boolean> {
     let result = await connection.query(`select count(*)
                                          from "User"
                                          where username = '${username}'`)
-    return result.rowCount === 1
+    return result.rows[0].count !== 0
 }
 
 export async function createUser(user: User): Promise<APIResponse> {
@@ -16,7 +16,7 @@ export async function createUser(user: User): Promise<APIResponse> {
     const encryptedPassword = md5(user.password!)
 
     const isUsernameExist = await isUsernameHasTaken(user.username)
-
+    // console.log(isUsernameExist)
     if (isUsernameExist) {
         return createException("Tên người dùng đã được sử dụng")
     }
@@ -200,7 +200,6 @@ export async function getUserLoginInfo(username: string, password: string, usern
         }
     }
 
-
     if (result.rowCount === 1) {
         return {
             isSuccess: true,
@@ -233,7 +232,40 @@ export async function updateUserPassword(id: number, oldPassword: string, newPas
     } catch (e) {
         return createException(e)
     }
+}
 
+export async function addUserMomoPayment(userId: number, momoAccount: string): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`insert into "UserMomoPayment"
+                                               values (default,
+                                                       userid,
+                                                       '${momoAccount}')`)
+        if (result.rowCount === 1) {
+            return createResult(true)
+        } else {
+            return createException("Khong tim thay ID")
+        }
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function updateUserMomoPayment(userId: number, momoAccountId: number, momoAccount: string): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`update "UserMomoPayment"
+                                               set momoaccount = '${momoAccount}'
+                                               where userid = '${userId}'
+                                                 and id = '${momoAccountId}'`)
+        if (result.rowCount === 1) {
+            return createResult(true)
+        } else {
+            return createException("Khong tim thay ID")
+        }
+    } catch (e) {
+        return createException(e)
+    }
 }
 
 

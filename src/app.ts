@@ -18,8 +18,9 @@ import {
 } from "./routes";
 import requestIp from 'request-ip'
 import {Client} from 'pg';
-import {getUsers, isAdminLogin, updateUser} from "./mysql";
+import {getUsers, isAdminLogin, updateUser} from "./postgre";
 import * as fs from "fs";
+import {addItemToCart} from "./postgre/CartItem";
 
 
 export const app: Application = express();
@@ -118,8 +119,9 @@ function handleDisconnect() {
 
 handleDisconnect()
 
-getUsers().then(r=> {
-    console.log(r)})
+addItemToCart(1, 5, 1).then(r=> {
+    console.log(r)
+})
 
 server.listen(port, () => {
 

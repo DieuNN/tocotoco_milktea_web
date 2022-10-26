@@ -1,7 +1,7 @@
 import {Application, Request, Response} from "express";
 import dotenv from "dotenv";
-import {isAdminLogin} from "../mysql";
-import {updateAdminLastLogin} from "../mysql/Admin";
+import {isAdminLogin} from "../postgre";
+import {updateAdminLastLogin} from "../postgre/Admin";
 
 dotenv.config({
     path: "process.env"

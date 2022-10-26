@@ -3,7 +3,6 @@ import {Pool} from 'pg';
 
 
 export async function isAdminLogin(username: string, password: string, ip: string | undefined): Promise<boolean> {
-    // const connection = await mySQL.createConnection(mySQLConfig)
     const connection = new Pool(PostgreSQLConfig)
     let result = await connection.query(`select *
                                          from "Admin"
