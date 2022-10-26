@@ -6,7 +6,7 @@ import {
     getProductCategory,
     getUsers,
     getUserLoginInfo,
-    getUser, getProducts, getProduct
+    getUser, getProducts, getProduct, getDiscount
 } from "../postgre";
 import {getUserId} from "../postgre/User";
 
@@ -54,6 +54,14 @@ export function API(app: Application) {
             res.end(r)
         }).catch(e => {
             res.end(e)
+        })
+    })
+    app.get("/api/discount", (req: Request, res: Response) => {
+        const {id} = req.body
+        getDiscount(id).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
         })
     })
     app.get('/api/login', async (req: Request, res: Response) => {
