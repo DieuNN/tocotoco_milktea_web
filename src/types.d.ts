@@ -23,7 +23,7 @@ declare type Product = {
     categoryId: number,
     quantity: number,
     price: number,
-    discountId: number,
+    discountId: number | null,
     displayImage: string,
     size: string
 }

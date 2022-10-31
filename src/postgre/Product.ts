@@ -12,8 +12,8 @@ export async function addProduct(product: Product): Promise<APIResponse> {
                                                        '${product.categoryId}',
                                                        '${product.quantity}',
                                                        '${product.price}',
-                                                       '${product.discountId}'.
-                                                               '${product.displayImage}',
+                                                       '${product.discountId}',
+                                                       '${product.displayImage}',
                                                        '${product.size}')`)
         return createResult(true)
     } catch (e) {
@@ -22,12 +22,19 @@ export async function addProduct(product: Product): Promise<APIResponse> {
 }
 
 export async function updateProductQuantity(id: number, quantity: number): Promise<APIResponse> {
+    if (quantity < 0) {
+        return createException("So luong cap nhat " + quantity + " khong hop le!")
+    }
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`update "Product"
                                                set quantity = ${quantity}
                                                where id = ${id}`)
-        return createResult(result.rowCount === 1)
+        if (result.rowCount === 1) {
+            return createResult(result.rowCount === 1)
+        } else {
+            return createException("Khong tim thay san pham co ID la" + id)
+        }
     } catch (e) {
         return createException(e)
     }
@@ -40,8 +47,6 @@ export async function getProducts(): Promise<APIResponse> {
         const result = await connection.query(`select *
                                                from "Product"`)
         return createResult(result.rows)
-
-
     } catch (e) {
         return createException(e)
     }

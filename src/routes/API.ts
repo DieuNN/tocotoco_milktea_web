@@ -6,7 +6,14 @@ import {
     getProductCategory,
     getUsers,
     getUserLoginInfo,
-    getUser, getProducts, getProduct, getDiscount, updateUserInfo, updateUserPassword, updateUserAddress
+    getUser,
+    getProducts,
+    getProduct,
+    getDiscount,
+    updateUserInfo,
+    updateUserPassword,
+    updateUserAddress,
+    createShoppingSession, addItemToCart, deleteShoppingSession
 } from "../postgre";
 import {getUserAddress, getUserId} from "../postgre/User";
 
@@ -150,6 +157,33 @@ export function API(app: Application) {
         }).catch(e => {
             res.end(e.toString())
         })
+    })
+    app.post("/api/shopping_session/create_session", (req: Request, res: Response) => {
+        const {userId} = req.body
+        createShoppingSession(userId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/shopping_session/delete_session", (req: Request, res: Response) => {
+        const {userId, sessionId} = req.body
+        deleteShoppingSession(userId, sessionId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/shopping_session/add_item", (req: Request, res: Response) => {
+        const {sessionId, productId, quantity} = req.body
+        addItemToCart(sessionId, productId, quantity).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/shopping_session/remove_item", (req: Request, res: Response) => {
+        // const
     })
 
 
