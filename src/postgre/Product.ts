@@ -90,4 +90,16 @@ export async function updateProduct(product: Product, productId: number): Promis
     }
 }
 
+export async function getProductsByCategoryId(categoryId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`select *
+                                               from "Product"
+                                               where categoryid = ${categoryId}`)
+        return createResult(result.rows)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
 

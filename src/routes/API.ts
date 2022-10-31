@@ -16,6 +16,7 @@ import {
     createShoppingSession, addItemToCart, deleteShoppingSession
 } from "../postgre";
 import {getUserAddress, getUserId} from "../postgre/User";
+import {getProductsByCategoryId} from "../postgre/Product";
 
 export function API(app: Application) {
     app.get("/api/product_categories", async (req: Request, res: Response) => {
@@ -58,6 +59,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
+
     app.post("/api/update_user_password", (req: Request, res: Response) => {
         const {id, oldPassword, newPassword} = req.body
         updateUserPassword(id, oldPassword, newPassword).then(r => {
@@ -153,6 +155,14 @@ export function API(app: Application) {
     app.get("/api/product", (req, res: Response) => {
         const {id} = req.body
         getProduct(id).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.get("/api/get_products_by_category", (req: Request, res: Response) => {
+        const {categoryId} = req.body
+        getProductsByCategoryId(categoryId).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
