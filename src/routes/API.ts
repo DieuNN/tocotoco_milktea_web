@@ -105,12 +105,12 @@ export function API(app: Application) {
         // @ts-ignore
         console.log(req)
         // console.log(id)
-        res.end(JSON.stringify(req.rawHeaders))
-        // getProductCategory(Number(id)).then(r => {
-        //     res.json(r)
-        // }).catch(e => {
-        //     res.end(e.toString())
-        // })
+        // res.end("???")
+        getProductCategory(Number(id)).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
     })
     app.get("/api/discounts", async (req: Request, res: Response) => {
         getDiscounts().then(r => {
