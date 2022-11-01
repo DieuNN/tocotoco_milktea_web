@@ -97,15 +97,17 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/product_category", async (req: Request, res: Response) => {
+    app.get("/api/product_category", (req: Request, res: Response) => {
         const {id} = req.body
+        console.log("This is test " + 101)
         console.log(req.body)
         // console.log(id)
-        getProductCategory(Number(id)).then(r => {
-            res.json(r)
-        }).catch(e => {
-            res.end(e.toString())
-        })
+        res.end("End here")
+        // getProductCategory(Number(id)).then(r => {
+        //     res.json(r)
+        // }).catch(e => {
+        //     res.end(e.toString())
+        // })
     })
     app.get("/api/discounts", async (req: Request, res: Response) => {
         getDiscounts().then(r => {
