@@ -72,32 +72,34 @@ export async function removeItemFromCart(itemId: number, sessionId: number): Pro
     }
 }
 
-// export async function updateCartItemQuantity(sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
-//     try {
-//         const connection = await new Pool(PostgreSQLConfig)
-//         const productQuantity = await connection.query(`select quantity
-//                                                         from "Product"
-//                                                         where id = ${productId}`)
-//         if (productQuantity.rows.length === 0) {
-//             return createException("Khong tim thay san pham co ID la " + productId)
-//         } else {
-//             if (quantity > productQuantity.rows[0].quantity) {
-//                 return createException("So luong khong hop le! Kho con " + productQuantity.rows[0].quantity + ", so luong nhap: " + quantity)
-//             }
-//             let result = await connection.query(`update "CartItem"
-//                                                  set quantity = ${quantity}
-//                                                  where sessionid = ${sessionId}
-//                                                    and productid = ${productId}`)
-//             /*TODO*/
-//             if (result.)
-//         }
-//
-//         // const result = await connection.query(`update "CartItem"
-//         //                                        set quantity =  ${quantity}`)
-//     } catch (e) {
-//         return createException(e)
-//     }
-// }
+export async function updateCartItemQuantity(sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const productQuantity = await connection.query(`select quantity
+                                                        from "Product"
+                                                        where id = ${productId}`)
+        if (productQuantity.rows.length === 0) {
+            return createException("Khong tim thay san pham co ID la " + productId)
+        } else {
+            if (quantity > productQuantity.rows[0].quantity) {
+                return createException("So luong khong hop le! Kho con " + productQuantity.rows[0].quantity + ", so luong nhap: " + quantity)
+            }
+            let result = await connection.query(`update "CartItem"
+                                                 set quantity = ${quantity}
+                                                 where sessionid = ${sessionId}
+                                                   and productid = ${productId}`)
+            /*TODO*/
+            if (result.rowCount != 0) {
+                return createResult(true)
+            } else {
+                return createResult(false)
+            }
+        }
+
+    } catch (e) {
+        return createException(e)
+    }
+}
 
 export async function getCartItems(sessionId: number): Promise<APIResponse> {
     try {
