@@ -99,13 +99,10 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/product_category", (req: Request, res: Response) => {
+    app.post("/api/product_category", (req: Request, res: Response) => {
         const {id} = req.body
         console.log("This is test " + 101)
-        // @ts-ignore
-        console.log(req)
-        // console.log(id)
-        // res.end("???")
+        console.log(req.body)
         getProductCategory(Number(id)).then(r => {
             res.json(r)
         }).catch(e => {
