@@ -19,16 +19,14 @@ import {getUserAddress, getUserId} from "../postgre/User";
 import {getProductsByCategoryId} from "../postgre/Product";
 
 export function API(app: Application) {
-
-
-    app.get("/api/product_categories", async (req: Request, res: Response) => {
+    app.post("/api/product_categories", async (req: Request, res: Response) => {
         getProductCategories().then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
         })
     })
-    app.get("/api/users", (req: Request, res: Response) => {
+    app.post("/api/users", (req: Request, res: Response) => {
         const result = getUsers()
         result.then(r => {
             res.json(r)
@@ -36,7 +34,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/user_info", async (req: Request, res: Response) => {
+    app.post("/api/user_info", async (req: Request, res: Response) => {
         const {id} = req.body
         getUser(id).then(r => {
             res.json(r)
@@ -83,7 +81,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/user_id", async (req: Request, res: Response) => {
+    app.post("/api/user_id", async (req: Request, res: Response) => {
         const {username} = req.body
         getUserId(username).then(r => {
             res.json(r)
@@ -91,7 +89,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/user_address", (req: Request, res: Response) => {
+    app.post("/api/user_address", (req: Request, res: Response) => {
         const {id} = req.body
         getUserAddress(id).then(r => {
             res.json(r)
@@ -109,7 +107,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/discounts", async (req: Request, res: Response) => {
+    app.post("/api/discounts", async (req: Request, res: Response) => {
         getDiscounts().then(r => {
             res.end(r)
         }).catch(e => {
@@ -124,7 +122,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get('/api/login', async (req: Request, res: Response) => {
+    app.post('/api/login', async (req: Request, res: Response) => {
         const {username, password, type} = req.body
         getUserLoginInfo(username, password, type).then(r => {
             res.json(r)
@@ -150,14 +148,14 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/products", (req: Request, res: Response) => {
+    app.post("/api/products", (req: Request, res: Response) => {
         getProducts().then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
         })
     })
-    app.get("/api/product", (req, res: Response) => {
+    app.post("/api/product", (req, res: Response) => {
         const {id} = req.body
         getProduct(id).then(r => {
             res.json(r)
@@ -165,7 +163,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.get("/api/get_products_by_category", (req: Request, res: Response) => {
+    app.post("/api/get_products_by_category", (req: Request, res: Response) => {
         const {categoryId} = req.body
         getProductsByCategoryId(categoryId).then(r => {
             res.json(r)
