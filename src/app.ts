@@ -89,8 +89,9 @@ productCategoryRoute(app)
 /* API Route */
 API(app)
 
-app.get("/private", (req: Request, res: Response) => {
+app.post("/private", (req: Request, res: Response) => {
     console.log("Start private")
+    console.log("That's POST")
     console.log(req.body)
     console.log("End private")
     res.end("End private")
