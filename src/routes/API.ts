@@ -100,7 +100,7 @@ export function API(app: Application) {
     app.get("/api/product_category", (req: Request, res: Response) => {
         const {id} = req.body
         console.log("This is test " + 101)
-        console.log(req.body)
+        console.log(req)
         // console.log(id)
         res.end("End here")
         // getProductCategory(Number(id)).then(r => {
