@@ -99,8 +99,9 @@ export function API(app: Application) {
     })
     app.get("/api/product_category", async (req: Request, res: Response) => {
         const {id} = req.body
-        console.log(id)
-        getProductCategory(id).then(r => {
+        console.log(req.body)
+        // console.log(id)
+        getProductCategory(Number(id)).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
