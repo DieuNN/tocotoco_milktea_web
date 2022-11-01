@@ -1,4 +1,4 @@
-import express, {Application} from "express";
+import express, {Application, Request, Response} from "express";
 import path from "path";
 import http from "http";
 import expressLayouts from 'express-ejs-layouts';
@@ -20,7 +20,6 @@ import requestIp from 'request-ip'
 import {Client} from 'pg';
 import {getUsers, isAdminLogin, updateUserInfo} from "./postgre";
 import * as fs from "fs";
-import {addItemToCart} from "./postgre/CartItem";
 
 
 export const app: Application = express();
@@ -89,10 +88,20 @@ productCategoryRoute(app)
 
 /* API Route */
 API(app)
+
+app.get("/private", (req: Request, res: Response) => {
+    console.log("Start private")
+    console.log(req.body)
+    console.log("End private")
+    res.end("End private")
+})
 /* 404 page */
 app.use((req, res) => {
     res.status(404).render('404')
 })
+
+
+
 
 let client;
 

@@ -19,6 +19,8 @@ import {getUserAddress, getUserId} from "../postgre/User";
 import {getProductsByCategoryId} from "../postgre/Product";
 
 export function API(app: Application) {
+
+
     app.get("/api/product_categories", async (req: Request, res: Response) => {
         getProductCategories().then(r => {
             res.json(r)
@@ -101,9 +103,9 @@ export function API(app: Application) {
         const {id} = req.body
         console.log("This is test " + 101)
         // @ts-ignore
-        console.log(req._body)
+        console.log(req)
         // console.log(id)
-        res.end("End here")
+        res.end(JSON.stringify(req.rawHeaders))
         // getProductCategory(Number(id)).then(r => {
         //     res.json(r)
         // }).catch(e => {
