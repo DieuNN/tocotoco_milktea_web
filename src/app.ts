@@ -26,7 +26,7 @@ import {addItemToCart} from "./postgre/CartItem";
 export const app: Application = express();
 const credentials = {
     key: fs.readFileSync('./cert/server.key', 'utf-8'),
-    cert : fs.readFileSync('./cert/server.cer', 'utf-8')
+    cert: fs.readFileSync('./cert/server.cer', 'utf-8')
 }
 
 const server: http.Server = http.createServer(app);
@@ -62,9 +62,8 @@ app.use(sessions({
     cookie: {maxAge: 1000 * 60 * 60 * 24},
     resave: true,
 }))
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded())
-app.use(bodyParser.urlencoded({extended: true}))
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 app.use(cookie_parser())
 app.use(requestIp.mw())
 
@@ -123,7 +122,7 @@ handleDisconnect()
 server.listen(port, () => {
 
 });
-httpsServer.listen(3443,()=> {
+httpsServer.listen(3443, () => {
 
 })
 
