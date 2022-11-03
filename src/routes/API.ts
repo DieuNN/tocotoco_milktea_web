@@ -13,10 +13,11 @@ import {
     updateUserInfo,
     updateUserPassword,
     updateUserAddress,
-    createShoppingSession, addItemToCart, deleteShoppingSession
+    createShoppingSession, addItemToCart, deleteShoppingSession, getCartItems, removeItemFromCart
 } from "../postgre";
 import {getUserAddress, getUserId} from "../postgre/User";
 import {getProductsByCategoryId} from "../postgre/Product";
+import {updateCartItemQuantity} from "../postgre/CartItem";
 
 export function API(app: Application) {
     app.post("/api/product_categories", async (req: Request, res: Response) => {
@@ -196,7 +197,30 @@ export function API(app: Application) {
         })
     })
     app.post("/api/shopping_session/remove_item", (req: Request, res: Response) => {
-        // const
+        const {itemId, sessionId} = req.body
+        removeItemFromCart(itemId, sessionId).then(r => {
+            res.json(r);
+            ``
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    });
+
+    app.post("/api/shopping_session/items", (req: Request, res: Response) => {
+        const {sessionId} = req.body
+        getCartItems(sessionId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/shopping_session/update_item", (req: Request, res: Response) => {
+        const {sessionId, productId, quantity} = req.body
+        updateCartItemQuantity(sessionId, productId, quantity).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
     })
 
 
