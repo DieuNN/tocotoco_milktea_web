@@ -58,6 +58,18 @@ declare type UserAddress = {
     phoneNumber: string
 }
 
+declare type CartItem = {
+    id: number | null,              // Mã sản phẩm trong giỏ hàng tạm
+    sessionId : null | number,      // Mã giỏ hàng tạm
+    productId : number | null,      // Mã sản phẩm
+    quantity : number,              // Số lượng sản phẩm trong giỏ hàng
+    productName : string,           // Tên sản phẩm
+    productDescription : string,    // Mô tả sản phẩm
+    totalPrice : number,            // Tổng giá trị của sản phẩm (số lượng * giá)
+    price: number ,                 // Giá của 1 sản phẩm
+    productCategoryName : string    // Tên loại sản phẩm
+}
+
 declare type APIResponse = {
     isSuccess: boolean
     result: null | any,

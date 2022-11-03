@@ -17,8 +17,9 @@ export async function addItemToCart(sessionId: number, productId: number, quanti
             }
             // if item in cart, update quantity
             let _isItemInTempCart = await isItemInTempCart(productId, sessionId)
-            if (_isItemInTempCart.isSuccess) {
-                // await updateCartItemQuantity()
+            if (_isItemInTempCart.result) {
+                await updateCartItemQuantity(sessionId, productId, quantity)
+                return createResult(true)
             }
 
             let insertResult = await connection.query(`insert into "CartItem"
@@ -44,10 +45,10 @@ export async function isItemInTempCart(productId: number, sessionId: number): Pr
                                              from "CartItem"
                                              where productid = ${productId}
                                                and sessionid = ${sessionId}`)
-        if (result.rows[0].count === 0) {
+        if (result.rows[0].count == 0) {
             return createResult(false)
         } else {
-            return createException(true)
+            return createResult(true)
         }
     } catch (e) {
         return createException(e)
@@ -92,7 +93,7 @@ export async function updateCartItemQuantity(sessionId: number, productId: numbe
             if (result.rowCount != 0) {
                 return createResult(true)
             } else {
-                return createResult(false)
+                return createException("Khong the cap nhat! Xem lai session ID")
             }
         }
 
@@ -104,9 +105,20 @@ export async function updateCartItemQuantity(sessionId: number, productId: numbe
 export async function getCartItems(sessionId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`select *
+        const result = await connection.query(`select "CartItem".id               as "id",
+                                                      sessionid                   as "sessionId",
+                                                      productid                   as "productId",
+                                                      "CartItem".quantity         as "quantity",
+                                                      P.name                      as "productName",
+                                                      P.description               as "description",
+                                                      price * "CartItem".quantity as total,
+                                                      P.price                     as price,
+                                                      "ProductCategory".name      as "productCategoryName"
                                                from "CartItem"
-                                               where sessionid = ${sessionId}`)
+                                                        inner join "Product" P on P.id = "CartItem".productid
+                                                        inner join "ProductCategory" on P.categoryid = "ProductCategory".id
+                                               where sessionid = ${sessionId};
+        `)
         return createResult(result.rows)
     } catch (e) {
         return createException(e)

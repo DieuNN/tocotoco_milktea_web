@@ -31,7 +31,7 @@ import {
     addProduct, getProducts, getProduct, updateProduct
 } from "./Product";
 import {createShoppingSession, deleteShoppingSession} from "./ShoppingSession";
-import {addItemToCart, removeItemFromCart} from "./CartItem";
+import {addItemToCart, removeItemFromCart, getCartItems, updateCartItemQuantity} from "./CartItem";
 
 export {
     isAdminLogin,
@@ -47,7 +47,7 @@ export {
     createUser, getUsers, getUser, deleteUser, updateUserAddress, updateUserInfo, getUserLoginInfo,
     addProduct, updateProduct, getProduct, getProducts,
     updateUserPassword, updateUserMomoPayment, getUserId, addUserMomoPayment, addItemToCart, createShoppingSession,
-    removeItemFromCart, deleteShoppingSession
+    removeItemFromCart, deleteShoppingSession, getCartItems
 }
 
 export function createException(e: any): APIResponse {
