@@ -1,5 +1,5 @@
 import {Pool} from 'pg'
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
 export async function addProduct(product: Product): Promise<APIResponse> {

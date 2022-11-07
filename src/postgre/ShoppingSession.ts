@@ -1,5 +1,5 @@
 import {Pool} from "pg";
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
 /* As we don't know much about PostgreSQL, we cannot create trigger in Postgre, so we decided to use

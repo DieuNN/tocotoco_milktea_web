@@ -5,7 +5,7 @@ import expressLayouts from 'express-ejs-layouts';
 import cookie_parser from 'cookie-parser'
 import sessions from 'express-session'
 import dotenv from 'dotenv'
-import {PostgreSQLConfig} from "./config/debug";
+import {PostgreSQLConfig} from "./config/posgre";
 import bodyParser from 'body-parser'
 import {
     adminLoginLogRoute,
@@ -20,6 +20,9 @@ import requestIp from 'request-ip'
 import {Client} from 'pg';
 import {getUsers, isAdminLogin, updateUserInfo} from "./postgre";
 import * as fs from "fs";
+import {initializeApp} from "firebase/app"
+import {firebaseAdminApp, firebaseConfig} from "./config/firebase_conf";
+import {getStorage} from "firebase/storage";
 
 
 export const app: Application = express();
@@ -104,7 +107,9 @@ app.use((req, res) => {
 
 
 
-let client;
+let client, firebaseApp;
+firebaseApp = firebaseAdminApp
+
 
 function handleDisconnect() {
     client = new Client(PostgreSQLConfig)

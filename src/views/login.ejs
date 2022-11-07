@@ -12,13 +12,17 @@
 </head>
 <body class="bg-primary">
 <div id="layoutAuthentication">
-    <div id="layoutAuthentication_content">
-        <main>
-            <div class="container">
+    <div id="layoutAuthentication_content" style="background-color: #F8F1F1">
+        <main class="h-100 w-100" style="min-height: 100%">
+            <div class="container w-100 h-100">
                 <div class="row justify-content-center">
-                    <div class="col-lg-5">
-                        <div class="card shadow-lg border-0 rounded-lg mt-5">
-                            <div class="card-header"><h3 class="text-center font-weight-light my-4">Đăng nhập</h3></div>
+                    <div class="col-lg-8">
+                        <div class="card shadow-lg border-0 rounded-3 mt-5" style="background-color: #FFFFFF">
+                            <div class="card-header" style="display: flex; flex-direction: column; align-items: center; align-content: center">
+                                <img src="/assets/img/admin_page_logo.png">
+                                <h4 class="text-center mt-4 fw-light">Chào mừng bạn đến với ToCoToCo</h4>
+                                <h3 class="text-center font-weight-light my-4">Đăng nhập</h3>
+                            </div>
                             <div class="card-body">
                                 <form action="/login" enctype="application/x-www-form-urlencoded" method="post"
                                       id="login-form">
@@ -47,7 +51,8 @@
                                            onclick="(()=>{alert('Liên hệ quản trị viên để lấy lại mật khẩu!')})()">Quên
                                             mật
                                             khẩu?</a>
-                                        <button class="btn btn-primary" type="submit">Đăng nhập</button>
+                                        <button class="btn btn-primary btn-lg" style="background-color: #FFA500; border-color: #FFA500" type="submit">Đăng nhập
+                                        </button>
                                     </div>
                                 </form>
                             </div>

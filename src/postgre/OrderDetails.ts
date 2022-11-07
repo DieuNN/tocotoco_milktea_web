@@ -1,5 +1,5 @@
 import {Pool} from "pg";
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult, deleteShoppingSession} from "./index";
 import {addCartItemsToOrder} from "./OrderItem";
 

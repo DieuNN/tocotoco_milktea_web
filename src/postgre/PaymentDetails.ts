@@ -1,5 +1,5 @@
 import {Pool} from "pg";
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
 // export async function createPaymentDetail(orderId: number, provider: String, status: string): Promise<APIResponse> {

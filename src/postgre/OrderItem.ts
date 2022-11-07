@@ -1,5 +1,5 @@
 import {Pool} from "pg";
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, removeItemFromCart} from "./index";
 
 export async function addCartItemsToOrder(orderId: number, sessionId: number) {

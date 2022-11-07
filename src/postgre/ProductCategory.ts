@@ -1,4 +1,4 @@
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 import {Pool} from "pg";
 

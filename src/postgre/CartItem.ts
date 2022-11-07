@@ -1,5 +1,5 @@
 import {Pool} from "pg";
-import {PostgreSQLConfig} from "../config/debug";
+import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
 export async function addItemToCart(sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
