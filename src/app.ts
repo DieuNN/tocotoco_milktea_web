@@ -21,8 +21,9 @@ import {Client} from 'pg';
 import {getUsers, isAdminLogin, updateUserInfo} from "./postgre";
 import * as fs from "fs";
 import {initializeApp} from "firebase/app"
-import {firebaseAdminApp, firebaseConfig} from "./config/firebase_conf";
+import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_conf";
 import {getStorage} from "firebase/storage";
+import multer from "multer";
 
 
 export const app: Application = express();
@@ -37,6 +38,12 @@ const httpsServer = http.createServer(credentials, app);
 dotenv.config({
     path: "process.env"
 })
+
+// muter upload
+const upload = multer({
+    storage: multer.memoryStorage()
+})
+
 
 const publicDirectoryPath = path.join(__dirname, "./public");
 app.use(express.static(publicDirectoryPath));
@@ -64,10 +71,13 @@ app.use(sessions({
     cookie: {maxAge: 1000 * 60 * 60 * 24},
     resave: true,
 }))
+
+
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookie_parser())
 app.use(requestIp.mw())
+
 
 var session: any;
 
@@ -87,7 +97,7 @@ logoutRoute(app)
 adminLoginLogRoute(app)
 
 /* Product categories route */
-productCategoryRoute(app)
+productCategoryRoute(app, upload)
 
 /* API Route */
 API(app)
@@ -105,10 +115,7 @@ app.use((req, res) => {
 })
 
 
-
-
-let client, firebaseApp;
-firebaseApp = firebaseAdminApp
+let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
 
 
 function handleDisconnect() {

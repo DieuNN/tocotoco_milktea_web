@@ -47,7 +47,8 @@ export {
     createUser, getUsers, getUser, deleteUser, updateUserAddress, updateUserInfo, getUserLoginInfo,
     addProduct, updateProduct, getProduct, getProducts,
     updateUserPassword, updateUserMomoPayment, getUserId, addUserMomoPayment, addItemToCart, createShoppingSession,
-    removeItemFromCart, deleteShoppingSession, getCartItems
+    removeItemFromCart, deleteShoppingSession, getCartItems,
+
 }
 
 export function createException(e: any): APIResponse {
