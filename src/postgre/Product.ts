@@ -12,9 +12,22 @@ export async function addProduct(product: Product): Promise<APIResponse> {
                                                        '${product.categoryId}',
                                                        '${product.quantity}',
                                                        '${product.price}',
-                                                       '${product.discountId}',
+                                                       ${product.discountId},
                                                        '${product.displayImage}',
                                                        '${product.size}')`)
+        return createResult(true)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function deleteProduct(id: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`delete
+                                               from "Product"
+                                               where id = ${id}`)
+        connection.end()
         return createResult(true)
     } catch (e) {
         return createException(e)
@@ -44,8 +57,28 @@ export async function updateProductQuantity(id: number, quantity: number): Promi
 export async function getProducts(): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`select *
-                                               from "Product"`)
+        const result = await connection.query(`select "Product".id,
+                                                      "Product".name         as "productName",
+                                                      "Product".description  as "productDescription",
+                                                      "ProductCategory".name as "productCategoryName",
+                                                      "Product".quantity     as "quantity",
+                                                      "Product".price        as "price",
+                                                      "Discount".name        as "discount",
+                                                      "Product".size         as "size",
+                                                      "Product".displayimage as "displayImage"
+                                               from "Product"
+                                                        inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
+                                                        left join "Discount" on "Product".discountid = "Discount".id
+        `)
+        result.rows.map(item => {
+            item.size = item.size.toString().split(",").filter((it: string) => {
+                return it != "";
+            }).join(",")
+            if (item.discount == null) {
+                item.discount = "Không"
+            }
+        })
+        connection.end()
         return createResult(result.rows)
     } catch (e) {
         return createException(e)

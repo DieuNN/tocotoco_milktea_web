@@ -37,6 +37,7 @@ export async function getProductCategories(): Promise<APIResponse> {
             item.createat = new Date(item.createat).toLocaleString()
             item.modifiedat = new Date(item.modifiedat).toLocaleString()
         })
+        connection.end()
         return {
             isSuccess: true,
             result: result.rows,

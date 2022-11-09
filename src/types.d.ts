@@ -33,7 +33,6 @@ declare type Discount = {
     name: string,
     description: string,
     discountPercent: number,
-    active: boolean,
     createAt: string,
     modifiedAt: string,
     displayImage: string

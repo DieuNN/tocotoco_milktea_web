@@ -6,11 +6,10 @@ export async function createDiscount(discount: Discount): Promise<APIResponse> {
     try {
         const connect = await new Pool(PostgreSQLConfig)
         let result = await connect.query(`insert into "Discount"
-                                          values (0,
+                                          values (default,
                                                   '${discount.name}',
                                                   '${discount.description}',
-                                                  ${discount.discountPercent},
-                                                  ${discount.active ? 1 : 0},
+                                                  '${discount.discountPercent}',
                                                   now(),
                                                   now(),
                                                   '${discount.displayImage}')`)
@@ -23,14 +22,15 @@ export async function createDiscount(discount: Discount): Promise<APIResponse> {
 export async function updateDiscount(oldId: number, discount: Discount): Promise<APIResponse> {
     try {
         const connect = await new Pool(PostgreSQLConfig)
+        console.log(discount)
         let result = await connect.query(` update "Discount"
                                            set name            = '${discount.name}',
+                                               displayimage    = '${discount.displayImage}',
+                                               discountpercent = '${discount.discountPercent}',
                                                description     = '${discount.description}',
-                                               discountPercent = '${discount.discountPercent}',
-                                               active          = '${discount.active ? 1 : 0}',
-                                               modifiedAt      = now(),
-                                               displayImage    = '${discount.displayImage}'
-                                           where id = ${oldId}`)
+                                               modifiedat      = now()
+                                           where id = ${oldId}
+        `)
         return createResult(result.rowCount === 1)
     } catch (e) {
         return createException(e)
@@ -70,6 +70,11 @@ export async function getDiscounts(): Promise<APIResponse> {
         const connect = await new Pool(PostgreSQLConfig)
         let result = await connect.query(`select *
                                           from "Discount"`)
+        result.rows.map(item => {
+            item.createat = new Date(item.createat).toLocaleString()
+            item.modifiedat = new Date(item.modifiedat).toLocaleString()
+        })
+        connect.end()
         return createResult(result.rows)
     } catch (e) {
         return createException(e)

@@ -24,6 +24,8 @@ import {initializeApp} from "firebase/app"
 import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_conf";
 import {getStorage} from "firebase/storage";
 import multer from "multer";
+import {productRoute} from "./routes/ProductRoute";
+import {discountRoute} from "./routes/DiscountRoute";
 
 
 export const app: Application = express();
@@ -98,6 +100,12 @@ adminLoginLogRoute(app)
 
 /* Product categories route */
 productCategoryRoute(app, upload)
+
+/* Product route */
+productRoute(app, upload)
+
+/* Discount route */
+discountRoute(app, upload)
 
 /* API Route */
 API(app)
