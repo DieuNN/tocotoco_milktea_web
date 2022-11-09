@@ -10,6 +10,21 @@
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet"/>
     <link href="/css/styles.css" rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        td {
+            text-align: center;
+        }
+
+        th {
+            text-align: center;
+        }
+
+        .product-name {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body class="sb-nav-fixed">
 <%- include ('topnav.ejs') %>
@@ -61,7 +76,8 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="formFile" class="form-label">Ảnh</label>
-                                        <input class="form-control" type="file" name="image" accept="image/*" id="formFile" required>
+                                        <input class="form-control" type="file" name="image" accept="image/*"
+                                               id="formFile" required>
                                     </div>
                                 </form>
                             </div>
@@ -77,7 +93,187 @@
             </div>
             <!--Main grid view -->
             <div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Ảnh</th>
+                        <th scope="col">Tên</th>
+                        <th scope="col">Mô tả</th>
+                        <th scope="col">Ngày tạo</th>
+                        <th scope="col">Ngày sửa</th>
+                        <th scope="row">Hoạt động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% for (var i = 0; i < categories.length; i++) { %>
+                        <tr>
+                            <th scope="row">
+                                <%= categories[i].id %>
+                            </th>
+                            <th>
+                                <img style="width: 24px; height: 32px"
+                                     src="<%= categories[i].displayimage %>"
+                                     alt="...">
+                            </th>
+                            <td class="product-name">
+                                <%= categories[i].name %>
+                            </td>
+                            <td class="product-description">
+                                <%= categories[i].description %>
+                            </td>
+                            <td>
+                                <%= categories[i].createat %>
+                            </td>
+                            <td>
+                                <%= categories[i].modifiedat %>
+                            </td>
+                            <td>
+                                <!-- Detail Modal -->
+                                <div class="modal fade " id="<%= "detailModal" + categories[i].id %>" tabindex="-1"
+                                     aria-labelledby="detailModal" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered"
+                                         style="text-align: start">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Chi tiết</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body"
+                                                 style="display: flex; flex-direction: column; gap: 16px">
+                                                <span><strong>Tên: </strong><%= categories[i].name %></span>
+                                                <span><strong>Mô tả: </strong><%= categories[i].description %></span>
+                                                <span><strong>Ngày tạo: </strong><%= categories[i].createat %></span>
+                                                <span><strong>Ngày chỉnh sửa: </strong><%= categories[i].modifiedat %></span>
+                                                <span style="display: flex; flex-direction: row;align-content: center; justify-content: center"><strong
+                                                            style="text-align: center">Ảnh</strong></span>
+                                                <span><img src="<%= categories[i].displayimage %>"
+                                                           style="width: 1080px; height: 1920px"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <!-- Delete Modal -->
+                                <div class="modal fade " id="<%= "deleteModal" + categories[i].id %>" tabindex="-1"
+                                     aria-labelledby="detailModal" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered"
+                                         style="text-align: start">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Xóa</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Xác nhận xoá thể loại <%= categories[i].name %></p>
+                                                <strong>Cảnh báo: Xoá loại sản phẩm sẽ xoá tất cả các sản phẩm thuộc
+                                                    loại sản phẩm đó, vẫn xoá?</strong>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form name="<%= "deleteCategoryForm" + categories[i].id %>"
+                                                      enctype="application/x-www-form-urlencoded"
+                                                      id="<%= "deleteCategoryForm" + categories[i].id %>"
+                                                      method="post"
+                                                      action="/delete_category">
+                                                    <input type="text" style="display: none" name="id"
+                                                           aria-label="..."
+                                                           value="<%= categories[i].id %>">
+                                                </form>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Huỷ
+                                                </button>
+                                                <button type="submit" class="btn btn-primary"
+                                                        form="<%= "deleteCategoryForm" + categories[i].id %>"
+                                                        style="background-color: #FFA500; border-color: #FFA500"
+                                                >Xoá
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Update Modal -->
+                                <div class="modal fade" id="<%= "updateModal" + categories[i].id %>" tabindex="-1"
+                                     aria-labelledby="exampleModalLabel"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Chỉnh sửa loại sản
+                                                    phẩm</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body" style="text-align: start">
+                                                <form method="post" enctype="multipart/form-data"
+                                                      action="/update_product_category"
+                                                      id="<%= "updateModal" + categories[i].id + "x" %>">
+                                                    <input aria-label="..." value="<%= categories[i].id %>"
+                                                           style="display: none" name="id">
+                                                    <label for="name" class="form-label">Tên</label>
+                                                    <div class="input-group mb-3">
+                                                        <input aria-label="..." type="text" class="form-control"
+                                                               id="basic-url"
+                                                               value="<%= categories[i].name %>"
+                                                               aria-describedby="basic-addon3" name="name" required>
+                                                    </div>
+                                                    <label for="name" class="form-label">Mô tả</label>
+                                                    <div class="input-group mb-3">
+                                                        <input aria-label="..." type="text" class="form-control"
+                                                               id="basic-url"
+                                                               value="<%= categories[i].description %>"
+                                                               aria-describedby="basic-addon3" name="description"
+                                                               required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="formFile" class="form-label">Ảnh</label>
+                                                        <input class="form-control" type="file" name="image"
+                                                               accept="image/*"
+                                                               id="formFile" required>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Huỷ
+                                                </button>
+                                                <button type="submit" class="btn btn-primary"
+                                                        form="<%= "updateModal" + categories[i].id + "x" %>"
+                                                        style="border-color: #FFA500; background-color: #FFA500">Chỉnh
+                                                    sửa
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div style="display: flex; flex-direction: row; gap: 24px; align-content: center; justify-content: center">
+                                    <button class="link-primary"
+                                            style="border: transparent; background-color: transparent"
+                                            data-bs-target="<%= "#updateModal" + categories[i].id %>"
+                                            data-bs-toggle="modal">Sửa
+                                    </button>
+                                    <button class="link-primary"
+                                            style="border: transparent; background-color: transparent"
+                                            data-bs-target="<%= "#deleteModal" + categories[i].id %>"
+                                            data-bs-toggle="modal"
+                                    >Xóa
+                                    </button>
+                                    <button class="link-primary"
+                                            style="border: transparent; background-color: transparent"
+                                            data-bs-target="<%= "#detailModal" + categories[i].id %>"
+                                            data-bs-toggle="modal"
+                                    >Chi tiết
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                    </tbody>
+                </table>
             </div>
         </main>
         <footer class="py-4 bg-light mt-auto">

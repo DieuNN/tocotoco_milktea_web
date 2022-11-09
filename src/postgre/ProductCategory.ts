@@ -7,7 +7,7 @@ export async function addProductCategory(productCategory: ProductCategory): Prom
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`INSERT INTO "ProductCategory"
-                                             values (0,
+                                             values (default,
                                                      '${productCategory.name}',
                                                      '${productCategory.description}',
                                                      '${productCategory.displayImage}',
@@ -33,6 +33,10 @@ export async function getProductCategories(): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query('select * from "ProductCategory"')
+        result.rows.map(item=> {
+            item.createat = new Date(item.createat).toLocaleString()
+            item.modifiedat = new Date(item.modifiedat).toLocaleString()
+        })
         return {
             isSuccess: true,
             result: result.rows,
