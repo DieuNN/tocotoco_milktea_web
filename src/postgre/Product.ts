@@ -58,14 +58,18 @@ export async function getProducts(): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "Product".id,
-                                                      "Product".name         as "productName",
-                                                      "Product".description  as "productDescription",
-                                                      "ProductCategory".name as "productCategoryName",
-                                                      "Product".quantity     as "quantity",
-                                                      "Product".price        as "price",
-                                                      "Discount".name        as "discount",
-                                                      "Product".size         as "size",
-                                                      "Product".displayimage as "displayImage"
+                                                      "Product".name             as "productName",
+                                                      "Product".description      as "productDescription",
+                                                      "ProductCategory".name     as "productCategoryName",
+                                                      "Product".quantity         as "quantity",
+                                                      "Product".price            as "price",
+                                                      "Discount".name            as "discount",
+                                                      "Discount".discountpercent as "discountPercent",
+                                                      "Product".price -
+                                                      round(("Discount".discountpercent * "Product".price) /
+                                                           100)       as "priceAfterDiscount",
+                                                      "Product".size             as "size",
+                                                      "Product".displayimage     as "displayImage"
                                                from "Product"
                                                         inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
                                                         left join "Discount" on "Product".discountid = "Discount".id
@@ -84,6 +88,7 @@ export async function getProducts(): Promise<APIResponse> {
         return createException(e)
     }
 }
+
 
 export async function getProduct(productId: number): Promise<APIResponse> {
     try {
@@ -134,5 +139,19 @@ export async function getProductsByCategoryId(categoryId: number): Promise<APIRe
         return createException(e)
     }
 }
+
+export async function applyDiscount(productId: number, discountId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`update "Product"
+                                             set discountid = ${discountId}
+                                             where id = ${productId}`)
+        return createResult(result.rowCount == 1)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+
 
 

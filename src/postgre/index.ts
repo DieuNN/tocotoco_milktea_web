@@ -32,6 +32,8 @@ import {
 } from "./Product";
 import {createShoppingSession, deleteShoppingSession} from "./ShoppingSession";
 import {addItemToCart, removeItemFromCart, getCartItems, updateCartItemQuantity} from "./CartItem";
+import {Pool} from "pg";
+import {PostgreSQLConfig} from "../config/posgre";
 
 export {
     isAdminLogin,
@@ -65,4 +67,10 @@ export function createResult(result: any): APIResponse {
         errorMessage: null,
         result: result
     }
+}
+
+export async function rollBackTransactions() {
+    const connection = await new Pool(PostgreSQLConfig)
+    await connection.query(`ROLLBACK`)
+    connection.end()
 }

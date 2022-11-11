@@ -18,6 +18,8 @@ import {
 import {getUserAddress, getUserId} from "../postgre/User";
 import {getProductsByCategoryId} from "../postgre/Product";
 import {updateCartItemQuantity} from "../postgre/CartItem";
+import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
+import {confirmOrder, getOrderDetail, getUserOrders} from "../postgre/OrderDetails";
 
 export function API(app: Application) {
     app.post("/api/product_categories", async (req: Request, res: Response) => {
@@ -66,7 +68,7 @@ export function API(app: Application) {
         updateUserPassword(id, oldPassword, newPassword).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e)
+            res.end(e.toString())
         })
     })
     app.post("/api/update_user_address", (req: Request, res: Response) => {
@@ -110,9 +112,9 @@ export function API(app: Application) {
     })
     app.post("/api/discounts", async (req: Request, res: Response) => {
         getDiscounts().then(r => {
-            res.end(r)
+            res.json(r)
         }).catch(e => {
-            res.end(e)
+            res.end(e.toString())
         })
     })
     app.get("/api/discount", (req: Request, res: Response) => {
@@ -172,6 +174,14 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
+    app.post("/api/shopping_session/get_session_id", (req: Request, res: Response) => {
+        const {userId} = req.body
+        getUserSessionId(userId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
     app.post("/api/shopping_session/create_session", (req: Request, res: Response) => {
         const {userId} = req.body
         createShoppingSession(userId).then(r => {
@@ -183,6 +193,14 @@ export function API(app: Application) {
     app.post("/api/shopping_session/delete_session", (req: Request, res: Response) => {
         const {userId, sessionId} = req.body
         deleteShoppingSession(userId, sessionId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/shopping_session/get_cart_info", (req: Request, res: Response) => {
+        const {sessionId} = req.body
+        getCartInfo(sessionId).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
@@ -223,5 +241,28 @@ export function API(app: Application) {
         })
     })
 
-
+    app.post("/api/order/confirm_order", (req: Request, res: Response) => {
+        const {userId, sessionId, provider} = req.body
+        confirmOrder(userId, sessionId, provider).then(r=> {
+            res.json(r)
+        }).catch(e=> {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/order/get_user_orders", (req: Request, res: Response) => {
+        getUserOrders(req.body.userId).then(r => {
+            console.log(r)
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/order/get_order", (req: Request, res: Response) => {
+        const {orderId} = req.body
+        getOrderDetail(orderId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
 }

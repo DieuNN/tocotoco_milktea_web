@@ -4,6 +4,7 @@ import {createException, createResult} from "./index";
 
 /* As we don't know much about PostgreSQL, we cannot create trigger in Postgre, so we decided to use
 * javascript as trigger. We know that it's not recommended, but we don't have much time left :<
+* Update: maybe don't need to trigger
 * By DieuNN */
 async function triggerUpdateSessionTotal(sessionId: number) {
     const connection = await new Pool(PostgreSQLConfig)
@@ -39,7 +40,43 @@ export async function createShoppingSession(userId: number): Promise<APIResponse
                                                        0,
                                                        now(),
                                                        now())`)
-        return createResult(result.rowCount === 1)
+        return createResult(result.rowCount == 1)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function getCartInfo(sessionId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select count(*)                                         as "totalCategory",
+                                                    sum(CI.quantity)                                 as "totalQuantity",
+                                                    sum(CI.quantity * price)                         as "priceBeforeDiscount",
+                                                    sum(CI.quantity * price) -
+                                                    round(sum(CI.quantity * price * discountpercent / 100))  as "priceAfterDiscount"
+                                             from "ShoppingSession"
+                                                      inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
+                                                      inner join "Product" P on CI.productid = P.id
+                                                      left join "Discount" on P.discountid = "Discount".id
+                                             where sessionid = ${sessionId};`)
+        return createResult(result.rows[0])
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function getUserSessionId(userId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`select "ShoppingSession".id
+                                               from "ShoppingSession"
+                                                        inner join "User" on "ShoppingSession".userid = "User".id
+                                               where "User".id = ${userId}`)
+        if (result.rowCount != 1) {
+            return createException("Nguoi dung chua co gio hang!")
+        } else {
+            return createResult(result.rows[0])
+        }
     } catch (e) {
         return createException(e)
     }
@@ -61,6 +98,7 @@ export async function deleteShoppingSession(userId: number, sessionId: number): 
         return createException(e)
     }
 }
+
 
 
 

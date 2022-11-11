@@ -3,12 +3,12 @@ import md5 from 'md5'
 import {createException, createResult} from "./index";
 import {Pool} from "pg";
 
-async function isUsernameHasTaken(username: string): Promise<boolean> {
+export async function isUsernameHasTaken(username: string): Promise<boolean> {
     const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`select count(*)
                                          from "User"
                                          where username = '${username}'`)
-    return result.rows[0].count !== 0
+    return result.rows[0].count != 0
 }
 
 export async function createUser(user: User): Promise<APIResponse> {
@@ -36,6 +36,8 @@ export async function createUser(user: User): Promise<APIResponse> {
                                                            ${insertIndex},
                                                            '',
                                                            '')`)
+    await addUserMomoPayment(insertIndex, "")
+
     if ((insertNewUserId.rowCount === 1
         && (insertUserAdress.rowCount === 1))) {
         return {
@@ -263,9 +265,9 @@ export async function addUserMomoPayment(userId: number, momoAccount: string): P
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`insert into "UserMomoPayment"
                                                values (default,
-                                                       userid,
+                                                       ${userId},
                                                        '${momoAccount}')`)
-        if (result.rowCount === 1) {
+        if (result.rowCount == 1) {
             return createResult(true)
         } else {
             return createException("Khong tim thay ID")
