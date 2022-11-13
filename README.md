@@ -24,14 +24,10 @@ App chạy ở localhost:3000
 
     npm i
 
-#### 3. Project sử dụng typescript, nên một số type phải cài thêm
-
-     types install --save mysql2
-
-#### 4. Chạy project:  
+#### 3. Chạy project:  
     npm run dev
 
-#### 5. Xem kết quả:
+#### 4. Xem kết quả:
     localhost:3000
 
 
