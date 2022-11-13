@@ -2,17 +2,22 @@ import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
-export async function createPaymentDetail(orderId: number, provider: String, status: string): Promise<number> {
+export async function createPaymentDetail(orderId: number, provider: String, status: string, phoneNumber: string, address: string): Promise<number> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`insert into "PaymentDetails"
+        const result = await connection.query(`insert into "PaymentDetails" (id, orderid, amount, status, createat,
+                                                                             modifiedat, provider, address,
+                                                                             "phoneNumber")
                                                values (default,
                                                        ${orderId},
                                                        0,
                                                        '${status}',
                                                        now(),
                                                        now(),
-                                                       '${provider}')
+                                                       '${provider}',
+                                                       '${address}',
+                                                       '${phoneNumber}'
+                                                       )
                                                returning id`)
         return result.rows[0].id
     } catch (e) {

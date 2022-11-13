@@ -4,11 +4,25 @@ import {createException, createResult} from "./index";
 
 /* As we don't know much about PostgreSQL, we cannot create trigger in Postgre, so we decided to use
 * javascript as trigger. We know that it's not recommended, but we don't have much time left :<
-* Update: maybe don't need to trigger
 * By DieuNN */
-async function triggerUpdateSessionTotal(sessionId: number) {
+export async function triggerUpdateSessionTotal(userId: number, sessionId: number) {
     const connection = await new Pool(PostgreSQLConfig)
-    await connection.query(``)
+    let result = await connection.query(`with total_sum as (select sum(CI.quantity * price) -
+                                                      round(sum(CI.quantity * price * discountpercent / 100)) as sum
+                                               from "ShoppingSession"
+                                                        inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
+                                                        inner join "Product" P on CI.productid = P.id
+                                                        left join "Discount" on P.discountid = "Discount".id
+                                               where sessionid = ${sessionId}
+                                                 and userid = ${userId})
+                            update "ShoppingSession"
+                            set total = total_sum.sum
+                            from total_sum
+                            where id = ${sessionId}
+                              and userid = ${userId};`)
+    console.log("triggered update")
+    console.log(result)
+    connection.end()
 }
 
 export async function isUserHasTempCart(userId: number): Promise<APIResponse> {
@@ -49,11 +63,11 @@ export async function createShoppingSession(userId: number): Promise<APIResponse
 export async function getCartInfo(sessionId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        let result = await connection.query(`select count(*)                                         as "totalCategory",
-                                                    sum(CI.quantity)                                 as "totalQuantity",
-                                                    sum(CI.quantity * price)                         as "priceBeforeDiscount",
+        let result = await connection.query(`select count(*)                                                as "totalCategory",
+                                                    sum(CI.quantity)                                        as "totalQuantity",
+                                                    sum(CI.quantity * price)                                as "priceBeforeDiscount",
                                                     sum(CI.quantity * price) -
-                                                    round(sum(CI.quantity * price * discountpercent / 100))  as "priceAfterDiscount"
+                                                    round(sum(CI.quantity * price * discountpercent / 100)) as "priceAfterDiscount"
                                              from "ShoppingSession"
                                                       inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
                                                       inner join "Product" P on CI.productid = P.id

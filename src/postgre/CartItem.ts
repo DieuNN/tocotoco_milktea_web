@@ -1,8 +1,9 @@
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
-import {createException, createResult} from "./index";
+import {createException, createResult, rollBackTransactions} from "./index";
+import {triggerUpdateSessionTotal} from "./ShoppingSession";
 
-export async function addItemToCart(sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
+export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const productQuantity = await connection.query(`select quantity
@@ -19,6 +20,7 @@ export async function addItemToCart(sessionId: number, productId: number, quanti
             let _isItemInTempCart = await isItemInTempCart(productId, sessionId)
             if (_isItemInTempCart.result) {
                 await updateCartItemQuantity(sessionId, productId, quantity)
+                triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             }
 
@@ -27,13 +29,15 @@ export async function addItemToCart(sessionId: number, productId: number, quanti
                                                                ${sessionId},
                                                                ${productId},
                                                                ${quantity})`)
-            if (insertResult.rowCount === 1) {
+            if (insertResult.rowCount == 1) {
+                triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             } else {
                 return createException("Them san pham bi loi")
             }
         }
     } catch (e) {
+        rollBackTransactions().then()
         return createException(e)
     }
 }

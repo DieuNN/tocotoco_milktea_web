@@ -7,15 +7,17 @@ import {getUserSessionId} from "./ShoppingSession";
 
 /* Move temporary cart to order details, cuz ppl confirmed buying */
 
-export async function confirmOrder(userId: number, sessionId: number, provider: string): Promise<APIResponse> {
+export async function confirmOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string): Promise<APIResponse> {
     try {
         /*Check if session exist?*/
         let _isSessionExist = await getUserSessionId(userId)
         if (!_isSessionExist.isSuccess) {
             return createException("Gio hang khong ton tai!")
         }
-        await createOrder(userId, sessionId, provider);
-        await deleteShoppingSession(userId, sessionId)
+
+        let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address).then()
+        deleteShoppingSession(userId, sessionId).then()
+        updateProductInventory(orderId, userId).then()
 
         return createResult(true)
     } catch (e) {
@@ -23,17 +25,31 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
     }
 }
 
+export async function updateProductInventory(orderId: number, userId: number) {
+    const connection = await new Pool(PostgreSQLConfig)
+    let productsId = await connection.query(`select productid, quantity
+                                             from "OrderDetail"
+                                                      inner join "OrderItem" OI on "OrderDetail".id = OI.orderid
+                                             where orderid = ${orderId}
+                                               and userid = ${userId};`)
+    for (let item of productsId.rows) {
+        connection.query(`update "Product"
+                          set quantity = quantity - ${item.quantity}
+                          where id = ${item.productid}`)
+    }
+    connection.end()
+    console.log(productsId)
+}
 
-
-export async function createOrder(userId: number, sessionId: number, provider: string): Promise<APIResponse> {
+async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string): Promise<any> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let orderId = await createEmptyOrder(userId)
-        let paymentId = await createPaymentDetail(orderId, provider, "Pending")
-        await updatePaymentId(orderId, paymentId)
-        await addCartItemsToOrder(orderId, sessionId)
+        let paymentId = await createPaymentDetail(orderId, provider, "Pending", phoneNumber, address)
+        updatePaymentId(orderId, paymentId).then()
+        addCartItemsToOrder(orderId, sessionId, userId).then()
         connection.end()
-        return createResult(true)
+        return orderId
     } catch (e) {
         return createException(e)
     }
@@ -50,10 +66,20 @@ async function updatePaymentId(orderId: number, paymentId: number) {
 export async function getUserOrders(userId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        let result = await connection.query(`select *
+        let result = await connection.query(`select "OrderDetail".id,
+                                                    round(total)           as total,
+                                                    "OrderDetail".createat as createat,
+                                                    status,
+                                                    provider,
+                                                    address,
+                                                    "phoneNumber"
                                              from "OrderDetail"
-                                             where userid = ${userId}`)
-
+                                                      inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                             where userid = ${userId}
+                                             order by createat desc;`)
+        result.rows.map(item => {
+            item.createat = new Date(item.createat).toLocaleString("vi-VN")
+        })
         return createResult(result.rows)
     } catch (e) {
         return createException(e)

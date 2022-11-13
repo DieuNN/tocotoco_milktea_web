@@ -207,8 +207,8 @@ export function API(app: Application) {
         })
     })
     app.post("/api/shopping_session/add_item", (req: Request, res: Response) => {
-        const {sessionId, productId, quantity} = req.body
-        addItemToCart(sessionId, productId, quantity).then(r => {
+        const {userId, sessionId, productId, quantity} = req.body
+        addItemToCart(userId, sessionId, productId, quantity).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
@@ -242,16 +242,15 @@ export function API(app: Application) {
     })
 
     app.post("/api/order/confirm_order", (req: Request, res: Response) => {
-        const {userId, sessionId, provider} = req.body
-        confirmOrder(userId, sessionId, provider).then(r=> {
+        const {userId, sessionId, provider, phoneNumber, address} = req.body
+        confirmOrder(userId, sessionId, provider, phoneNumber, address).then(r => {
             res.json(r)
-        }).catch(e=> {
+        }).catch(e => {
             res.end(e.toString())
         })
     })
     app.post("/api/order/get_user_orders", (req: Request, res: Response) => {
         getUserOrders(req.body.userId).then(r => {
-            console.log(r)
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
@@ -265,4 +264,5 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
+
 }

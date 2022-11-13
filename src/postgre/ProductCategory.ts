@@ -33,9 +33,9 @@ export async function getProductCategories(): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query('select * from "ProductCategory"')
-        result.rows.map(item=> {
-            item.createat = new Date(item.createat).toLocaleString()
-            item.modifiedat = new Date(item.modifiedat).toLocaleString()
+        result.rows.map(item => {
+            item.createat = new Date(item.createat).toLocaleString("vi-VN", {timeZone: "Asia/Saigon"})
+            item.modifiedat = new Date(item.modifiedat).toLocaleString("vi-VN", {timeZone: "Asia/Saigon"})
         })
         connection.end()
         return {

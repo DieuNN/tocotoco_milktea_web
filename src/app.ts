@@ -26,10 +26,8 @@ import {getStorage} from "firebase/storage";
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
-import {isUsernameHasTaken} from "./postgre/User";
-import {createPaymentDetail} from "./postgre/PaymentDetails";
-import {confirmOrder, createEmptyOrder, createOrder} from "./postgre/OrderDetails";
-import {addCartItemsToOrder} from "./postgre/OrderItem";
+import {updateProductInventory} from "./postgre/OrderDetails";
+
 
 
 export const app: Application = express();
@@ -128,16 +126,6 @@ app.use((req, res) => {
 
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
-
-// createPaymentDetail(1, "Cash", "Pending").then(r=> {
-//     console.log(r)
-// })
-// createOrder(8, 14, "Cash").then(r=> {
-//     console.log("Created")
-// })
-// confirmOrder(8, 1, "Cash").then(r=> {
-//     console.log(r)
-// })
 
 function handleDisconnect() {
     client = new Client(PostgreSQLConfig)
