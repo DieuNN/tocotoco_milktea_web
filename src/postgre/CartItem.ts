@@ -3,7 +3,7 @@ import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult, rollBackTransactions} from "./index";
 import {triggerUpdateSessionTotal} from "./ShoppingSession";
 
-export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
+export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number, size: string): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const productQuantity = await connection.query(`select quantity
@@ -24,11 +24,13 @@ export async function addItemToCart(userId: number, sessionId: number, productId
                 return createResult(true)
             }
 
-            let insertResult = await connection.query(`insert into "CartItem"
+            let insertResult = await connection.query(`insert into "CartItem" (id, sessionid, productid, quantity, size)
                                                        values (default,
                                                                ${sessionId},
                                                                ${productId},
-                                                               ${quantity})`)
+                                                               ${quantity},
+                                                               '${size}')
+            `)
             if (insertResult.rowCount == 1) {
                 triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
@@ -117,10 +119,16 @@ export async function getCartItems(sessionId: number): Promise<APIResponse> {
                                                       P.description               as "description",
                                                       price * "CartItem".quantity as total,
                                                       P.price                     as price,
-                                                      "ProductCategory".name      as "productCategoryName"
+                                                      "ProductCategory".name      as "productCategoryName",
+                                                      "CartItem".size             as "size",
+                                                      discountid                  as "discountId",
+                                                      price * "CartItem".quantity -
+                                                      round((price * "CartItem".quantity * "Discount".discountpercent) /
+                                                            100)                  as "priceAfterDiscount"
                                                from "CartItem"
                                                         inner join "Product" P on P.id = "CartItem".productid
                                                         inner join "ProductCategory" on P.categoryid = "ProductCategory".id
+                                                        left outer join "Discount" on P.discountid = "Discount".id
                                                where sessionid = ${sessionId};
         `)
         return createResult(result.rows)

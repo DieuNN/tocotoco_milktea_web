@@ -19,7 +19,7 @@ import {getUserAddress, getUserId} from "../postgre/User";
 import {getProductsByCategoryId} from "../postgre/Product";
 import {updateCartItemQuantity} from "../postgre/CartItem";
 import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
-import {confirmOrder, getOrderDetail, getUserOrders} from "../postgre/OrderDetails";
+import {confirmOrder, getItemsInOrder, getOrderDetail, getUserOrders} from "../postgre/OrderDetails";
 
 export function API(app: Application) {
     app.post("/api/product_categories", async (req: Request, res: Response) => {
@@ -207,8 +207,8 @@ export function API(app: Application) {
         })
     })
     app.post("/api/shopping_session/add_item", (req: Request, res: Response) => {
-        const {userId, sessionId, productId, quantity} = req.body
-        addItemToCart(userId, sessionId, productId, quantity).then(r => {
+        const {userId, sessionId, productId, quantity, size} = req.body
+        addItemToCart(userId, sessionId, productId, quantity, size).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
@@ -256,9 +256,16 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.post("/api/order/get_order", (req: Request, res: Response) => {
-        const {orderId} = req.body
-        getOrderDetail(orderId).then(r => {
+    app.post("/api/order/get_order_detail", (req: Request, res: Response) => {
+        const {orderId, userId} = req.body
+        getOrderDetail(userId, orderId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/order/get_items", (req: Request, res: Response) => {
+        getItemsInOrder(req.body.orderId, req.body.userId).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())

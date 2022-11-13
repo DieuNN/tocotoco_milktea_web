@@ -38,7 +38,6 @@ export async function updateProductInventory(orderId: number, userId: number) {
                           where id = ${item.productid}`)
     }
     connection.end()
-    console.log(productsId)
 }
 
 async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string): Promise<any> {
@@ -67,15 +66,19 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderDetail".id,
-                                                    round(total)           as total,
-                                                    "OrderDetail".createat as createat,
+                                                    round(total)  as total,
+                                                    "OrderDetail".createat,
                                                     status,
                                                     provider,
                                                     address,
-                                                    "phoneNumber"
+                                                    "phoneNumber",
+                                                    sum(quantity) as "totalProduct"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                                      inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
                                              where userid = ${userId}
+                                             group by "OrderDetail".id, total, "OrderDetail".createat, status, provider,
+                                                      address, "phoneNumber"
                                              order by createat desc;`)
         result.rows.map(item => {
             item.createat = new Date(item.createat).toLocaleString("vi-VN")
@@ -86,17 +89,59 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
     }
 }
 
-export async function getOrderDetail(orderId: number): Promise<APIResponse> {
+export async function getOrderDetail(userId: number, orderId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`select *
+        const result = await connection.query(`select "OrderDetail".id,
+                                                      round(total)  as total,
+                                                      "OrderDetail".createat,
+                                                      status,
+                                                      provider,
+                                                      address,
+                                                      "phoneNumber",
+                                                      sum(quantity) as "totalProduct"
                                                from "OrderDetail"
-                                               where id = ${orderId}`)
+                                                        inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                                        inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
+                                               where userid = ${userId}
+                                                 and "OrderDetail".id = ${orderId}
+                                               group by "OrderDetail".id, total, "OrderDetail".createat, status,
+                                                        provider,
+                                                        address, "phoneNumber"
+                                               order by createat desc;`)
         if (result.rowCount != 1) {
             return createException("Khong tim thay order " + orderId)
         } else {
             return createResult(result.rows[0])
         }
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function getItemsInOrder(orderId: number, userId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select "OrderItem".id               as "id",
+                                                    orderid                      as "orderId",
+                                                    productid                    as "productId",
+                                                    "OrderItem".quantity         as "quantity",
+                                                    P.name                       as "productName",
+                                                    P.description                as "description",
+                                                    price * "OrderItem".quantity as total,
+                                                    P.price                      as price,
+                                                    "ProductCategory".name       as "productCategoryName"
+                                                     ,
+                                                    "OrderItem".size             as "size",
+                                                    pricebeforediscount          as "priceBeforeDiscount",
+                                                    priceafterdiscount           as "priceAfterDiscount"
+                                             from "OrderItem"
+                                                      inner join "Product" P on P.id = "OrderItem".productid
+                                                      inner join "ProductCategory" on P.categoryid = "ProductCategory".id
+                                                      inner join "OrderDetail" on "OrderItem".orderid = "OrderDetail".id
+                                             where orderid = ${orderId}
+                                               and userid = ${userId};`)
+        return createResult(result.rows)
     } catch (e) {
         return createException(e)
     }

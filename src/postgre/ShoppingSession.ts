@@ -20,8 +20,6 @@ export async function triggerUpdateSessionTotal(userId: number, sessionId: numbe
                             from total_sum
                             where id = ${sessionId}
                               and userid = ${userId};`)
-    console.log("triggered update")
-    console.log(result)
     connection.end()
 }
 
