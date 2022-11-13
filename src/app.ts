@@ -147,6 +147,9 @@ function handleDisconnect() {
     })
 }
 
+/*TODO:
+*  1. FAV Products*/
+
 handleDisconnect()
 
 

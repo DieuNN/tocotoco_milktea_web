@@ -21,25 +21,26 @@ export async function createUser(user: User): Promise<APIResponse> {
         return createException("Tên người dùng đã được sử dụng")
     }
 
-    let insertNewUserId = await connection.query(`insert into "User"
+    let insertNewUserId = await connection.query(`insert into "User" (id, email, password, name, phonenumber, createat,
+                                                                      modifiedat, username)
                                                       values (DEFAULT,
-                                                              '${user.username}',
                                                               '${user.email}',
                                                               '${encryptedPassword}',
                                                               '${user.name}',
                                                               '${user.phoneNumber}',
                                                               now(),
-                                                              now()) returning id`)
+                                                              now(),
+                                                              '${user.username}') returning id`)
     let insertIndex = insertNewUserId.rows[0].id
-    let insertUserAdress = await connection.query(`insert into "UserAddress"
-                                                   values (DEFAULT,
-                                                           ${insertIndex},
-                                                           '',
-                                                           '')`)
+    let insertUserAddress = await connection.query(`insert into "UserAddress"
+                                                    values (DEFAULT,
+                                                            ${insertIndex},
+                                                            '',
+                                                            '')`)
     await addUserMomoPayment(insertIndex, "")
 
     if ((insertNewUserId.rowCount === 1
-        && (insertUserAdress.rowCount === 1))) {
+        && (insertUserAddress.rowCount === 1))) {
         return {
             isSuccess: true,
             result: true,
