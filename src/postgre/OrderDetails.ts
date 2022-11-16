@@ -46,7 +46,7 @@ async function createOrder(userId: number, sessionId: number, provider: string, 
         let orderId = await createEmptyOrder(userId)
         let paymentId = await createPaymentDetail(orderId, provider, "Pending", phoneNumber, address)
         updatePaymentId(orderId, paymentId).then()
-        addCartItemsToOrder(orderId, sessionId, userId).then()
+        await addCartItemsToOrder(orderId, sessionId, userId)
         connection.end()
         return orderId
     } catch (e) {

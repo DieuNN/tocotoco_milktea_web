@@ -18,15 +18,16 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
                                                              left outer join "Discount" D on P.discountid = D.id
 
                                                     where sessionid = ${sessionId};`)
+        console.log(sessionResult.rows)
         for (const item of sessionResult.rows) {
-            let hey = await connection.query(`insert into "OrderItem" (id, orderid, productid, quantity, createat,
-                                                                       modifiedat, size, pricebeforediscount,
-                                                                       priceafterdiscount)
-                                              values (default, ${orderId}, ${item.productId}, ${item.quantity}, now(),
-                                                      now(), '${item.size}', ${item.priceBeforeDiscount},
-                                                      ${item.priceAfterDiscount})`)
+            await connection.query(`insert into "OrderItem" (id, orderid, productid, quantity, createat,
+                                                             modifiedat, size, pricebeforediscount,
+                                                             priceafterdiscount)
+                                    values (default, ${orderId}, ${item.productId}, ${item.quantity}, now(),
+                                            now(), '${item.size}', ${item.priceBeforeDiscount},
+                                            ${item.priceAfterDiscount})`)
         }
-        updateOrderDetailTotal(orderId, userId).then()
+        await updateOrderDetailTotal(orderId, userId)
     } catch (e) {
         console.log(e)
     }
@@ -37,12 +38,11 @@ async function updateOrderDetailTotal(orderId: number, userId: number) {
     connection.query(`with total_sum as (select sum(priceafterdiscount)
                                          from "OrderDetail"
                                                   inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
-                                         where "OrderDetail".id = 43)
+                                         where "OrderDetail".id = ${orderId})
                       update "OrderDetail"
                       set total = total_sum.sum
                       from total_sum
                       where id = ${orderId}
                         and userid = ${userId}
     ;`)
-    connection.end()
 }

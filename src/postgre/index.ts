@@ -31,9 +31,10 @@ import {
     addProduct, getProducts, getProduct, updateProduct
 } from "./Product";
 import {createShoppingSession, deleteShoppingSession} from "./ShoppingSession";
-import {addItemToCart, removeItemFromCart, getCartItems, updateCartItemQuantity} from "./CartItem";
+import {addItemToCart, removeItemFromCart, getCartItems, updateCartItem} from "./CartItem";
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
+import {getLovedItems} from "./LovedProducts";
 
 export {
     isAdminLogin,
@@ -50,7 +51,7 @@ export {
     addProduct, updateProduct, getProduct, getProducts,
     updateUserPassword, updateUserMomoPayment, getUserId, addUserMomoPayment, addItemToCart, createShoppingSession,
     removeItemFromCart, deleteShoppingSession, getCartItems,
-
+    getLovedItems
 }
 
 export function createException(e: any): APIResponse {

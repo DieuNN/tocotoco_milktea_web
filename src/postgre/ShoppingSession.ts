@@ -58,7 +58,7 @@ export async function createShoppingSession(userId: number): Promise<APIResponse
     }
 }
 
-export async function getCartInfo(sessionId: number): Promise<APIResponse> {
+export async function getCartInfo(userId : number, sessionId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select count(*)                                                as "totalCategory",
@@ -70,7 +70,7 @@ export async function getCartInfo(sessionId: number): Promise<APIResponse> {
                                                       inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
                                                       inner join "Product" P on CI.productid = P.id
                                                       left join "Discount" on P.discountid = "Discount".id
-                                             where sessionid = ${sessionId};`)
+                                             where sessionid = ${sessionId} and userid = ${userId};`)
         return createResult(result.rows[0])
     } catch (e) {
         return createException(e)

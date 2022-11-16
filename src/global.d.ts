@@ -19,6 +19,14 @@ declare global {
         warningStatus?: number,
         changedRows?: number,
     }
+
+    interface JWTPayload {
+        id : number,
+        username : string,
+        password : string,
+        iat : number
+    }
 }
+
 
 export {}

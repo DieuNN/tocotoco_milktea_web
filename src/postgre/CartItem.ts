@@ -19,7 +19,7 @@ export async function addItemToCart(userId: number, sessionId: number, productId
             // if item in cart, update quantity
             let _isItemInTempCart = await isItemInTempCart(productId, sessionId)
             if (_isItemInTempCart.result) {
-                await updateCartItemQuantity(sessionId, productId, quantity)
+                await updateCartItem(userId, sessionId, productId, quantity, size)
                 triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             }
@@ -79,7 +79,7 @@ export async function removeItemFromCart(itemId: number, sessionId: number): Pro
     }
 }
 
-export async function updateCartItemQuantity(sessionId: number, productId: number, quantity: number): Promise<APIResponse> {
+export async function updateCartItem(userId: number, sessionId: number, productId: number, quantity: number, size: string): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const productQuantity = await connection.query(`select quantity
@@ -92,10 +92,11 @@ export async function updateCartItemQuantity(sessionId: number, productId: numbe
                 return createException("So luong khong hop le! Kho con " + productQuantity.rows[0].quantity + ", so luong nhap: " + quantity)
             }
             let result = await connection.query(`update "CartItem"
-                                                 set quantity = ${quantity}
+                                                 set quantity = ${quantity},
+                                                     size     = '${size}'
                                                  where sessionid = ${sessionId}
-                                                   and productid = ${productId}`)
-            /*TODO*/
+                                                   and productid = ${productId}
+            `)
             if (result.rowCount != 0) {
                 return createResult(true)
             } else {
@@ -108,7 +109,7 @@ export async function updateCartItemQuantity(sessionId: number, productId: numbe
     }
 }
 
-export async function getCartItems(sessionId: number): Promise<APIResponse> {
+export async function getCartItems(userId: number, sessionId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "CartItem".id               as "id",
@@ -126,10 +127,13 @@ export async function getCartItems(sessionId: number): Promise<APIResponse> {
                                                       round((price * "CartItem".quantity * "Discount".discountpercent) /
                                                             100)                  as "priceAfterDiscount"
                                                from "CartItem"
+                                                        inner join "ShoppingSession" on "CartItem".sessionid = "ShoppingSession".id
                                                         inner join "Product" P on P.id = "CartItem".productid
                                                         inner join "ProductCategory" on P.categoryid = "ProductCategory".id
                                                         left outer join "Discount" on P.discountid = "Discount".id
-                                               where sessionid = ${sessionId};
+
+                                               where sessionid = ${sessionId}
+                                                 and userid = ${userId};
         `)
         return createResult(result.rows)
     } catch (e) {

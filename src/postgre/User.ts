@@ -1,7 +1,13 @@
 import {PostgreSQLConfig} from "../config/posgre";
 import md5 from 'md5'
-import {createException, createResult} from "./index";
+import {createException, createResult, rollBackTransactions} from "./index";
 import {Pool} from "pg";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config({
+    path: "process.env"
+})
 
 export async function isUsernameHasTaken(username: string): Promise<boolean> {
     const connection = await new Pool(PostgreSQLConfig)
@@ -37,7 +43,7 @@ export async function createUser(user: User): Promise<APIResponse> {
                                                             ${insertIndex},
                                                             '',
                                                             '')`)
-    await addUserMomoPayment(insertIndex, "")
+    addUserMomoPayment(insertIndex, "").then()
 
     if ((insertNewUserId.rowCount === 1
         && (insertUserAddress.rowCount === 1))) {
@@ -47,6 +53,7 @@ export async function createUser(user: User): Promise<APIResponse> {
             errorMessage: null
         }
     } else {
+        rollBackTransactions().then()
         return {
             isSuccess: false,
             result: null,
@@ -70,7 +77,8 @@ export async function getUsers() {
     }
 }
 
-export async function getUser(id: number): Promise<APIResponse> {
+export async function getUser(token: string): Promise<APIResponse> {
+    const user = await jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
     const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`select "User".id,
                                                 "User".username,
@@ -81,7 +89,7 @@ export async function getUser(id: number): Promise<APIResponse> {
                                                 "UserAddress".address
                                          from "User"
                                                   inner join "UserAddress" on "User".id = "UserAddress".userId
-                                         where "User".id = ${id};`)
+                                         where "User".id = ${user.id};`)
 
     if (result.rows.length == 0) {
         return {
@@ -168,8 +176,10 @@ export async function getUserAddress(id: number): Promise<APIResponse> {
     }
 }
 
-export async function getUserId(username: string): Promise<APIResponse> {
+export async function getUserId(username: string, token : string): Promise<APIResponse> {
     try {
+        const user = jwt.verify(token, process.env.JWT_SCRET!)
+        console.log(user)
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select id
                                              from "User"
@@ -187,14 +197,11 @@ export async function getUserId(username: string): Promise<APIResponse> {
 
 export async function getUserLoginInfo(username: string, password: string, usernameType: string): Promise<APIResponse> {
     let encryptedPassword: string = md5(password)
-    console.log(username)
-    console.log(encryptedPassword)
-    console.log(usernameType)
     const connection = await new Pool(PostgreSQLConfig)
     let result;
     switch (usernameType) {
         case "email" : {
-            let sqlQuery = `Select count(*)
+            let sqlQuery = `Select id, username, password
                             from "User"
                             where email = '${username}'
                               and password = '${encryptedPassword}'`
@@ -202,7 +209,7 @@ export async function getUserLoginInfo(username: string, password: string, usern
             break
         }
         case "phoneNumber" : {
-            let sqlQuery = `Select count(*)
+            let sqlQuery = `Select id, username, password
                             from "User"
                             where phoneNumber = '${username}'
                               and password = '${encryptedPassword}'`
@@ -210,7 +217,7 @@ export async function getUserLoginInfo(username: string, password: string, usern
             break
         }
         case "username" : {
-            let sqlQuery = `Select count(*)
+            let sqlQuery = `Select id, username, password
                             from "User"
                             where username = '${username}'
                               and password = '${encryptedPassword}'`
@@ -225,18 +232,17 @@ export async function getUserLoginInfo(username: string, password: string, usern
             }
         }
     }
-
-    // console.log(result)
-    if (result.rows[0].count != 0) {
+    if (result.rows.length == 1) {
+        const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SCRET!.toString())
         return {
             isSuccess: true,
-            result: true,
+            result: _jwt,
             errorMessage: null
         }
     } else {
         return {
             isSuccess: false,
-            result: false,
+            result: null,
             errorMessage: "Thông tin đăng nhập không đúng!"
         }
     }
