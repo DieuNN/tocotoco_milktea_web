@@ -6,7 +6,6 @@ import cookie_parser from 'cookie-parser'
 import sessions from 'express-session'
 import dotenv from 'dotenv'
 import {PostgreSQLConfig} from "./config/posgre";
-import bodyParser from 'body-parser'
 import {
     adminLoginLogRoute,
     API,
@@ -18,15 +17,11 @@ import {
 } from "./routes";
 import requestIp from 'request-ip'
 import {Client} from 'pg';
-import {getUsers, isAdminLogin, updateUserInfo} from "./postgre";
 import * as fs from "fs";
-import {initializeApp} from "firebase/app"
 import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_conf";
-import {getStorage} from "firebase/storage";
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
-import {updateProductInventory} from "./postgre/OrderDetails";
 
 
 
