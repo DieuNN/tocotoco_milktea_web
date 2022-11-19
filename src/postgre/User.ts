@@ -195,11 +195,11 @@ export async function getUserId(username: string, token : string): Promise<APIRe
 }
 
 
-export async function getUserLoginInfo(username: string, password: string, usernameType: string): Promise<APIResponse> {
+export async function getUserLoginInfo(username: string, password: string, type: string): Promise<APIResponse> {
     let encryptedPassword: string = md5(password)
     const connection = await new Pool(PostgreSQLConfig)
     let result;
-    switch (usernameType) {
+    switch (type) {
         case "email" : {
             let sqlQuery = `Select id, username, password
                             from "User"
@@ -232,7 +232,8 @@ export async function getUserLoginInfo(username: string, password: string, usern
             }
         }
     }
-    if (result.rows.length == 1) {
+    console.log(result.rows)
+    if (result.rows.length != 0) {
         const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SCRET!.toString())
         return {
             isSuccess: true,
