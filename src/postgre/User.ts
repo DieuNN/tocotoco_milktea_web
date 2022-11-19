@@ -233,6 +233,7 @@ export async function getUserLoginInfo(username: string, password: string, type:
         }
     }
     console.log(result.rows)
+    /*TODO: FIX THIS LOL*/
     if (result.rows.length != 0) {
         const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SCRET!.toString())
         return {

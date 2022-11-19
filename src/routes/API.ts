@@ -184,6 +184,27 @@ export function API(app: Application) {
     })
     app.post('/api/signup', async (req: Request, res: Response) => {
         const {username, password, email, phoneNumber, name} = req.body
+        if (username == undefined || username.toString() == "") {
+            res.json(createException("Chua nhap ten nguoi dung!"))
+            return
+        }
+        if (password == undefined || password.toString() == "") {
+            res.json(createException("Chua nhap mat khau!"))
+            return
+        }
+        if (email == undefined || email.toString() == "") {
+            res.json(createException("Chua nhap email!"))
+            return
+        }
+        if (phoneNumber == undefined || phoneNumber.toString() == "") {
+            res.json(createException("Chua nhap so dien thoai!"))
+            return
+        }
+        if (name == undefined || name.toString() == "") {
+            res.json(createException("Chua nhap ten!"))
+            return
+        }
+
         createUser({
             username: username,
             password: password,
