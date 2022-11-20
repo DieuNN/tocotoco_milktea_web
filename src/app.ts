@@ -23,7 +23,7 @@ import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_c
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
-import {getAllStatistical} from "./postgre/Statistical";
+import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
 
 
 
@@ -146,9 +146,11 @@ function handleDisconnect() {
     })
 }
 
-
 handleDisconnect()
 
+getYearlyChart().then(r=> {
+    console.log(r)
+})
 
 server.listen(port, () => {
 

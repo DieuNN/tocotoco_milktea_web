@@ -19,7 +19,7 @@ import {
     getCartItems,
     removeItemFromCart,
     getLovedItems,
-    createException
+    createException, getAllStatistical
 } from "../postgre";
 import {getUserAddress, getUserId} from "../postgre/User";
 import {getProductsByCategoryId} from "../postgre/Product";
@@ -29,6 +29,7 @@ import {confirmOrder, getItemsInOrder, getOrderDetail, getUserOrders} from "../p
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {addLovedItem, deleteLovedItem} from "../postgre/LovedProducts";
+import {getMonthlyChart, getYearlyChart} from "../postgre/Statistical";
 
 dotenv.config({
     path: "process.env"
@@ -446,6 +447,20 @@ export function API(app: Application) {
         }
         const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
         deleteLovedItem(userId, productId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/statistical/monthly-chart", (req: Request, res: Response) => {
+        getMonthlyChart().then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/statistical/yearly-chart", (req: Request, res: Response) => {
+        getYearlyChart().then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
