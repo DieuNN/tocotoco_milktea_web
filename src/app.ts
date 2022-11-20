@@ -6,6 +6,7 @@ import cookie_parser from 'cookie-parser'
 import sessions from 'express-session'
 import dotenv from 'dotenv'
 import {PostgreSQLConfig} from "./config/posgre";
+import cors from "cors"
 import {
     adminLoginLogRoute,
     API,
@@ -22,6 +23,7 @@ import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_c
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
+import {getAllStatistical} from "./postgre/Statistical";
 
 
 
@@ -70,6 +72,8 @@ app.use(sessions({
     cookie: {maxAge: 1000 * 60 * 60 * 24},
     resave: true,
 }))
+
+app.use(cors())
 
 
 app.use(express.json())
@@ -142,8 +146,6 @@ function handleDisconnect() {
     })
 }
 
-/*TODO:
-*  1. FAV Products*/
 
 handleDisconnect()
 

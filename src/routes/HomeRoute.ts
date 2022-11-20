@@ -1,4 +1,5 @@
 import {Application, Request, Response} from "express";
+import {getAllStatistical} from "../postgre";
 
 export function homeRoute(app: Application) {
 
@@ -9,6 +10,11 @@ export function homeRoute(app: Application) {
         // } else{
         //     res.render('index')
         // }
-        res.render('index')
+        getAllStatistical().then(r=> {
+            res.render('index', {data : r.result})
+        }).catch(e=> {
+            res.end("Error in get statistical")
+        })
+
     });
 }

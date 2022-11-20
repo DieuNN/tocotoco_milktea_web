@@ -17,14 +17,41 @@ export async function isUsernameHasTaken(username: string): Promise<boolean> {
     return result.rows[0].count != 0
 }
 
+async function isPhoneNumberHasTaken(phoneNumber: string): Promise<boolean> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select count(*)
+                                             from "User"
+                                             where phonenumber = '${phoneNumber}'`)
+        return result.rows[0].count != 0
+    } catch (e) {
+        return false
+    }
+}
+
+async function isEmailHasTaken(email: string): Promise<boolean> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select count(*)
+                                             from "User"
+                                             where email = '${email}'`)
+        return result.rows[0].count != 0
+    } catch (e) {
+        return false
+    }
+}
+
 export async function createUser(user: User): Promise<APIResponse> {
     const connection = await new Pool(PostgreSQLConfig)
     const encryptedPassword = md5(user.password!)
 
-    const isUsernameExist = await isUsernameHasTaken(user.username)
-    // console.log(isUsernameExist)
-    if (isUsernameExist) {
+    const validateResult = await Promise.all([isUsernameHasTaken(user.username), isEmailHasTaken(user.email), isPhoneNumberHasTaken(user.phoneNumber)])
+    if (validateResult[0]) {
         return createException("Tên người dùng đã được sử dụng")
+    } else if (validateResult[1]) {
+        return createException("Email đã đuợc sử dụng")
+    } else if (validateResult[2]) {
+        return createException("Số điện thoại đã đuợc sử dụng")
     }
 
     let insertNewUserId = await connection.query(`insert into "User" (id, email, password, name, phonenumber, createat,
@@ -176,7 +203,7 @@ export async function getUserAddress(id: number): Promise<APIResponse> {
     }
 }
 
-export async function getUserId(username: string, token : string): Promise<APIResponse> {
+export async function getUserId(username: string, token: string): Promise<APIResponse> {
     try {
         const user = jwt.verify(token, process.env.JWT_SCRET!)
         console.log(user)

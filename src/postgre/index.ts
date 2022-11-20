@@ -35,6 +35,7 @@ import {addItemToCart, removeItemFromCart, getCartItems, updateCartItem} from ".
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
 import {getLovedItems} from "./LovedProducts";
+import {getAllStatistical} from "./Statistical";
 
 export {
     isAdminLogin,
@@ -51,7 +52,8 @@ export {
     addProduct, updateProduct, getProduct, getProducts,
     updateUserPassword, updateUserMomoPayment, getUserId, addUserMomoPayment, addItemToCart, createShoppingSession,
     removeItemFromCart, deleteShoppingSession, getCartItems,
-    getLovedItems
+    getLovedItems,
+    getAllStatistical
 }
 
 export function createException(e: any): APIResponse {
