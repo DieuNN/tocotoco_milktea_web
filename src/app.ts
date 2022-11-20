@@ -73,7 +73,7 @@ app.use(sessions({
     resave: true,
 }))
 
-app.use(cors())
+// app.use(cors())
 
 
 app.use(express.json())
@@ -148,9 +148,6 @@ function handleDisconnect() {
 
 handleDisconnect()
 
-getYearlyChart().then(r=> {
-    console.log(r)
-})
 
 server.listen(port, () => {
 
