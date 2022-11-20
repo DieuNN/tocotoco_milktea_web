@@ -8,7 +8,8 @@ var ctx = document.getElementById("monthlyChart");
 let xAxis;
 let data;
 await fetch("https://tocotea.software/api/statistical/monthly-chart", {
-    method: "post"
+    method: "post",
+    mode : "no-cors"
 }).then(r => r.json()).then(r => {
     xAxis = r.xAxis
     data = r.data
