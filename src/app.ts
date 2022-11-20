@@ -26,7 +26,6 @@ import {discountRoute} from "./routes/DiscountRoute";
 import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
 
 
-
 export const app: Application = express();
 const credentials = {
     key: fs.readFileSync('./cert/server.key', 'utf-8'),
@@ -49,6 +48,8 @@ const upload = multer({
 const publicDirectoryPath = path.join(__dirname, "./public");
 app.use(express.static(publicDirectoryPath));
 
+app.use(cors())
+
 // Setting the port
 const port = process.env.HTTP_PORT;
 
@@ -61,8 +62,6 @@ app.set('views', path.join(__dirname, 'views'));
 // Setting the view engine
 app.set('view engine', 'ejs');
 
-// Set static folder
-app.use(express.static(__dirname + '/public'));
 
 /*Create application sessions */
 app.use(sessions({
@@ -72,8 +71,6 @@ app.use(sessions({
     cookie: {maxAge: 1000 * 60 * 60 * 24},
     resave: true,
 }))
-
-// app.use(cors())
 
 
 app.use(express.json())
@@ -150,7 +147,7 @@ handleDisconnect()
 
 
 server.listen(port, () => {
-
+    console.log("Running on port " + port)
 });
 httpsServer.listen(3443, () => {
 

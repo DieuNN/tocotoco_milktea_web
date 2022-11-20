@@ -8,7 +8,6 @@ export async function getAllStatistical(): Promise<APIResponse> {
         const queryResult = await connection.query(`select *
                                                     from "OrderDetail"
                                                              inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid`)
-        console.log(queryResult.rows)
         let result = {
             total: queryResult.rows.length,
             pending: 0,

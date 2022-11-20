@@ -1,5 +1,4 @@
 // Set new default font family and font color to mimic Bootstrap's default styling
-
 Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 Chart.defaults.global.defaultFontColor = '#292b2c';
 
@@ -7,10 +6,16 @@ Chart.defaults.global.defaultFontColor = '#292b2c';
 var ctx = document.getElementById("monthlyChart");
 let xAxis;
 let data;
-await fetch("https://tocotea.software/api/statistical/monthly-chart", {
-    method: "post",
-    mode : "cors"
-}).then(r => r.json()).then(r => {
+
+await fetch("http://localhost:3000/api/statistical/monthly-chart", {
+    mode: 'cors',
+    headers: {
+        'accept' : 'application/json',
+    },
+    method: 'get'
+}).then(r => {
+    return r.json()
+}).then(r => {
     xAxis = r.xAxis
     data = r.data
 })
