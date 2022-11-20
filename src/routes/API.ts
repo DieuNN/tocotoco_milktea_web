@@ -452,14 +452,14 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
-    app.post("/api/statistical/monthly-chart", (req: Request, res: Response) => {
+    app.get("/api/statistical/monthly-chart", (req: Request, res: Response) => {
         getMonthlyChart().then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
         })
     })
-    app.post("/api/statistical/yearly-chart", (req: Request, res: Response) => {
+    app.get("/api/statistical/yearly-chart", (req: Request, res: Response) => {
         getYearlyChart().then(r => {
             res.json(r)
         }).catch(e => {
