@@ -20,7 +20,7 @@ var myLineChart = new Chart(ctx, {
     data: {
         labels: xAxis,
         datasets: [{
-            label: "Revenue",
+            label: "Tổng thu nhập",
             backgroundColor: "rgba(2,117,216,1)",
             borderColor: "rgba(2,117,216,1)",
             data: data,

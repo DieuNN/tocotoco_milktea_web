@@ -19,6 +19,7 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         deleteShoppingSession(userId, sessionId).then()
         updateProductInventory(orderId, userId).then()
 
+
         return createResult(true)
     } catch (e) {
         return createException(e)
@@ -45,7 +46,7 @@ async function createOrder(userId: number, sessionId: number, provider: string, 
         const connection = await new Pool(PostgreSQLConfig)
         let orderId = await createEmptyOrder(userId)
         let paymentId = await createPaymentDetail(orderId, provider, "Pending", phoneNumber, address)
-        updatePaymentId(orderId, paymentId).then()
+        await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
         connection.end()
         return orderId

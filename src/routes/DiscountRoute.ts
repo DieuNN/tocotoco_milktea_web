@@ -11,6 +11,7 @@ export function discountRoute(app: Application, upload: multer.Multer) {
 
     app.post("/delete_discount", (req: Request, res: Response) => {
         deleteDiscount(req.body.id).then(r => {
+            console.log(r)
             res.redirect("/discount")
         }).catch(e => {
             res.end(e.toString())

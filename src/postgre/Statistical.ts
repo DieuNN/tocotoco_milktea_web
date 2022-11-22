@@ -28,6 +28,11 @@ export async function getAllStatistical(): Promise<APIResponse> {
     }
 }
 
+async function getOrders() {
+    const connection = await new Pool(PostgreSQLConfig)
+
+}
+
 export async function getMonthlyChart(): Promise<any> {
     const connection = await new Pool(PostgreSQLConfig)
     let result: { xAxis: number[], data: number[] } = {
@@ -38,6 +43,7 @@ export async function getMonthlyChart(): Promise<any> {
     let daysInMonth = new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 0).getDate()
     let firstDayOfMonth = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), 1).toLocaleString("en-US")
     let lastDayOfMonth = new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 0).toLocaleString("en-US")
+    let today = dateInstance.getDate();
     for (let i = 1; i <= daysInMonth; i++) {
         result.xAxis.push(i)
     }
@@ -48,7 +54,7 @@ export async function getMonthlyChart(): Promise<any> {
                                             where status = 'Completed'
                                               and PD.modifiedat >= '${firstDayOfMonth}'
                                               and PD.modifiedat <= '${lastDayOfMonth}'`)
-    for (let i = 1; i <= daysInMonth; i++) {
+    for (let i = 1; i <= today; i++) {
         let day = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), i + 1)
         let findResult = orderData.rows.filter(item => new Date(item.modifiedat).getDate() == day.getDate())
         if (findResult == undefined || findResult.length == 0) {

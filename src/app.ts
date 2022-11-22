@@ -24,6 +24,7 @@ import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
 import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
+import {findProductsByName} from "./postgre/Product";
 
 
 export const app: Application = express();
@@ -144,6 +145,10 @@ function handleDisconnect() {
 }
 
 handleDisconnect()
+
+findProductsByName("matcha").then(r=> {
+    console.log(r)
+})
 
 
 server.listen(port, () => {

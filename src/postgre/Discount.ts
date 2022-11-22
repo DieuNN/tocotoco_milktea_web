@@ -55,11 +55,13 @@ export async function getDiscount(id: number): Promise<APIResponse> {
 
 export async function deleteDiscount(id: number): Promise<APIResponse> {
     try {
+        console.log(id)
         const connect = await new Pool(PostgreSQLConfig)
         let result = await connect.query(`delete
                                           from "Discount"
                                           where id = ${id}`)
-        return createResult(result.rowCount === 1)
+        console.log(result.rows)
+        return createResult(result.rowCount == 1)
     } catch (e) {
         return createException(e)
     }

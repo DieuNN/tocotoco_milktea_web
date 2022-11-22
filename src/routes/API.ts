@@ -22,7 +22,7 @@ import {
     createException, getAllStatistical
 } from "../postgre";
 import {getUserAddress, getUserId} from "../postgre/User";
-import {getProductsByCategoryId} from "../postgre/Product";
+import {findProductsByName, getProductsByCategoryId} from "../postgre/Product";
 import {updateCartItem} from "../postgre/CartItem";
 import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
 import {confirmOrder, getItemsInOrder, getOrderDetail, getUserOrders} from "../postgre/OrderDetails";
@@ -464,6 +464,13 @@ export function API(app: Application) {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
+        })
+    })
+    app.post("/api/product/find", (req: Request, res: Response) => {
+        findProductsByName(req.body.query).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e)
         })
     })
 }

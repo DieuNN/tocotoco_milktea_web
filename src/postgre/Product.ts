@@ -67,7 +67,7 @@ export async function getProducts(): Promise<APIResponse> {
                                                       "Discount".discountpercent as "discountPercent",
                                                       "Product".price -
                                                       round(("Discount".discountpercent * "Product".price) /
-                                                           100)       as "priceAfterDiscount",
+                                                            100)                 as "priceAfterDiscount",
                                                       "Product".size             as "size",
                                                       "Product".displayimage     as "displayImage"
                                                from "Product"
@@ -147,6 +147,42 @@ export async function applyDiscount(productId: number, discountId: number): Prom
                                              set discountid = ${discountId}
                                              where id = ${productId}`)
         return createResult(result.rowCount == 1)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function findProductsByName(query: string): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`select "Product".id,
+                                                      "Product".name             as "productName",
+                                                      "Product".description      as "productDescription",
+                                                      "ProductCategory".name     as "productCategoryName",
+                                                      "Product".quantity         as "quantity",
+                                                      "Product".price            as "price",
+                                                      "Discount".name            as "discount",
+                                                      "Discount".discountpercent as "discountPercent",
+                                                      "Product".price -
+                                                      round(("Discount".discountpercent * "Product".price) /
+                                                            100)                 as "priceAfterDiscount",
+                                                      "Product".size             as "size",
+                                                      "Product".displayimage     as "displayImage"
+                                               from "Product"
+                                                        inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
+                                                        left join "Discount" on "Product".discountid = "Discount".id
+                                               where upper("Product".name) like upper('%${query}%')
+        `)
+        result.rows.map(item => {
+            item.size = item.size.toString().split(",").filter((it: string) => {
+                return it != "";
+            }).join(",")
+            if (item.discount == null) {
+                item.discount = "Không"
+            }
+        })
+        connection.end()
+        return createResult(result.rows)
     } catch (e) {
         return createException(e)
     }
