@@ -146,9 +146,6 @@ function handleDisconnect() {
 
 handleDisconnect()
 
-findProductsByName("matcha").then(r=> {
-    console.log(r)
-})
 
 
 server.listen(port, () => {

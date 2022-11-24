@@ -7,7 +7,7 @@ var ctx = document.getElementById("monthlyChart");
 let xAxis;
 let data;
 
-await fetch("http://localhost:3000/api/statistical/monthly-chart", {
+await fetch("http://0.0.0.0:3000/api/statistical/monthly-chart", {
     mode: 'cors',
     headers: {
         'accept' : 'application/json',
