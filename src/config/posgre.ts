@@ -6,7 +6,7 @@ dotenv.config({
     path: "process.env"
 })
 
-const dbUrl = process.env.PRODUCTION ? "postgres://dieu:6j52V96LmusXlpiXZTzVKQtR1QoXDb2M@dpg-cdbb2nqrrk09hiqcif50-a.singapore-postgres.render.com/tocotea?ssl=true"
+const dbUrl = Boolean(process.env.PRODUCTION) ? "postgres://dieu:6j52V96LmusXlpiXZTzVKQtR1QoXDb2M@dpg-cdbb2nqrrk09hiqcif50-a.singapore-postgres.render.com/tocotea?ssl=true"
     : "postgres://dieu:6j52V96LmusXlpiXZTzVKQtR1QoXDb2M@dpg-cdbb2nqrrk09hiqcif50-a/tocotea"
 
 
