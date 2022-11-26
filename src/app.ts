@@ -1,6 +1,7 @@
 import express, {Application, Request, Response} from "express";
 import path from "path";
 import http from "http";
+import https from 'https'
 import expressLayouts from 'express-ejs-layouts';
 import cookie_parser from 'cookie-parser'
 import sessions from 'express-session'
@@ -25,17 +26,16 @@ import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
 import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
 import {findProductsByName} from "./postgre/Product";
+import {isUserLovedProduct} from "./postgre/LovedProducts";
 
 
 export const app: Application = express();
 const credentials = {
-    key: fs.readFileSync('./cert/server.key', 'utf-8'),
-    cert: fs.readFileSync('./cert/server.cer', 'utf-8')
+    key: fs.readFileSync('./key.pem'),
+    cert: fs.readFileSync('./cert.pem')
 }
-
 const server: http.Server = http.createServer(app);
-// @ts-ignore
-const httpsServer = http.createServer(credentials, app);
+const httpsServer = https.createServer(credentials, app);
 dotenv.config({
     path: "process.env"
 })
@@ -109,17 +109,11 @@ discountRoute(app, upload)
 /* API Route */
 API(app)
 
-app.post("/private", (req: Request, res: Response) => {
-    console.log("Start private")
-    console.log("That's POST")
-    console.log(req.body)
-    console.log("End private")
-    res.end("End private")
-})
 /* 404 page */
 app.use((req, res) => {
     res.status(404).render('404')
 })
+
 
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
@@ -147,12 +141,11 @@ function handleDisconnect() {
 handleDisconnect()
 
 
-
-server.listen(port, () => {
-    console.log("Running on port " + port)
-});
+// server.listen(port, () => {
+//     console.log("Running on port " + port)
+// });
 httpsServer.listen(3443, () => {
-
+    console.log("HTTPS Server running on 3443")
 })
 
 

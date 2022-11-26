@@ -80,3 +80,17 @@ async function isItemAlreadyInList(userId: number, productId: number): Promise<b
         return false;
     }
 }
+
+
+export async function isUserLovedProduct(userId: number, productId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select *
+                                             from "LovedItems"
+                                             where userid = ${userId}
+                                               and productid = ${productId}`)
+        return createResult(result.rowCount != 0)
+    } catch (e) {
+        return createException(e)
+    }
+}

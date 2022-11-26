@@ -28,7 +28,7 @@ import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
 import {confirmOrder, getItemsInOrder, getOrderDetail, getUserOrders} from "../postgre/OrderDetails";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import {addLovedItem, deleteLovedItem} from "../postgre/LovedProducts";
+import {addLovedItem, deleteLovedItem, isUserLovedProduct} from "../postgre/LovedProducts";
 import {getMonthlyChart, getYearlyChart} from "../postgre/Statistical";
 
 dotenv.config({
@@ -449,6 +449,19 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
+    app.post("/api/fav/check_loved", (req: Request, res: Response) => {
+        const {token, productId} = req.body
+        if (!validateToken(token)) {
+            res.json(returnInvalidToken())
+            return
+        }
+        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        isUserLovedProduct(userId, productId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
     app.get("/api/statistical/monthly-chart", (req: Request, res: Response) => {
         getMonthlyChart().then(r => {
             res.json(r)
@@ -470,6 +483,7 @@ export function API(app: Application) {
             res.end(e)
         })
     })
+
 }
 
 function validateToken(token: string): boolean {
