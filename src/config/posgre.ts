@@ -14,9 +14,9 @@ export const PostgreSQLConfig: ClientConfig = {
     user: process.env.USER,
     password: process.env.PASSWORD,
     ssl: {
-        rejectUnauthorized: true,
-        cert: fs.readFileSync('./cert.pem').toString(),
-        key: fs.readFileSync('./key.pem').toString()
+        rejectUnauthorized: false,
+        cert: fs.readFileSync('./cert.pem'),
+        key: fs.readFileSync('./key.pem')
     },
         // query_timeout: 60000,
         // connectionTimeoutMillis: 60000,
