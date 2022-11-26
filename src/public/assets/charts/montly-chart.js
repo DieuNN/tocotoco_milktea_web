@@ -7,7 +7,7 @@ var ctx = document.getElementById("monthlyChart");
 let xAxis;
 let data;
 
-await fetch("https://tocotea.software/api/statistical/monthly-chart", {
+await fetch("https://tocotea-web.onrender.com/api/statistical/monthly-chart", {
     mode: 'cors',
     headers: {
         'accept': 'application/json',

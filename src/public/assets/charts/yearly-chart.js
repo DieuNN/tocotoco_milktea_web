@@ -5,7 +5,7 @@ Chart.defaults.global.defaultFontColor = '#292b2c';
 // Bar Chart Example
 let xAxis;
 let data;
-await fetch("https://tocotea.software/api/statistical/yearly-chart", {
+await fetch("https://tocotea-web.onrender.com/api/statistical/yearly-chart", {
     method: "get",
     headers : {
         'accept': 'application/json',
