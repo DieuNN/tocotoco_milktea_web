@@ -11,17 +11,17 @@ const dbUrl = process.env.PRODUCTION ? "postgres://dieu:6j52V96LmusXlpiXZTzVKQtR
 
 
 export const PostgreSQLConfig: ClientConfig = {
-    // host: process.env.HOST,
-    // port: Number(process.env.PORT),
-    // database: process.env.DATABASE,
-    // user: process.env.USER,
-    // password: process.env.PASSWORD,
-    // ssl: {
-    //     rejectUnauthorized: true,
-    //     cert: fs.readFileSync('./cert.pem').toString(),
-    //     key: fs.readFileSync('./key.pem').toString()
-    // },
-    // query_timeout: 60000,
-    // connectionTimeoutMillis: 60000,
+    host: process.env.HOST,
+    port: Number(process.env.PORT),
+    database: process.env.DATABASE,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    ssl: {
+        rejectUnauthorized: false,
+        cert: fs.readFileSync('./cert.pem').toString(),
+        key: fs.readFileSync('./key.pem').toString()
+    },
+    query_timeout: 60000,
+    connectionTimeoutMillis: 60000,
     connectionString: dbUrl,
 }
