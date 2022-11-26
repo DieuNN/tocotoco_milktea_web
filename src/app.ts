@@ -45,6 +45,8 @@ const upload = multer({
     storage: multer.memoryStorage()
 })
 
+console.log(process.env.PRODUCTION)
+
 
 const publicDirectoryPath = path.join(__dirname, "./public");
 app.use(express.static(publicDirectoryPath));
