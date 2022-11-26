@@ -7,6 +7,10 @@ let xAxis;
 let data;
 await fetch("https://tocotea.software/api/statistical/yearly-chart", {
     method: "get",
+    headers : {
+        'accept': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
     mode : "cors"
 }).then(r => r.json()).then(r => {
     xAxis = r.xAxis

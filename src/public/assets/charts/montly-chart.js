@@ -10,7 +10,8 @@ let data;
 await fetch("https://tocotea.software/api/statistical/monthly-chart", {
     mode: 'cors',
     headers: {
-        'accept' : 'application/json',
+        'accept': 'application/json',
+        'Access-Control-Allow-Origin': '*'
     },
     method: 'get'
 }).then(r => {
