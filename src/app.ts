@@ -141,9 +141,9 @@ function handleDisconnect() {
 handleDisconnect()
 
 
-server.listen(port, () => {
-    console.log("Running on port " + port)
-});
+// server.listen(port, () => {
+//     console.log("Running on port " + port)
+// });
 httpsServer.listen(3443, () => {
     console.log("HTTPS Server running on 3443")
 })
