@@ -463,6 +463,8 @@ export function API(app: Application) {
         })
     })
     app.get("/api/statistical/monthly-chart", (req: Request, res: Response) => {
+        res.header('Content-Type: application/json')
+        res.header('Access-Control-Allow-Origin: *')
         getMonthlyChart().then(r => {
             res.json(r)
         }).catch(e => {
@@ -470,6 +472,8 @@ export function API(app: Application) {
         })
     })
     app.get("/api/statistical/yearly-chart", (req: Request, res: Response) => {
+        res.header('Content-Type: application/json')
+        res.header('Access-Control-Allow-Origin: *')
         getYearlyChart().then(r => {
             res.json(r)
         }).catch(e => {

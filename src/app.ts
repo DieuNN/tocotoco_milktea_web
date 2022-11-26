@@ -49,7 +49,9 @@ const upload = multer({
 const publicDirectoryPath = path.join(__dirname, "./public");
 app.use(express.static(publicDirectoryPath));
 
-app.use(cors())
+app.use(cors({
+    origin : '*'
+}))
 
 // Setting the port
 const port = process.env.HTTP_PORT;
