@@ -122,6 +122,7 @@ export async function getCartItems(userId: number, sessionId: number): Promise<A
                                                       P.price                     as price,
                                                       "ProductCategory".name      as "productCategoryName",
                                                       "CartItem".size             as "size",
+                                                      P.displayimage              as "displayImage",
                                                       discountid                  as "discountId",
                                                       price * "CartItem".quantity -
                                                       round((price * "CartItem".quantity * "Discount".discountpercent) /
