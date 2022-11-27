@@ -23,6 +23,7 @@
     "@types/node": "^16.3.2",
     "@types/request": "^2.48.8",
     "del": "^6.0.0",
+    "fcm-node": "^1.6.1",
     "gulp": "^4.0.2",
     "gulp-typescript": "^6.0.0-alpha.1",
     "npm-run-all": "^4.1.5",

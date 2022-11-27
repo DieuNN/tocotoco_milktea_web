@@ -174,7 +174,7 @@ export function API(app: Application) {
     })
     app.post('/api/login', async (req: Request, res: Response) => {
         const {username, password, type, token_device} = req.body
-        getUserLoginInfo(username, password, type).then(r => {
+        getUserLoginInfo(username, password, type, token_device).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())

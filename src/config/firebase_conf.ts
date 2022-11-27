@@ -15,7 +15,8 @@ export const firebaseConfig = {
     storageBucket: "datn-ltmt9.appspot.com",
     messagingSenderId: "388744100447",
     appId: "1:388744100447:web:e75a86071a9518111d79ea",
-    measurementId: "G-LT86NRRKE8"
+    measurementId: "G-LT86NRRKE8",
+
 };
 
 export const firebaseAdminApp = admin.initializeApp({

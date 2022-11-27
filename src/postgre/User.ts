@@ -222,7 +222,7 @@ export async function getUserId(username: string, token: string): Promise<APIRes
 }
 
 
-export async function getUserLoginInfo(username: string, password: string, type: string): Promise<APIResponse> {
+export async function getUserLoginInfo(username: string, password: string, type: string, token_device: string): Promise<APIResponse> {
     let encryptedPassword: string = md5(password)
     const connection = await new Pool(PostgreSQLConfig)
     let result;
@@ -261,6 +261,7 @@ export async function getUserLoginInfo(username: string, password: string, type:
     }
     if (result.rows.length != 0) {
         const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SCRET!.toString())
+        await updateUserTokenDevice(result.rows[0].id, token_device)
         return {
             isSuccess: true,
             result: _jwt,
@@ -275,16 +276,25 @@ export async function getUserLoginInfo(username: string, password: string, type:
     }
 }
 
+async function updateUserTokenDevice(id: number, token_device: string) {
+    const connection = await new Pool(PostgreSQLConfig)
+    await connection.query(`update "User"
+                            set tokendevice = '${token_device}'
+                            where id = ${id}`)
+}
+
 
 export async function updateUserPassword(id: number, oldPassword: string, newPassword: string): Promise<APIResponse> {
     try {
         let encryptedOldPassword: string = md5(oldPassword)
         let encryptedNewPassword: string = md5(newPassword)
         const connection = await new Pool(PostgreSQLConfig)
-        let result = await connection.query(`update "User"
-                                             set password = '${encryptedNewPassword}'
-                                             where id = ${id}
-                                               and password = '${encryptedOldPassword}'`)
+        let result = await connection.query(`
+            update
+                "User"
+            set password = '${encryptedNewPassword}'
+            where id = ${id}
+              and password = '${encryptedOldPassword}'`)
         if (result.rowCount === 1) {
             return createResult(true)
         } else {
@@ -298,10 +308,14 @@ export async function updateUserPassword(id: number, oldPassword: string, newPas
 export async function addUserMomoPayment(userId: number, momoAccount: string): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`insert into "UserMomoPayment"
-                                               values (default,
-                                                       ${userId},
-                                                       '${momoAccount}')`)
+        const result = await connection.query(`
+            insert
+            into "UserMomoPayment"
+            values (default,
+                    ${userId}
+                       ,
+                    '${momoAccount}')
+        `)
         if (result.rowCount == 1) {
             return createResult(true)
         } else {
@@ -315,10 +329,12 @@ export async function addUserMomoPayment(userId: number, momoAccount: string): P
 export async function updateUserMomoPayment(userId: number, momoAccountId: number, momoAccount: string): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`update "UserMomoPayment"
-                                               set momoaccount = '${momoAccount}'
-                                               where userid = '${userId}'
-                                                 and id = '${momoAccountId}'`)
+        const result = await connection.query(`
+            update
+                "UserMomoPayment"
+            set momoaccount = '${momoAccount}'
+            where userid = '${userId}'
+              and id = '${momoAccountId}'`)
         if (result.rowCount === 1) {
             return createResult(true)
         } else {

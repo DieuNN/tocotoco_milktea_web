@@ -8,6 +8,8 @@ import sessions from 'express-session'
 import dotenv from 'dotenv'
 import {PostgreSQLConfig} from "./config/posgre";
 import cors from "cors"
+//@ts-ignore
+const FCM = require("fcm-node")
 import {
     adminLoginLogRoute,
     API,
@@ -24,6 +26,7 @@ import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_c
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
+import admin from 'firebase-admin'
 import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
 import {findProductsByName} from "./postgre/Product";
 import {isUserLovedProduct} from "./postgre/LovedProducts";
@@ -118,19 +121,10 @@ app.use((req, res) => {
 })
 
 
-sendNotification("Dieu test gui thong bao 2", "Day la thong bao test 2", "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB")
-// let string = JSON.stringify({
-//     "data": {
-//         "title": "Dieu test gui thong bao 2",
-//         "message": "Day la thong bao test 2"
-//     },
-//     "to": "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB"
-// })
-
-// console.log(string)
-
+// sendNotification("Dieu test luc 19:24", "Day la thong bao test 2", "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB")
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
+
 
 async function handleDisconnect() {
     client = new Client(PostgreSQLConfig)
