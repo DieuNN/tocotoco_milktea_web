@@ -27,6 +27,8 @@ import {discountRoute} from "./routes/DiscountRoute";
 import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
 import {findProductsByName} from "./postgre/Product";
 import {isUserLovedProduct} from "./postgre/LovedProducts";
+import {sendNotification} from "./routes/NotificationRoute";
+import request from 'request'
 
 
 export const app: Application = express();
@@ -34,8 +36,7 @@ const credentials = {
     key: fs.readFileSync('./key.pem'),
     cert: fs.readFileSync('./cert.pem')
 }
-const server: http.Server = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
+
 dotenv.config({
     path: "process.env"
 })
@@ -50,7 +51,7 @@ const publicDirectoryPath = path.join(__dirname, "./public");
 app.use(express.static(publicDirectoryPath));
 
 app.use(cors({
-    origin : '*'
+    origin: '*'
 }))
 
 // Setting the port
@@ -117,17 +118,26 @@ app.use((req, res) => {
 })
 
 
+// sendNotification("Dieu test gui thong bao 2", "Day la thong bao test 2", "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB")
+// let string = JSON.stringify({
+//     "data": {
+//         "title": "Dieu test gui thong bao 2",
+//         "message": "Day la thong bao test 2"
+//     },
+//     "to": "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB"
+// })
+
+// console.log(string)
+
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
 
-function handleDisconnect() {
+async function handleDisconnect() {
     client = new Client(PostgreSQLConfig)
-    client.connect((error) => {
-        if (error)
-            console.log(error)
-        else
-            console.log("Connected")
+    await client.connect((error) => {
+        console.log(error)
     })
+    console.log("Connected")
     client.end()
 
     client.on('error', (error: any) => {
@@ -140,9 +150,10 @@ function handleDisconnect() {
     })
 }
 
-handleDisconnect()
+handleDisconnect().then()
 
-
+const server: http.Server = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
 server.listen(port, () => {
     console.log("Running on port " + port)
 });
