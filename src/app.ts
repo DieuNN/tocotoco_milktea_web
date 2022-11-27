@@ -118,7 +118,7 @@ app.use((req, res) => {
 })
 
 
-// sendNotification("Dieu test gui thong bao 2", "Day la thong bao test 2", "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB")
+sendNotification("Dieu test gui thong bao 2", "Day la thong bao test 2", "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB")
 // let string = JSON.stringify({
 //     "data": {
 //         "title": "Dieu test gui thong bao 2",
