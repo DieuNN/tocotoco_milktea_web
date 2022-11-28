@@ -5,14 +5,14 @@ export function homeRoute(app: Application) {
 
     app.get("/", (req: Request, res: Response) => {
         /* Uncomment this and comment render line below*/
-        if (req.session.userid !== 'admin') {
-            res.redirect("/login")
-        } else {
+        // if (req.session.userid !== 'admin') {
+        //     res.redirect("/login")
+        // } else {
             getAllStatistical().then(r => {
                 res.render('index', {data: r.result})
             }).catch(e => {
                 res.end("Error in get statistical")
             })
-        }
+        // }
     });
 }

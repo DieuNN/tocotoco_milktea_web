@@ -131,8 +131,8 @@ export async function getItemsInOrder(orderId: number, userId: number): Promise<
                                                     P.description                as "description",
                                                     price * "OrderItem".quantity as total,
                                                     P.price                      as price,
-                                                    "ProductCategory".name       as "productCategoryName"
-                                                     ,
+                                                    "ProductCategory".name       as "productCategoryName",
+                                                    P.displayimage               as "displayImage",
                                                     "OrderItem".size             as "size",
                                                     pricebeforediscount          as "priceBeforeDiscount",
                                                     priceafterdiscount           as "priceAfterDiscount"

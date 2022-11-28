@@ -4,6 +4,8 @@ import {logoutRoute} from "./LogoutRoute";
 import {adminLoginLogRoute} from "./AdminLoginLogRoute";
 import {productCategoryRoute} from "./ProductCategoryRoute";
 import {API} from "./API";
+import {notificationRoute} from "./NotificationRoute";
+
 
 
 
@@ -14,5 +16,6 @@ export {
     logoutRoute,
     adminLoginLogRoute,
     productCategoryRoute,
-    API
+    API,
+    notificationRoute
 }
