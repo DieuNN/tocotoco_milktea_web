@@ -227,7 +227,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                                                     pricebeforediscount  as "priceBeforeDiscount",
                                                     priceafterdiscount   as "priceAfterDiscount",
                                                     "OrderItem".quantity as "quantity",
-                                                    PD.address           as "address"
+                                                    PD.address           as "address",
+                                                    PD.modifiedat        as "time"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -249,11 +250,12 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     status: element.status,
                     productName: [element.productName],
                     orderId: element.orderId,
-                    paymentId : element.paymentId,
+                    paymentId: element.paymentId,
                     priceBeforeDiscount: element.priceBeforeDiscount,
                     priceAfterDiscount: element.priceAfterDiscount,
                     quantity: element.quantity,
-                    address: element.address
+                    address: element.address,
+                    time: element.time
                 })
             } else {
                 let temp = map.get(element.orderId)
@@ -265,8 +267,9 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     status: element.status,
                     productName: array,
                     orderId: element.orderId,
-                    paymentId : element.paymentId,
-                    address: element.address
+                    paymentId: element.paymentId,
+                    address: element.address,
+                    time: element.time
                 })
             }
         }
@@ -285,9 +288,14 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
             tempObj.detail = detail.result
             tempObj.address = value.address
             tempObj.paymentId = value.paymentId
+            tempObj.time = value.time
             dumpResult.push(tempObj)
         }
         connection.end()
+
+        dumpResult.map(element=> {
+            element.time = new Date(element.time).toLocaleString("vi-VN")
+        })
 
         return createResult(dumpResult)
     } catch (e) {

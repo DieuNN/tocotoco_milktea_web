@@ -29,7 +29,8 @@ export async function updatePaymentDetailStatus(paymentId: number, orderId: numb
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`update "PaymentDetails"
-                                               set status = '${status}'
+                                               set status     = '${status}',
+                                                   modifiedat = now()
                                                where id = ${paymentId}
                                                  and orderid = ${orderId}`)
         return createResult(result.rowCount == 1)
