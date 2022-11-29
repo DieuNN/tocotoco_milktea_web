@@ -213,10 +213,13 @@ export async function createEmptyOrder(userId: number): Promise<number> {
     return result.rows[0].id
 }
 
-export async function getOrders(): Promise<APIResponse> {
+
+export async function getOrders(type: string | null): Promise<APIResponse> {
     try {
+        if (type == null) type = "%%"
         const connection = await new Pool(PostgreSQLConfig)
         let orders = await connection.query(`select "OrderItem".orderid  as "orderId",
+                                                    PD.id                as "paymentId",
                                                     U.name               as "username",
                                                     PD."phoneNumber"     as "phoneNumber",
                                                     status               as "status",
@@ -235,7 +238,8 @@ export async function getOrders(): Promise<APIResponse> {
                                                                            from "OrderDetail"
                                                                                     inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                                                     inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid)
-                                             order by "OrderItem".orderid;`)
+                                               and status like '${type}'
+                                             order by PD.modifiedat desc `)
         const map = new Map()
         for (let element of orders.rows) {
             if (map.get(element.orderId) == undefined) {
@@ -245,10 +249,11 @@ export async function getOrders(): Promise<APIResponse> {
                     status: element.status,
                     productName: [element.productName],
                     orderId: element.orderId,
+                    paymentId : element.paymentId,
                     priceBeforeDiscount: element.priceBeforeDiscount,
                     priceAfterDiscount: element.priceAfterDiscount,
                     quantity: element.quantity,
-                    address : element.address
+                    address: element.address
                 })
             } else {
                 let temp = map.get(element.orderId)
@@ -260,7 +265,8 @@ export async function getOrders(): Promise<APIResponse> {
                     status: element.status,
                     productName: array,
                     orderId: element.orderId,
-                    address : element.address
+                    paymentId : element.paymentId,
+                    address: element.address
                 })
             }
         }
@@ -273,12 +279,13 @@ export async function getOrders(): Promise<APIResponse> {
             tempObj.status = value.status
             tempObj.items = value.productName
             tempObj.phoneNumber = value.phoneNumber
-            dumpResult.push(tempObj)
             let detail = await adminGetItemsInOrder(key)
             let total = await adminGetOrderDetails(key)
             tempObj.total = total.result.total
             tempObj.detail = detail.result
             tempObj.address = value.address
+            tempObj.paymentId = value.paymentId
+            dumpResult.push(tempObj)
         }
         connection.end()
 

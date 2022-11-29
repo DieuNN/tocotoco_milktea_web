@@ -26,6 +26,7 @@ import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
 import {adminGetItemsInOrder, getItemsInOrder, getOrders} from "./postgre/OrderDetails";
 import {getMonthlyChart} from "./postgre/Statistical";
+import {orderRoutes} from "./routes/OrderRoutes";
 
 
 export const app: Application = express();
@@ -112,6 +113,9 @@ API(app)
 /*Notification route*/
 notificationRoute(app, upload)
 
+/*Order routes*/
+orderRoutes(app)
+
 /* 404 page */
 app.use((req, res) => {
     res.status(404).render('404')
@@ -145,8 +149,7 @@ async function handleDisconnect() {
 // getOrders().then(r=> {
 //     console.log(r.result[0].detail)
 // })
-getMonthlyChart().then(r=> {
-})
+
 handleDisconnect().then()
 
 const server: http.Server = http.createServer(app);
