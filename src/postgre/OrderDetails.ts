@@ -120,6 +120,35 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
     }
 }
 
+export async function adminGetOrderDetails(orderId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`select "OrderDetail".id,
+                                                      round(total)  as total,
+                                                      "OrderDetail".createat,
+                                                      status,
+                                                      provider,
+                                                      address,
+                                                      "phoneNumber",
+                                                      sum(quantity) as "totalProduct"
+                                               from "OrderDetail"
+                                                        inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                                        inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
+                                               where "OrderDetail".id = ${orderId}
+                                               group by "OrderDetail".id, total, "OrderDetail".createat, status,
+                                                        provider,
+                                                        address, "phoneNumber"
+                                               order by createat desc;`)
+        if (result.rowCount != 1) {
+            return createException("Khong tim thay order " + orderId)
+        } else {
+            return createResult(result.rows[0])
+        }
+    } catch (e) {
+        return createException(e)
+    }
+}
+
 export async function getItemsInOrder(orderId: number, userId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
@@ -148,10 +177,110 @@ export async function getItemsInOrder(orderId: number, userId: number): Promise<
     }
 }
 
+export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select "OrderItem".id               as "id",
+                                                    orderid                      as "orderId",
+                                                    productid                    as "productId",
+                                                    "OrderItem".quantity         as "quantity",
+                                                    P.name                       as "productName",
+                                                    P.description                as "description",
+                                                    price * "OrderItem".quantity as total,
+                                                    P.price                      as price,
+                                                    "ProductCategory".name       as "productCategoryName",
+                                                    P.displayimage               as "displayImage",
+                                                    "OrderItem".size             as "size",
+                                                    pricebeforediscount          as "priceBeforeDiscount",
+                                                    priceafterdiscount           as "priceAfterDiscount"
+                                             from "OrderItem"
+                                                      inner join "Product" P on P.id = "OrderItem".productid
+                                                      inner join "ProductCategory" on P.categoryid = "ProductCategory".id
+                                                      inner join "OrderDetail" on "OrderItem".orderid = "OrderDetail".id
+                                             where orderid = ${orderId}`)
+        connection.end()
+        return createResult(result.rows)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
 export async function createEmptyOrder(userId: number): Promise<number> {
     const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`insert into "OrderDetail" (id, userid, total, paymentid, createat, modifiedat)
                                          values (default, ${userId}, 0, null, now(), now())
                                          returning id`)
     return result.rows[0].id
+}
+
+export async function getOrders(): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let orders = await connection.query(`select "OrderItem".orderid  as "orderId",
+                                                    U.name               as "username",
+                                                    PD."phoneNumber"     as "phoneNumber",
+                                                    status               as "status",
+                                                    P.name               as "productName",
+                                                    pricebeforediscount  as "priceBeforeDiscount",
+                                                    priceafterdiscount   as "priceAfterDiscount",
+                                                    "OrderItem".quantity as "quantity",
+                                                    PD.address           as "address"
+                                             from "OrderItem"
+                                                      inner join "Product" P on P.id = "OrderItem".productid
+                                                      inner join "ProductCategory" on P.categoryid = "ProductCategory".id
+                                                      inner join "OrderDetail" on "OrderItem".orderid = "OrderDetail".id
+                                                      inner join "User" U on U.id = "OrderDetail".userid
+                                                      inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                             where "OrderItem".orderid in (select "OrderDetail".id
+                                                                           from "OrderDetail"
+                                                                                    inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                                                                    inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid)
+                                             order by "OrderItem".orderid;`)
+        const map = new Map()
+        for (let element of orders.rows) {
+            if (map.get(element.orderId) == undefined) {
+                map.set(element.orderId, {
+                    username: element.username,
+                    phoneNumber: element.phoneNumber,
+                    status: element.status,
+                    productName: [element.productName],
+                    orderId: element.orderId,
+                    priceBeforeDiscount: element.priceBeforeDiscount,
+                    priceAfterDiscount: element.priceAfterDiscount,
+                    quantity: element.quantity,
+                    address : element.address
+                })
+            } else {
+                let temp = map.get(element.orderId)
+                let array = temp.productName
+                array.push(element.productName)
+                map.set(element.orderId, {
+                    username: element.username,
+                    phoneNumber: element.phoneNumber,
+                    status: element.status,
+                    productName: array,
+                    orderId: element.orderId,
+                    address : element.address
+                })
+            }
+        }
+
+        let dumpResult = []
+        for (let [key, value] of map) {
+            let tempObj: any = {}
+            tempObj.orderId = key
+            tempObj.username = value.username
+            tempObj.status = value.status
+            tempObj.items = value.productName
+            tempObj.phoneNumber = value.phoneNumber
+            dumpResult.push(tempObj)
+            let detail = await adminGetItemsInOrder(key)
+            tempObj.detail = detail.result
+            tempObj.address = value.address
+        }
+        connection.end()
+        return createResult(dumpResult)
+    } catch (e) {
+        return createException("")
+    }
 }

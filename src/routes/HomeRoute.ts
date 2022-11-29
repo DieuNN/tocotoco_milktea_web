@@ -1,5 +1,6 @@
 import {Application, Request, Response} from "express";
 import {getAllStatistical} from "../postgre";
+import {getOrders} from "../postgre/OrderDetails";
 
 export function homeRoute(app: Application) {
 
@@ -8,11 +9,15 @@ export function homeRoute(app: Application) {
         // if (req.session.userid !== 'admin') {
         //     res.redirect("/login")
         // } else {
-            getAllStatistical().then(r => {
-                res.render('index', {data: r.result})
-            }).catch(e => {
-                res.end("Error in get statistical")
+
+        getAllStatistical().then(r => {
+            getOrders().then(r1=> {
+                console.log(r1)
+                res.render('index', {data: r.result, orders : r1.result})
             })
+        }).catch(e => {
+            res.end("Error in get statistical")
+        })
         // }
     });
 }

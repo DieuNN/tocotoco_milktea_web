@@ -8,8 +8,6 @@ import sessions from 'express-session'
 import dotenv from 'dotenv'
 import {PostgreSQLConfig} from "./config/posgre";
 import cors from "cors"
-//@ts-ignore
-const FCM = require("fcm-node")
 import {
     adminLoginLogRoute,
     API,
@@ -22,16 +20,11 @@ import {
 import requestIp from 'request-ip'
 import {Client} from 'pg';
 import * as fs from "fs";
-import {firebaseAdminApp, firebaseApp, firebaseConfig} from "./config/firebase_conf";
+import {firebaseAdminApp, firebaseApp} from "./config/firebase_conf";
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
-import admin from 'firebase-admin'
-import {getAllStatistical, getMonthlyChart, getMonthlyIncome, getYearlyChart} from "./postgre/Statistical";
-import {findProductsByName} from "./postgre/Product";
-import {isUserLovedProduct} from "./postgre/LovedProducts";
-import {sendNotification, sendNotificationForAllUser} from "./routes/NotificationRoute";
-import request from 'request'
+import {adminGetItemsInOrder, getItemsInOrder, getOrders} from "./postgre/OrderDetails";
 
 
 export const app: Application = express();
@@ -147,6 +140,10 @@ async function handleDisconnect() {
     })
 }
 // sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
+
+// getOrders().then(r=> {
+//     console.log(r.result[0].detail)
+// })
 
 handleDisconnect().then()
 

@@ -24,8 +24,8 @@ export async function addProduct(product: Product): Promise<APIResponse> {
 export async function deleteProduct(id: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`delete
-                                               from "Product"
+        const result = await connection.query(`update "Product"
+                                               set active = false
                                                where id = ${id}`)
         connection.end()
         return createResult(true)
@@ -51,7 +51,6 @@ export async function updateProductQuantity(id: number, quantity: number): Promi
     } catch (e) {
         return createException(e)
     }
-
 }
 
 export async function getProducts(): Promise<APIResponse> {
@@ -73,6 +72,7 @@ export async function getProducts(): Promise<APIResponse> {
                                                from "Product"
                                                         inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
                                                         left join "Discount" on "Product".discountid = "Discount".id
+                                                where "Product".active = true
         `)
         result.rows.map(item => {
             item.size = item.size.toString().split(",").filter((it: string) => {

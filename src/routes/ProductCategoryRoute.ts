@@ -4,9 +4,6 @@ import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/st
 import {addProductCategory, deleteProductCategory, editProductCategory, getProductCategories} from "../postgre";
 
 export function productCategoryRoute(app: Application, upload: multer.Multer) {
-    // const upload = multer({
-    //     storage : multer.memoryStorage()
-    // })
     app.get('/category', (req: Request, res: Response) => {
         // if (req.session.userid === 'admin') {
         //     res.render('product_category')
