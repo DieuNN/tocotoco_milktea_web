@@ -12,13 +12,16 @@ export async function getAllStatistical(): Promise<APIResponse> {
             total: queryResult.rows.length,
             pending: 0,
             completed: 0,
-            canceled: 0
+            canceled: 0,
+            delivering : 0
         }
         queryResult.rows.forEach(item => {
-            if (item.status == 'Pending')
+            if (item.status == 'Đợi xác nhận')
                 result.pending++
-            else if (item.status == 'Completed')
+            else if (item.status == 'Hoàn thành')
                 result.completed++
+            else if (item.status == "Đang giao")
+                result.delivering++
             else
                 result.canceled++
         })
@@ -51,7 +54,7 @@ export async function getMonthlyChart(): Promise<any> {
     let orderData = await connection.query(`select *
                                             from "OrderDetail"
                                                      inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
-                                            where status = 'Completed'
+                                            where status like 'Hoàn thành'
                                               and PD.modifiedat >= '${firstDayOfMonth}'
                                               and PD.modifiedat <= '${lastDayOfMonth}'`)
     for (let i = 1; i <= today; i++) {
@@ -64,7 +67,7 @@ export async function getMonthlyChart(): Promise<any> {
             result.data.push(total)
         }
     }
-
+    console.log("Month: ",result)
     return result
 }
 
@@ -83,6 +86,7 @@ export async function getYearlyChart(): Promise<any> {
     }
     let promisesResult = await Promise.all(promises)
     promisesResult.forEach(item => result.data.push(item))
+    console.log("Year: ", result)
     return result
 }
 
@@ -96,7 +100,7 @@ export async function getMonthlyIncome(month: number): Promise<number> {
     let orderData = await connection.query(`select *
                                             from "OrderDetail"
                                                      inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
-                                            where status = 'Completed'
+                                            where status like 'Hoàn thành'
                                               and PD.modifiedat >= '${firstDayOfMonth}'
                                               and PD.modifiedat <= '${lastDayOfMonth}'`)
     for (let i = 1; i <= daysInMonth; i++) {
@@ -106,7 +110,6 @@ export async function getMonthlyIncome(month: number): Promise<number> {
 
         } else {
             findResult.forEach(item => total += Number(item.total))
-
         }
     }
     return total

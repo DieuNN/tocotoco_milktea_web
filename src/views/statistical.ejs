@@ -37,6 +37,16 @@
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
+        <div class="card bg-warning text-white mb-4">
+            <div class="card-body">Đơn hàng đang được giao</div>
+            <p class="card-body ms-0 mt-0 fs-1"><%= data.delivering %></p>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="#">Chi tiết</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
         <div class="card bg-success text-white mb-4">
             <div class="card-body">Đơn hàng thành công</div>
             <p class="card-body ms-0 mt-0 fs-1"><%= data.completed %></p>
@@ -157,9 +167,9 @@
                                         <div style="flex: 1; text-align: center; margin-top: 16px;"></div>
                                         <div style="flex: 1; text-align: center ; margin-top: 16px;"></div>
                                         <div style="flex: 1; text-align: center ; margin-top: 16px;"></div>
-                                        <div style="flex: 1; text-align: center; margin-top: 16px">Tổng: </div>
-                                        <div style="flex: 1; text-align: center; margin-top: 16px;"><%= %></div>
-                                        <div style="flex: 1; text-align: center; margin-top: 16px;">69420</div>
+                                        <div style="flex: 1; text-align: center; margin-top: 16px"></div>
+                                        <div style="flex: 1; text-align: center; margin-top: 16px;">Tổng: </div>
+                                        <div style="flex: 1; text-align: center; margin-top: 16px;"><%= orders[i].total%></div>
                                     </div>
                                 </div>
                             </div>

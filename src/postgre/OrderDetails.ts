@@ -275,10 +275,13 @@ export async function getOrders(): Promise<APIResponse> {
             tempObj.phoneNumber = value.phoneNumber
             dumpResult.push(tempObj)
             let detail = await adminGetItemsInOrder(key)
+            let total = await adminGetOrderDetails(key)
+            tempObj.total = total.result.total
             tempObj.detail = detail.result
             tempObj.address = value.address
         }
         connection.end()
+
         return createResult(dumpResult)
     } catch (e) {
         return createException("")

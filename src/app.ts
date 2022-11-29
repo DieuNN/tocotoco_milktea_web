@@ -25,6 +25,7 @@ import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
 import {adminGetItemsInOrder, getItemsInOrder, getOrders} from "./postgre/OrderDetails";
+import {getMonthlyChart} from "./postgre/Statistical";
 
 
 export const app: Application = express();
@@ -144,7 +145,8 @@ async function handleDisconnect() {
 // getOrders().then(r=> {
 //     console.log(r.result[0].detail)
 // })
-
+getMonthlyChart().then(r=> {
+})
 handleDisconnect().then()
 
 const server: http.Server = http.createServer(app);
