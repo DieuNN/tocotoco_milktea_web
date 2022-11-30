@@ -306,10 +306,19 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
 export async function getUserCurrentOrder(userId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        let result = await connection.query(`select *
+        let result = await connection.query(`select orderid       as "orderId",
+                                                    round(total)  as "total",
+                                                    paymentid     as "paymentId",
+                                                    PD.createat   as "createAt",
+                                                    PD.modifiedat as "modifiedAt",
+                                                    status        as "status",
+                                                    provider      as "provider",
+                                                    address       as "address",
+                                                    "phoneNumber" as "phoneNumber"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
-                                             where userid = ${userId} and (status != 'Hoàn thành' and status != 'Bị hủy')
+                                             where userid = ${userId}
+                                               and (status = 'Đợi xác nhận' or status = 'Đang giao')
                                              order by PD.modifiedat desc;`)
         if (result.rows.length == 0) {
             return createException("Bạn hiện tại chưa có đơn hàng nào!")

@@ -6,7 +6,7 @@ import {updatePaymentDetailStatus} from "../postgre/PaymentDetails";
 export function orderRoutes(app: Application) {
     app.get("/pending-orders", (req: Request, res: Response) => {
         getOrders("Đợi xác nhận").then(r => {
-            console.log(r.result)
+            console.log(r.result.detail)
             res.render("pending_orders", {orders: r.result})
         })
     })
