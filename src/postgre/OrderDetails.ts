@@ -309,7 +309,7 @@ export async function getUserCurrentOrder(userId: number): Promise<APIResponse> 
         let result = await connection.query(`select *
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
-                                             where userid = ${userId} and (status != 'Hoàn thành' or status != 'Bị hủy')
+                                             where userid = ${userId} and (status != 'Hoàn thành' and status != 'Bị hủy')
                                              order by PD.modifiedat desc;`)
         if (result.rows.length == 0) {
             return createException("Bạn hiện tại chưa có đơn hàng nào!")
