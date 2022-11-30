@@ -9,7 +9,7 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
                                                            "CartItem".quantity         as "quantity",
                                                            price * "CartItem".quantity as "priceBeforeDiscount",
                                                            price * "CartItem".quantity -
-                                                           (price * "CartItem".quantity * D.discountpercent) /
+                                                           (price * "CartItem".quantity * coalesce(D.discountpercent, 0)) /
                                                            100                         as "priceAfterDiscount",
                                                            "CartItem".size
                                                     from "CartItem"
@@ -35,7 +35,7 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
 
 async function updateOrderDetailTotal(orderId: number, userId: number) {
     const connection = await new Pool(PostgreSQLConfig)
-    connection.query(`with total_sum as (select sum(priceafterdiscount)
+    await connection.query(`with total_sum as (select sum(priceafterdiscount)
                                          from "OrderDetail"
                                                   inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
                                          where "OrderDetail".id = ${orderId})

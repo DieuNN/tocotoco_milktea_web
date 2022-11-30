@@ -146,22 +146,24 @@
                             </div>
                         </div>
                         <!-- Cancel Modal -->
-                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                        <div class="modal fade" id="cancelModal<%= orders[i].orderId %>" tabindex="-1" aria-labelledby="exampleModalLabel"
                              aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Huy</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Hủy đơn hàng số <%= orders[i].orderId %>?</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        ...
+                                        Huy order <%= orders[i].orderId%>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng
                                         </button>
-                                        <button type="button" class="btn btn-primary">Save changes</button>
+                                        <button type="submit" class="btn btn-primary"
+                                                form="<%= "confirmOrder" + orders[i].orderId %>"
+                                                style="background-color: #FFA500; border-color: #FFA500">Hủy</button>
                                     </div>
                                 </div>
                             </div>
@@ -185,7 +187,7 @@
                                     Xác nhận
                                 </a>
                                 <a class="link-primary" data-bs-toggle="modal"
-                                   data-bs-target="#cancel<%= orders[i].orderId %>">
+                                   data-bs-target="#cancelModal<%= orders[i].orderId %>">
                                     Hủy
                                 </a>
                             </td>

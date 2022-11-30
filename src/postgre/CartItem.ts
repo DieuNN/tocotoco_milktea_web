@@ -20,7 +20,7 @@ export async function addItemToCart(userId: number, sessionId: number, productId
             let _isItemInTempCart = await isItemInTempCart(productId, sessionId)
             if (_isItemInTempCart.result) {
                 await updateCartItem(userId, sessionId, productId, quantity, size)
-                triggerUpdateSessionTotal(userId, sessionId).then()
+                await triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             }
 
@@ -32,13 +32,14 @@ export async function addItemToCart(userId: number, sessionId: number, productId
                                                                '${size}')
             `)
             if (insertResult.rowCount == 1) {
-                triggerUpdateSessionTotal(userId, sessionId).then()
+                await triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             } else {
                 return createException("Them san pham bi loi")
             }
         }
     } catch (e) {
+        // ???
         rollBackTransactions().then()
         return createException(e)
     }
@@ -103,7 +104,6 @@ export async function updateCartItem(userId: number, sessionId: number, productI
                 return createException("Khong the cap nhat! Xem lai session ID")
             }
         }
-
     } catch (e) {
         return createException(e)
     }

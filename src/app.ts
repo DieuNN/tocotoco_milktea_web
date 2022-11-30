@@ -148,11 +148,6 @@ async function handleDisconnect() {
 // sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
 
 handleDisconnect().then()
-// getUserCurrentOrder(8).then(r => {
-//     console.log(
-//         r
-//     )
-// })
 
 const server: http.Server = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
