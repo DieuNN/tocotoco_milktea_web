@@ -345,6 +345,18 @@ export async function updateUserMomoPayment(userId: number, momoAccountId: numbe
     }
 }
 
+export async function getUserTokenDevice(userId: number): Promise<string> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select tokendevice
+                                             from "User"
+                                             where id = ${userId}`)
+        return result.rows[0]
+    } catch (e) {
+        return ""
+    }
+}
+
 
 
 

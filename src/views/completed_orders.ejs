@@ -112,42 +112,7 @@
                             </div>
                         </div>
 
-                        <!-- Confirm Modal -->
-                        <div class="modal fade" id="confirmModal<%= orders[i].orderId %>" tabindex="-1"
-                             aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Xác nhận đơn hàng</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Xác nhận đơn hàng số <%= orders[i].orderId %>?
-                                        <form name="<%= "confirmOrder" + orders[i].orderId %>"
-                                              enctype="application/x-www-form-urlencoded"
-                                              id="<%= "confirmOrder" + orders[i].orderId %>"
-                                              method="post"
-                                              action="/pending-orders/confirm"
-                                        >
-                                            <input type="text" style="display: none" name="orderId"
-                                                   aria-label="..."
-                                                   value="<%= orders[i].orderId %>">
-                                            <input type="text" style="display: none" name="paymentId"
-                                                   aria-label="..."
-                                                   value="<%= orders[i].paymentId %>">
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng
-                                        </button>
-                                        <button type="submit" class="btn btn-primary"
-                                                form="<%= "confirmOrder" + orders[i].orderId %>"
-                                                style="background-color: #FFA500; border-color: #FFA500">Xác nhận</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                         <!-- Cancel Modal -->
                         <div class="modal fade" id="cancelModal<%= orders[i].orderId %>" tabindex="-1" aria-labelledby="exampleModalLabel"
                              aria-hidden="true">
@@ -159,12 +124,12 @@
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        Bạn chắc chắn muốn hủy order số <%= orders[i].orderId %>?
+                                            Bạn chắc chắn muốn xóa order số <%= orders[i].orderId %>?
                                         <form name="<%= "cancelOrder" + orders[i].orderId %>"
                                               enctype="application/x-www-form-urlencoded"
                                               id="<%= "cancelOrder" + orders[i].orderId %>"
                                               method="post"
-                                              action="/pending-orders/cancel"
+                                              action="/completed-order/delete"
                                         >
                                             <input type="text" style="display: none" name="orderId"
                                                    aria-label="..."
@@ -179,7 +144,7 @@
                                         </button>
                                         <button type="submit" class="btn btn-primary"
                                                 form="<%= "cancelOrder" + orders[i].orderId %>"
-                                                style="background-color: #FFA500; border-color: #FFA500">Hủy</button>
+                                                style="background-color: #FFA500; border-color: #FFA500">Xóa</button>
                                     </div>
                                 </div>
                             </div>
@@ -197,14 +162,9 @@
                                    data-bs-target="#detailModal<%= orders[i].orderId %>">
                                     Chi tiết
                                 </a>
-                                <!-- Button trigger confirm modal -->
-                                <a class="link-primary" data-bs-toggle="modal" style="margin-right: 16px"
-                                   data-bs-target="#confirmModal<%= orders[i].orderId %>">
-                                    Xác nhận
-                                </a>
                                 <a class="link-primary" data-bs-toggle="modal"
-                                   data-bs-target="#cancelModal<%= orders[i].orderId %>">
-                                    Hủy
+                                   data-bs-target="#deleteModal<%= orders[i].orderId %>">
+                                    Xóa
                                 </a>
                             </td>
                         </tr>

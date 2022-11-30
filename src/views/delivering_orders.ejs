@@ -17,7 +17,7 @@
     <%- include ('sidenav.ejs') %>
     <div id="layoutSidenav_content">
         <main class="container-fluid px-4">
-            <h1 class="mt-4">Đơn hàng đang chờ</h1>
+            <h1 class="mt-4">Đơn hàng đang được giao</h1>
             <div>
                 <table id="pendingOrdersTable">
                     <thead>
@@ -123,12 +123,12 @@
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        Xác nhận đơn hàng số <%= orders[i].orderId %>?
+                                        Xác nhận hoàn thành đơn hàng số <%= orders[i].orderId %>?
                                         <form name="<%= "confirmOrder" + orders[i].orderId %>"
                                               enctype="application/x-www-form-urlencoded"
                                               id="<%= "confirmOrder" + orders[i].orderId %>"
                                               method="post"
-                                              action="/pending-orders/confirm"
+                                              action="/delivering-order/confirm"
                                         >
                                             <input type="text" style="display: none" name="orderId"
                                                    aria-label="..."
@@ -164,7 +164,7 @@
                                               enctype="application/x-www-form-urlencoded"
                                               id="<%= "cancelOrder" + orders[i].orderId %>"
                                               method="post"
-                                              action="/pending-orders/cancel"
+                                              action="/delivering-order/cancel"
                                         >
                                             <input type="text" style="display: none" name="orderId"
                                                    aria-label="..."
@@ -200,7 +200,7 @@
                                 <!-- Button trigger confirm modal -->
                                 <a class="link-primary" data-bs-toggle="modal" style="margin-right: 16px"
                                    data-bs-target="#confirmModal<%= orders[i].orderId %>">
-                                    Xác nhận
+                                    Hoàn thành
                                 </a>
                                 <a class="link-primary" data-bs-toggle="modal"
                                    data-bs-target="#cancelModal<%= orders[i].orderId %>">

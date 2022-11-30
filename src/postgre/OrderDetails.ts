@@ -4,6 +4,8 @@ import {createException, createResult, deleteShoppingSession} from "./index";
 import {createPaymentDetail} from "./PaymentDetails";
 import {addCartItemsToOrder} from "./OrderItem";
 import {getUserSessionId} from "./ShoppingSession";
+import {getUserTokenDevice} from "./User";
+import {sendNotification} from "../routes/NotificationRoute";
 
 /* Move temporary cart to order details, cuz ppl confirmed buying */
 
@@ -21,7 +23,8 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         deleteShoppingSession(userId, sessionId).then()
         updateProductInventory(orderId, userId).then()
-
+        let userTokenDevice = await getUserTokenDevice(userId)
+        await sendNotification("Thong bao", "Don hang xac nhan thanh cong", userTokenDevice)
 
         return createResult(true)
     } catch (e) {

@@ -27,6 +27,7 @@ import {discountRoute} from "./routes/DiscountRoute";
 import {adminGetItemsInOrder, getItemsInOrder, getOrders, getUserCurrentOrder} from "./postgre/OrderDetails";
 import {getMonthlyChart} from "./postgre/Statistical";
 import {orderRoutes} from "./routes/OrderRoutes";
+import {sendNotificationForAllUser} from "./routes/NotificationRoute";
 
 
 export const app: Application = express();
@@ -145,7 +146,7 @@ async function handleDisconnect() {
     })
 }
 
-// sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
+sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
 
 handleDisconnect().then()
 
