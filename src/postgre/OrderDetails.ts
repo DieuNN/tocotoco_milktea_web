@@ -45,7 +45,7 @@ async function createOrder(userId: number, sessionId: number, provider: string, 
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let orderId = await createEmptyOrder(userId)
-        let paymentId = await createPaymentDetail(orderId, provider, "Pending", phoneNumber, address)
+        let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address)
         await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
         connection.end()
@@ -293,12 +293,29 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
         }
         connection.end()
 
-        dumpResult.map(element=> {
+        dumpResult.map(element => {
             element.time = new Date(element.time).toLocaleString("vi-VN")
         })
 
         return createResult(dumpResult)
     } catch (e) {
         return createException("")
+    }
+}
+
+export async function getUserCurrentOrder(userId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select *
+                                             from "OrderDetail"
+                                                      inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                             where userid = ${userId}
+                                             order by PD.modifiedat desc;`)
+        if (result.rows.length == 0) {
+            return createException("Bạn hiện tại chưa có đơn hàng nào!")
+        }
+        return createResult(result.rows[0])
+    } catch (e) {
+        return createException(e)
     }
 }

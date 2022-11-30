@@ -25,7 +25,13 @@ import {getUserAddress, getUserId} from "../postgre/User";
 import {findProductsByName, getProductsByCategoryId} from "../postgre/Product";
 import {updateCartItem} from "../postgre/CartItem";
 import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
-import {confirmOrder, getItemsInOrder, getOrderDetail, getUserOrders} from "../postgre/OrderDetails";
+import {
+    confirmOrder,
+    getItemsInOrder,
+    getOrderDetail,
+    getUserCurrentOrder,
+    getUserOrders
+} from "../postgre/OrderDetails";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {addLovedItem, deleteLovedItem, isUserLovedProduct} from "../postgre/LovedProducts";
@@ -124,6 +130,7 @@ export function API(app: Application) {
             res.end(e.toString())
         })
     })
+
     // TODO: Should we need this?
     app.post("/api/user_id", async (req: Request, res: Response) => {
         const {username, token} = req.body
@@ -144,6 +151,19 @@ export function API(app: Application) {
         getUserAddress(id).then(r => {
             res.json(r)
         }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/user/current-order", (req: Request, res: Response) => {
+        const {token} = req.body
+        if (!validateToken(token)) {
+            res.json(returnInvalidToken())
+            return
+        }
+        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        getUserCurrentOrder(id).then(r=> {
+            res.json(r)
+        }).catch(e=> {
             res.end(e.toString())
         })
     })
