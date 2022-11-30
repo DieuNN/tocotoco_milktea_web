@@ -156,13 +156,26 @@
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        Huy order <%= orders[i].orderId%>
+                                        Bạn chắc chắn muốn hủy order số <%= orders[i].orderId %>?
+                                        <form name="<%= "cancelOrder" + orders[i].orderId %>"
+                                              enctype="application/x-www-form-urlencoded"
+                                              id="<%= "cancelOrder" + orders[i].orderId %>"
+                                              method="post"
+                                              action="/pending-orders/cancel"
+                                        >
+                                            <input type="text" style="display: none" name="orderId"
+                                                   aria-label="..."
+                                                   value="<%= orders[i].orderId %>">
+                                            <input type="text" style="display: none" name="paymentId"
+                                                   aria-label="..."
+                                                   value="<%= orders[i].paymentId %>">
+                                        </form>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng
                                         </button>
                                         <button type="submit" class="btn btn-primary"
-                                                form="<%= "confirmOrder" + orders[i].orderId %>"
+                                                form="<%= "cancelOrder" + orders[i].orderId %>"
                                                 style="background-color: #FFA500; border-color: #FFA500">Hủy</button>
                                     </div>
                                 </div>
