@@ -372,13 +372,13 @@ export function API(app: Application) {
     })
 
     app.post("/api/order/confirm_order", (req: Request, res: Response) => {
-        const {token, sessionId, provider, phoneNumber, address} = req.body
+        const {token, sessionId, provider, phoneNumber, address, note} = req.body
         if (!validateToken(token)) {
             res.json(returnInvalidToken())
             return
         }
         const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
-        confirmOrder(userId, sessionId, provider, phoneNumber, address).then(r => {
+        confirmOrder(userId, sessionId, provider, phoneNumber, address, note).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())

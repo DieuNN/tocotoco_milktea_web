@@ -7,15 +7,18 @@ import {getUserSessionId} from "./ShoppingSession";
 
 /* Move temporary cart to order details, cuz ppl confirmed buying */
 
-export async function confirmOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string): Promise<APIResponse> {
+export async function confirmOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note?: string | null): Promise<APIResponse> {
     try {
+        if (note == undefined) {
+            note = ""
+        }
         /*Check if session exist?*/
         let _isSessionExist = await getUserSessionId(userId)
         if (!_isSessionExist.isSuccess) {
             return createException("Gio hang khong ton tai!")
         }
 
-        let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address).then()
+        let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         deleteShoppingSession(userId, sessionId).then()
         updateProductInventory(orderId, userId).then()
 
@@ -41,11 +44,11 @@ export async function updateProductInventory(orderId: number, userId: number) {
     connection.end()
 }
 
-async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string): Promise<any> {
+async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<any> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let orderId = await createEmptyOrder(userId)
-        let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address)
+        let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address, note)
         await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
         connection.end()
