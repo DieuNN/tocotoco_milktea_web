@@ -24,7 +24,7 @@ import {firebaseAdminApp, firebaseApp} from "./config/firebase_conf";
 import multer from "multer";
 import {productRoute} from "./routes/ProductRoute";
 import {discountRoute} from "./routes/DiscountRoute";
-import {adminGetItemsInOrder, getItemsInOrder, getOrders} from "./postgre/OrderDetails";
+import {adminGetItemsInOrder, getItemsInOrder, getOrders, getUserCurrentOrder} from "./postgre/OrderDetails";
 import {getMonthlyChart} from "./postgre/Statistical";
 import {orderRoutes} from "./routes/OrderRoutes";
 
@@ -144,6 +144,7 @@ async function handleDisconnect() {
         }
     })
 }
+
 // sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
 
 // getOrders().then(r=> {
@@ -151,6 +152,11 @@ async function handleDisconnect() {
 // })
 
 handleDisconnect().then()
+getUserCurrentOrder(99).then(r => {
+    console.log(
+        r
+    )
+})
 
 const server: http.Server = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
