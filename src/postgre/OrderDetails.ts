@@ -103,7 +103,8 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
                                                       provider,
                                                       address,
                                                       "phoneNumber",
-                                                      sum(quantity) as "totalProduct"
+                                                      sum(quantity) as "totalProduct",
+                                                      note          as "note"
                                                from "OrderDetail"
                                                         inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                         inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
