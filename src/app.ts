@@ -146,7 +146,7 @@ async function handleDisconnect() {
     })
 }
 
-sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
+// sendNotificationForAllUser("Co khuyen mai moi","Thu gui thong bao cho moi nguoi")
 
 handleDisconnect().then()
 
