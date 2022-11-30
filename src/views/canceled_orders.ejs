@@ -17,7 +17,7 @@
     <%- include ('sidenav.ejs') %>
     <div id="layoutSidenav_content">
         <main class="container-fluid px-4">
-            <h1 class="mt-4">Đơn hàng đã hoàn thành</h1>
+            <h1 class="mt-4">Đơn hàng đã hủy</h1>
             <div>
                 <table id="pendingOrdersTable">
                     <thead>
@@ -129,7 +129,7 @@
                                               enctype="application/x-www-form-urlencoded"
                                               id="<%= "deleteOrder" + orders[i].orderId %>"
                                               method="post"
-                                              action="/completed-orders/delete"
+                                              action="/canceled-orders/delete"
                                         >
                                             <input type="text" style="display: none" name="orderId"
                                                    aria-label="..."

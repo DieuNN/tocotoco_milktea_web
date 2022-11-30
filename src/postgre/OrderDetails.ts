@@ -23,8 +23,6 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         deleteShoppingSession(userId, sessionId).then()
         updateProductInventory(orderId, userId).then()
-        let userTokenDevice = await getUserTokenDevice(userId)
-        await sendNotification("Thong bao", "Don hang xac nhan thanh cong", userTokenDevice)
 
         return createResult(true)
     } catch (e) {
@@ -228,6 +226,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
         let orders = await connection.query(`select "OrderItem".orderid  as "orderId",
                                                     PD.id                as "paymentId",
                                                     U.name               as "username",
+                                                    U.id                 as "userId",
                                                     PD."phoneNumber"     as "phoneNumber",
                                                     status               as "status",
                                                     P.name               as "productName",
@@ -262,7 +261,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     priceAfterDiscount: element.priceAfterDiscount,
                     quantity: element.quantity,
                     address: element.address,
-                    time: element.time
+                    time: element.time,
+                    userId: element.userId
                 })
             } else {
                 let temp = map.get(element.orderId)
@@ -276,7 +276,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     orderId: element.orderId,
                     paymentId: element.paymentId,
                     address: element.address,
-                    time: element.time
+                    time: element.time,
+                    userId: element.userId
                 })
             }
         }
@@ -296,6 +297,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
             tempObj.address = value.address
             tempObj.paymentId = value.paymentId
             tempObj.time = value.time
+            tempObj.userId = value.userId
             dumpResult.push(tempObj)
         }
         connection.end()
@@ -334,4 +336,15 @@ export async function getUserCurrentOrder(userId: number): Promise<APIResponse> 
     } catch (e) {
         return createException(e)
     }
+}
+
+export async function deleteOrder(orderId: number, paymentId: number) {
+    const connection = await new Pool(PostgreSQLConfig)
+    await connection.query(`delete
+                            from "OrderDetail"
+                            where id = ${orderId}
+                              and paymentid = ${paymentId}`)
+    await connection.query(`delete
+                            from "PaymentDetails"
+                            where id = ${paymentId}`)
 }

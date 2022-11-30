@@ -56,7 +56,7 @@ var myLineChart = new Chart(ctx, {
             }],
             yAxes: [{
                 ticks: {
-                    min: min,
+                    min: 0,
                     max: max + max * 0.1,
                     maxTicksLimit: 10
                 },
