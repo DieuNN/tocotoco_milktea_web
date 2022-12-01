@@ -17,7 +17,7 @@ export function orderRoutes(app: Application) {
         updatePaymentDetailStatus(paymentId, orderId, "Đang giao").then(r => {
             getUserTokenDevice(userId).then(r1 => {
                 console.log(r1)
-                sendNotification("Thông báo", "Đơn hàng có mã số " + orderId + " của bạn đang được giao", r1)
+                sendNotification("Thông báo", "Đơn hàng của bạn đã được xác nhận", r1)
             })
             res.redirect("/pending-orders")
         })
@@ -26,7 +26,7 @@ export function orderRoutes(app: Application) {
         const {paymentId, orderId, userId} = req.body
         updatePaymentDetailStatus(paymentId, orderId, "Bị hủy").then(r => {
             getUserTokenDevice(userId).then(r1 => {
-                sendNotification("Thông báo", "Đơn hàng có mã số " + orderId + " của bạn đã bị hủy", r1)
+                sendNotification("Thông báo", "Đơn hàng của bạn đã bị hủy", r1)
             })
             res.redirect("/pending-orders")
         })
@@ -40,7 +40,7 @@ export function orderRoutes(app: Application) {
         const {paymentId, orderId, userId} = req.body
         updatePaymentDetailStatus(paymentId, orderId, "Hoàn thành").then(r => {
             getUserTokenDevice(userId).then(r1 => {
-                sendNotification("Thông báo", "Đơn hàng có mã số " + orderId + " của bạn đã được giao thành công", r1)
+                sendNotification("Thông báo", "Đơn hàng của bạn đã giao xong", r1)
             })
             res.redirect("/delivering-order")
         })
@@ -49,7 +49,7 @@ export function orderRoutes(app: Application) {
         const {paymentId, orderId, userId} = req.body
         updatePaymentDetailStatus(paymentId, orderId, "Bị hủy").then(r => {
             getUserTokenDevice(userId).then(r1 => {
-                sendNotification("Thông báo", "Đơn hàng có mã số " + orderId + " của bạn đã bị hủy", r1)
+                sendNotification("Thông báo", "Đơn hàng của bạn đã bị hủy", r1)
             })
             res.redirect("/delivering-order")
         })
