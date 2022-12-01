@@ -161,9 +161,9 @@ export function API(app: Application) {
             return
         }
         const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
-        getUserCurrentOrder(id).then(r=> {
+        getUserCurrentOrder(id).then(r => {
             res.json(r)
-        }).catch(e=> {
+        }).catch(e => {
             res.end(e.toString())
         })
     })
@@ -344,7 +344,10 @@ export function API(app: Application) {
     });
 
     app.post("/api/shopping_session/items", (req: Request, res: Response) => {
+        console.log(req.body)
         const {token, sessionId} = req.body
+        console.log(token)
+        console.log(sessionId)
         if (!validateToken(token)) {
             res.json(returnInvalidToken())
             return

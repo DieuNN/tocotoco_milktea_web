@@ -17,13 +17,14 @@ const nonProductionConf: ClientConfig = {
     database: process.env.DATABASE,
     user: process.env.USER,
     password: process.env.PASSWORD,
+    // ssl : true
     ssl: {
         rejectUnauthorized: false,
         cert: fs.readFileSync('./cert.pem').toString(),
         key: fs.readFileSync('./key.pem').toString(),
     },
-    // query_timeout: 60000,
-    // connectionTimeoutMillis: 60000,
+    query_timeout: 60000,
+    connectionTimeoutMillis: 60000,
 }
 export const PostgreSQLConfig
     :

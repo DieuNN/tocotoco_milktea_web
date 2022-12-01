@@ -14,15 +14,23 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         if (note == undefined) {
             note = ""
         }
+        console.log(userId)
+        console.log(sessionId)
+        console.log(provider)
+        console.log(phoneNumber)
+        console.log(address)
+        console.log(note)
         /*Check if session exist?*/
         let _isSessionExist = await getUserSessionId(userId)
         if (!_isSessionExist.isSuccess) {
             return createException("Gio hang khong ton tai!")
         }
 
+        console.log("Enter create order")
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
-        deleteShoppingSession(userId, sessionId).then()
-        updateProductInventory(orderId, userId).then()
+        console.log("End create order")
+        // deleteShoppingSession(userId, sessionId).then().catch()
+        // updateProductInventory(orderId, userId).then().catch()
 
         return createResult(true)
     } catch (e) {
@@ -48,7 +56,9 @@ export async function updateProductInventory(orderId: number, userId: number) {
 async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<any> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
+        console.log("Enter create empty order")
         let orderId = await createEmptyOrder(userId)
+        console.log("End create empty order")
         let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address, note)
         await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
@@ -76,7 +86,7 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
                                                     status,
                                                     provider,
                                                     address,
-                                                    "phoneNumber",
+                                                    phonenumber as "phoneNumber",
                                                     sum(quantity) as "totalProduct"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
@@ -103,7 +113,7 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
                                                       status,
                                                       provider,
                                                       address,
-                                                      "phoneNumber",
+                                                      phonenumber as "phoneNumber",
                                                       sum(quantity) as "totalProduct",
                                                       note          as "note"
                                                from "OrderDetail"
@@ -134,7 +144,7 @@ export async function adminGetOrderDetails(orderId: number): Promise<APIResponse
                                                       status,
                                                       provider,
                                                       address,
-                                                      "phoneNumber",
+                                                      phonenumber as "phoneNumber",
                                                       sum(quantity) as "totalProduct"
                                                from "OrderDetail"
                                                         inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
@@ -196,8 +206,8 @@ export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse
                                                     "ProductCategory".name       as "productCategoryName",
                                                     P.displayimage               as "displayImage",
                                                     "OrderItem".size             as "size",
-                                                    pricebeforediscount          as "priceBeforeDiscount",
-                                                    priceafterdiscount           as "priceAfterDiscount"
+                                                    round(pricebeforediscount)          as "priceBeforeDiscount",
+                                                    round(priceafterdiscount)           as "priceAfterDiscount"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -210,12 +220,18 @@ export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse
     }
 }
 
-export async function createEmptyOrder(userId: number): Promise<number> {
-    const connection = await new Pool(PostgreSQLConfig)
-    let result = await connection.query(`insert into "OrderDetail" (id, userid, total, paymentid, createat, modifiedat)
+export async function createEmptyOrder(userId: number): Promise<any> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`insert into "OrderDetail" (id, userid, total, paymentid, createat, modifiedat)
                                          values (default, ${userId}, 0, null, now(), now())
                                          returning id`)
-    return result.rows[0].id
+        console.log(result.rows)
+        return result.rows[0].id
+    } catch (e) {
+        console.log(e)
+        return 0
+    }
 }
 
 
@@ -230,8 +246,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                                                     PD.phonenumber     as "phoneNumber",
                                                     status               as "status",
                                                     P.name               as "productName",
-                                                    pricebeforediscount  as "priceBeforeDiscount",
-                                                    priceafterdiscount   as "priceAfterDiscount",
+                                                    round(pricebeforediscount)  as "priceBeforeDiscount",
+                                                    round(priceafterdiscount)   as "priceAfterDiscount",
                                                     "OrderItem".quantity as "quantity",
                                                     PD.address           as "address",
                                                     PD.modifiedat        as "time"
