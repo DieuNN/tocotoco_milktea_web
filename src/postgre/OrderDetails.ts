@@ -227,7 +227,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                                                     PD.id                as "paymentId",
                                                     U.name               as "username",
                                                     U.id                 as "userId",
-                                                    PD."phoneNumber"     as "phoneNumber",
+                                                    PD.phonenumber     as "phoneNumber",
                                                     status               as "status",
                                                     P.name               as "productName",
                                                     pricebeforediscount  as "priceBeforeDiscount",
@@ -308,7 +308,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
 
         return createResult(dumpResult)
     } catch (e) {
-        return createException("")
+        return createException(e)
     }
 }
 
@@ -323,7 +323,7 @@ export async function getUserCurrentOrder(userId: number): Promise<APIResponse> 
                                                     status        as "status",
                                                     provider      as "provider",
                                                     address       as "address",
-                                                    "phoneNumber" as "phoneNumber"
+                                                    phonenumber as "phoneNumber"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                              where userid = ${userId}

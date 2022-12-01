@@ -7,7 +7,7 @@ export async function createPaymentDetail(orderId: number, provider: String, sta
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`insert into "PaymentDetails" (id, orderid, amount, status, createat,
                                                                              modifiedat, provider, address,
-                                                                             "phoneNumber", note)
+                                                                             phonenumber, note)
                                                values (default,
                                                        ${orderId},
                                                        0,

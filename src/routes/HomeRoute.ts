@@ -12,6 +12,7 @@ export function homeRoute(app: Application) {
 
         getAllStatistical().then(r => {
             getOrders(null).then(r1=> {
+                console.log(r1)
                 res.render('index', {data: r.result, orders : r1.result})
             })
         }).catch(e => {
