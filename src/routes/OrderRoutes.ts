@@ -16,6 +16,7 @@ export function orderRoutes(app: Application) {
         const {paymentId, orderId, userId} = req.body
         updatePaymentDetailStatus(paymentId, orderId, "Đang giao").then(r => {
             getUserTokenDevice(userId).then(r1 => {
+                console.log(r1)
                 sendNotification("Thông báo", "Đơn hàng có mã số " + orderId + " của bạn đang được giao", r1)
             })
             res.redirect("/pending-orders")

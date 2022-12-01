@@ -24,9 +24,9 @@ export function notificationRoute(app : Application, upload : multer.Multer) {
 export async function sendNotification(title: string, message: string, token_device: string) {
     let fcm = new FCM(process.env.FCM_SERVER_KEY)
     let sendBody = {
-        data: {
+        notification: {
             title: title,
-            message: message
+            body: message
         },
         to: token_device
     }
