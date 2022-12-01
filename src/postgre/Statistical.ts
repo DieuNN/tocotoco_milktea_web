@@ -31,10 +31,6 @@ export async function getAllStatistical(): Promise<APIResponse> {
     }
 }
 
-async function getOrders() {
-    const connection = await new Pool(PostgreSQLConfig)
-
-}
 
 export async function getMonthlyChart(): Promise<any> {
     const connection = await new Pool(PostgreSQLConfig)
