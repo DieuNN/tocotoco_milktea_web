@@ -6,17 +6,17 @@ export function homeRoute(app: Application) {
 
     app.get("/", (req: Request, res: Response) => {
         /* Uncomment this and comment render line below*/
-        // if (req.session.userid !== 'admin') {
-        //     res.redirect("/login")
-        // } else {
+        if (req.session.userid !== 'admin') {
+            res.redirect("/login")
+        } else {
 
-        getAllStatistical().then(r => {
-            getOrders(null).then(r1=> {
-                res.render('index', {data: r.result, orders : r1.result})
+            getAllStatistical().then(r => {
+                getOrders(null).then(r1 => {
+                    res.render('index', {data: r.result, orders: r1.result})
+                })
+            }).catch(e => {
+                res.end("Error in get statistical")
             })
-        }).catch(e => {
-            res.end("Error in get statistical")
-        })
-        // }
+        }
     });
 }
