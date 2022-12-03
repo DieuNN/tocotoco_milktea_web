@@ -6,7 +6,7 @@ export async function getAllNotifications(): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select *
-                                             from "Notifications"`)
+                                             from "Notifications" order by id`)
         return createResult(result.rows)
     } catch (e) {
         return createException(e)
@@ -50,5 +50,10 @@ export async function addNotification(title: string, message: string, type: stri
     } catch (e) {
         return createException(e)
     }
+}
+
+export async function deleteNotification(id : number) {
+    const connection = await new Pool(PostgreSQLConfig)
+    await connection.query(`delete from "Notifications" where id = ${id}`)
 }
 

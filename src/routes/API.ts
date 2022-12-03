@@ -36,6 +36,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {addLovedItem, deleteLovedItem, isUserLovedProduct} from "../postgre/LovedProducts";
 import {getMonthlyChart, getYearlyChart} from "../postgre/Statistical";
+import {getNewsNotifications, getPromotionNotifications} from "../postgre/Notification";
 
 dotenv.config({
     path: "process.env"
@@ -46,7 +47,7 @@ export function API(app: Application) {
         getProductCategories().then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     // TODO: Should we need this?
@@ -55,7 +56,7 @@ export function API(app: Application) {
         result.then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/user_info", async (req: Request, res: Response) => {
@@ -67,7 +68,7 @@ export function API(app: Application) {
         getUser(token).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/update_user_info", (req: Request, res: Response) => {
@@ -95,7 +96,7 @@ export function API(app: Application) {
         }).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
 
@@ -109,7 +110,7 @@ export function API(app: Application) {
         updateUserPassword(id, oldPassword, newPassword).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/update_user_address", (req: Request, res: Response) => {
@@ -127,7 +128,7 @@ export function API(app: Application) {
         }).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
 
@@ -137,7 +138,7 @@ export function API(app: Application) {
         getUserId(username, token).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
 
@@ -151,7 +152,7 @@ export function API(app: Application) {
         getUserAddress(id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/user/current-order", (req: Request, res: Response) => {
@@ -164,7 +165,7 @@ export function API(app: Application) {
         getUserCurrentOrder(id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/product_category", (req: Request, res: Response) => {
@@ -174,14 +175,14 @@ export function API(app: Application) {
         getProductCategory(Number(id)).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/discounts", async (req: Request, res: Response) => {
         getDiscounts().then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.get("/api/discount", (req: Request, res: Response) => {
@@ -189,7 +190,7 @@ export function API(app: Application) {
         getDiscount(id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post('/api/login', async (req: Request, res: Response) => {
@@ -197,7 +198,7 @@ export function API(app: Application) {
         getUserLoginInfo(username, password, type, token_device).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post('/api/signup', async (req: Request, res: Response) => {
@@ -235,14 +236,14 @@ export function API(app: Application) {
         }).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/products", (req: Request, res: Response) => {
         getProducts().then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/product", (req, res: Response) => {
@@ -250,7 +251,7 @@ export function API(app: Application) {
         getProduct(id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/get_products_by_category", (req: Request, res: Response) => {
@@ -258,7 +259,7 @@ export function API(app: Application) {
         getProductsByCategoryId(categoryId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/shopping_session/get_session_id", (req: Request, res: Response) => {
@@ -271,7 +272,7 @@ export function API(app: Application) {
         getUserSessionId(id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/shopping_session/create_session", (req: Request, res: Response) => {
@@ -284,7 +285,7 @@ export function API(app: Application) {
         createShoppingSession(id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/shopping_session/delete_session", (req: Request, res: Response) => {
@@ -297,7 +298,7 @@ export function API(app: Application) {
         deleteShoppingSession(userId, sessionId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/shopping_session/get_cart_info", (req: Request, res: Response) => {
@@ -310,7 +311,7 @@ export function API(app: Application) {
         getCartInfo(id, sessionId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/shopping_session/add_item", (req: Request, res: Response) => {
@@ -323,7 +324,7 @@ export function API(app: Application) {
         addItemToCart(userId, sessionId, productId, quantity, size).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/shopping_session/delete_item", (req: Request, res: Response) => {
@@ -339,7 +340,7 @@ export function API(app: Application) {
         removeItemFromCart(itemId, sessionId).then(r => {
             res.json(r);
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     });
 
@@ -356,7 +357,7 @@ export function API(app: Application) {
         getCartItems(userId, sessionId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     // I don't even know what did I write XD
@@ -370,7 +371,7 @@ export function API(app: Application) {
         updateCartItem(userId, sessionId, productId, quantity, size).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
 
@@ -384,7 +385,7 @@ export function API(app: Application) {
         confirmOrder(userId, sessionId, provider, phoneNumber, address, note).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/order/get_user_orders", (req: Request, res: Response) => {
@@ -397,7 +398,7 @@ export function API(app: Application) {
         getUserOrders(userId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/order/get_order_detail", (req: Request, res: Response) => {
@@ -410,7 +411,7 @@ export function API(app: Application) {
         getOrderDetail(userId, orderId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/order/cancel_order", (req: Request, res: Response) => {
@@ -423,7 +424,7 @@ export function API(app: Application) {
         userCancelOrder(userId, orderId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/order/get_items", (req: Request, res: Response) => {
@@ -436,7 +437,7 @@ export function API(app: Application) {
         getItemsInOrder(orderId, userId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     // FAV Items
@@ -456,7 +457,7 @@ export function API(app: Application) {
         getLovedItems(user!.id).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/fav/add", (req: Request, res: Response) => {
@@ -469,7 +470,7 @@ export function API(app: Application) {
         addLovedItem(userId, productId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/fav/delete", (req: Request, res: Response) => {
@@ -482,7 +483,7 @@ export function API(app: Application) {
         deleteLovedItem(userId, productId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/fav/check_loved", (req: Request, res: Response) => {
@@ -495,7 +496,7 @@ export function API(app: Application) {
         isUserLovedProduct(userId, productId).then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.get("/api/statistical/monthly-chart", (req: Request, res: Response) => {
@@ -504,7 +505,7 @@ export function API(app: Application) {
         getMonthlyChart().then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.get("/api/statistical/yearly-chart", (req: Request, res: Response) => {
@@ -513,7 +514,7 @@ export function API(app: Application) {
         getYearlyChart().then(r => {
             res.json(r)
         }).catch(e => {
-            res.end(e.toString())
+            res.json(createException(e));
         })
     })
     app.post("/api/product/find", (req: Request, res: Response) => {
@@ -523,7 +524,20 @@ export function API(app: Application) {
             res.end(e)
         })
     })
-
+    app.post("/api/notification/promote", (req: Request, res: Response) => {
+        getPromotionNotifications().then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.json(createException(e));
+        })
+    })
+    app.post("/api/notification/news", (req: Request, res: Response) => {
+        getNewsNotifications().then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.json(createException(e));
+        })
+    })
 }
 
 function validateToken(token: string): boolean {

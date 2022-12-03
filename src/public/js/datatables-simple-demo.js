@@ -7,8 +7,11 @@ window.addEventListener('DOMContentLoaded', event => {
         new simpleDatatables.DataTable(datatablesSimple);
     }
     const pendingTable = document.getElementById("pendingOrdersTable")
-    console.log(pendingTable)
     if (pendingTable) {
         new simpleDatatables.DataTable(pendingTable)
+    }
+    const notificationsTable = document.getElementById("notificationsTable")
+    if (notificationsTable) {
+        new simpleDatatables.DataTable(notificationsTable)
     }
 });
