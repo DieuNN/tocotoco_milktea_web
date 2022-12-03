@@ -228,7 +228,7 @@ export async function getUserLoginInfo(username: string, password: string, type:
     let result;
     switch (type) {
         case "email" : {
-            let sqlQuery = `Select id, username, password
+            let sqlQuery = `Select id, username, password, active
                             from "User"
                             where email = '${username}'
                               and password = '${encryptedPassword}'`
@@ -236,7 +236,7 @@ export async function getUserLoginInfo(username: string, password: string, type:
             break
         }
         case "phoneNumber" : {
-            let sqlQuery = `Select id, username, password
+            let sqlQuery = `Select id, username, password, active
                             from "User"
                             where phoneNumber = '${username}'
                               and password = '${encryptedPassword}'`
@@ -244,7 +244,7 @@ export async function getUserLoginInfo(username: string, password: string, type:
             break
         }
         case "username" : {
-            let sqlQuery = `Select id, username, password
+            let sqlQuery = `Select id, username, password, active
                             from "User"
                             where username = '${username}'
                               and password = '${encryptedPassword}'`
@@ -260,6 +260,11 @@ export async function getUserLoginInfo(username: string, password: string, type:
         }
     }
     if (result.rows.length != 0) {
+        console.log(result.rows[0])
+        if (result.rows[0].active == false) {
+
+            return createException("Tài khoản của bạn bị tạm khóa, liên hệ với cửa hàng để biết thêm thông tin!")
+        }
         const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SCRET!.toString())
         await updateUserTokenDevice(result.rows[0].id, token_device)
         return {
