@@ -21,19 +21,12 @@ export function notificationRoute(app: Application, upload: multer.Multer) {
     app.get("/notification", (req: Request, res: Response) => {
         getAllNotifications().then(r => {
             console.log(r.result)
-            r.result.map((item : any)=> {
-                if (item.type == "News")
-                    item.type = "Tin tức"
-                else {
-                    item.type =  "Khuyến mại"
-                }
-            })
             res.render("notification", {notifications: r.result})
         })
     })
     app.post("/notification/add", upload.single("image"), (req: Request, res: Response) => {
         if (!req.file) {
-            res.end("File required")
+            res.end("Bạn chưa chọn file")
         }
         const {title, message, type} = req.body
         console.log(req.body)

@@ -18,7 +18,7 @@ export async function getPromotionNotifications(): Promise<APIResponse> {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select *
                                              from "Notifications"
-                                             where type = 'Promotion'`)
+                                             where type = 'Khuyến mại'`)
         return createResult(result.rows)
     } catch (e) {
         return createException(e)
@@ -30,7 +30,7 @@ export async function getNewsNotifications(): Promise<APIResponse> {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select *
                                              from "Notifications"
-                                             where type = 'News'`)
+                                             where type = 'Tin tức'`)
         return createResult(result.rows)
     } catch (e) {
         return createException(e)

@@ -36,7 +36,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {addLovedItem, deleteLovedItem, isUserLovedProduct} from "../postgre/LovedProducts";
 import {getMonthlyChart, getYearlyChart} from "../postgre/Statistical";
-import {getNewsNotifications, getPromotionNotifications} from "../postgre/Notification";
+import {getAllNotifications, getNewsNotifications, getPromotionNotifications} from "../postgre/Notification";
 
 dotenv.config({
     path: "process.env"
@@ -533,6 +533,13 @@ export function API(app: Application) {
     })
     app.post("/api/notification/news", (req: Request, res: Response) => {
         getNewsNotifications().then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.json(createException(e));
+        })
+    })
+    app.post("/api/notification/all" , (req: Request, res: Response) => {
+        getAllNotifications().then(r => {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
