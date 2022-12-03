@@ -30,7 +30,7 @@ import {
     getItemsInOrder,
     getOrderDetail,
     getUserCurrentOrder,
-    getUserOrders
+    getUserOrders, userCancelOrder
 } from "../postgre/OrderDetails";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -408,6 +408,19 @@ export function API(app: Application) {
         }
         const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
         getOrderDetail(userId, orderId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.post("/api/order/cancel_order", (req: Request, res: Response) => {
+        const {token, orderId} = req.body
+        if (!validateToken(token)) {
+            res.json(returnInvalidToken())
+            return
+        }
+        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        userCancelOrder(userId, orderId).then(r => {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())

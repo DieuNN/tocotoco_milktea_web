@@ -1,7 +1,7 @@
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult, deleteShoppingSession} from "./index";
-import {createPaymentDetail} from "./PaymentDetails";
+import {createPaymentDetail, updatePaymentDetailStatus} from "./PaymentDetails";
 import {addCartItemsToOrder} from "./OrderItem";
 import {getUserSessionId} from "./ShoppingSession";
 import {getUserTokenDevice} from "./User";
@@ -86,7 +86,7 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
                                                     status,
                                                     provider,
                                                     address,
-                                                    phonenumber as "phoneNumber",
+                                                    phonenumber   as "phoneNumber",
                                                     sum(quantity) as "totalProduct"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
@@ -105,7 +105,6 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
 }
 
 
-
 export async function getOrderDetail(userId: number, orderId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
@@ -115,7 +114,7 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
                                                       status,
                                                       provider,
                                                       address,
-                                                      phonenumber as "phoneNumber",
+                                                      phonenumber   as "phoneNumber",
                                                       sum(quantity) as "totalProduct",
                                                       note          as "note"
                                                from "OrderDetail"
@@ -146,7 +145,7 @@ export async function adminGetOrderDetails(orderId: number): Promise<APIResponse
                                                       status,
                                                       provider,
                                                       address,
-                                                      phonenumber as "phoneNumber",
+                                                      phonenumber   as "phoneNumber",
                                                       sum(quantity) as "totalProduct"
                                                from "OrderDetail"
                                                         inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
@@ -208,8 +207,8 @@ export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse
                                                     "ProductCategory".name       as "productCategoryName",
                                                     P.displayimage               as "displayImage",
                                                     "OrderItem".size             as "size",
-                                                    round(pricebeforediscount)          as "priceBeforeDiscount",
-                                                    round(priceafterdiscount)           as "priceAfterDiscount"
+                                                    round(pricebeforediscount)   as "priceBeforeDiscount",
+                                                    round(priceafterdiscount)    as "priceAfterDiscount"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -226,8 +225,8 @@ export async function createEmptyOrder(userId: number): Promise<any> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`insert into "OrderDetail" (id, userid, total, paymentid, createat, modifiedat)
-                                         values (default, ${userId}, 0, null, now(), now())
-                                         returning id`)
+                                             values (default, ${userId}, 0, null, now(), now())
+                                             returning id`)
         console.log(result.rows)
         return result.rows[0].id
     } catch (e) {
@@ -241,18 +240,18 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
     try {
         if (type == null) type = "%%"
         const connection = await new Pool(PostgreSQLConfig)
-        let orders = await connection.query(`select "OrderItem".orderid  as "orderId",
-                                                    PD.id                as "paymentId",
-                                                    U.name               as "username",
-                                                    U.id                 as "userId",
-                                                    PD.phonenumber     as "phoneNumber",
-                                                    status               as "status",
-                                                    P.name               as "productName",
-                                                    round(pricebeforediscount)  as "priceBeforeDiscount",
-                                                    round(priceafterdiscount)   as "priceAfterDiscount",
-                                                    "OrderItem".quantity as "quantity",
-                                                    PD.address           as "address",
-                                                    PD.modifiedat        as "time"
+        let orders = await connection.query(`select "OrderItem".orderid        as "orderId",
+                                                    PD.id                      as "paymentId",
+                                                    U.name                     as "username",
+                                                    U.id                       as "userId",
+                                                    PD.phonenumber             as "phoneNumber",
+                                                    status                     as "status",
+                                                    P.name                     as "productName",
+                                                    round(pricebeforediscount) as "priceBeforeDiscount",
+                                                    round(priceafterdiscount)  as "priceAfterDiscount",
+                                                    "OrderItem".quantity       as "quantity",
+                                                    PD.address                 as "address",
+                                                    PD.modifiedat              as "time"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -341,7 +340,7 @@ export async function getUserCurrentOrder(userId: number): Promise<APIResponse> 
                                                     status        as "status",
                                                     provider      as "provider",
                                                     address       as "address",
-                                                    phonenumber as "phoneNumber"
+                                                    phonenumber   as "phoneNumber"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                              where userid = ${userId}
@@ -365,4 +364,45 @@ export async function deleteOrder(orderId: number, paymentId: number) {
     await connection.query(`delete
                             from "PaymentDetails"
                             where id = ${paymentId}`)
+}
+
+async function getPaymentId(orderId: number): Promise<number | null> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        const result = await connection.query(`select paymentid as "paymentId"
+                                               from "OrderDetail"
+                                               where id = ${orderId}
+                                               limit 1`)
+        if (result.rowCount != 1) {
+            return null
+        }
+        console.log(result.rows)
+        connection.end();
+        return result.rows[0].paymentId
+    } catch (e) {
+        return null
+    }
+}
+
+export async function userCancelOrder(userId: number, orderId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let paymentId = await getPaymentId(orderId)
+        if (paymentId == null) {
+            return createException("Không tìm thấy order của bạn")
+        }
+        let result = await connection.query(`update "PaymentDetails"
+                                             set status     = 'Bị hủy',
+                                                 modifiedat = now()
+                                             where id = ${paymentId}
+                                               and orderid = ${orderId}
+                                               and status like 'Đợi xác nhận'`)
+        console.log(result.rows)
+        if (result.rowCount != 1) {
+            return createException("Bạn không thể hủy đơn này!")
+        }
+        return createResult("Hủy thành công!")
+    } catch (e) {
+        return createException(e)
+    }
 }
