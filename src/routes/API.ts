@@ -28,7 +28,7 @@ import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
 import {
     confirmOrder,
     getItemsInOrder,
-    getOrderDetail,
+    getOrderDetail, getUserCompletedOrders,
     getUserCurrentOrder,
     getUserOrders, userCancelOrder
 } from "../postgre/OrderDetails";
@@ -51,6 +51,7 @@ export function API(app: Application) {
         })
     })
     // TODO: Should we need this?
+    // Update: We need this
     app.post("/api/users", (req: Request, res: Response) => {
         const result = getUsers()
         result.then(r => {
@@ -315,13 +316,13 @@ export function API(app: Application) {
         })
     })
     app.post("/api/shopping_session/add_item", (req: Request, res: Response) => {
-        const {token, sessionId, productId, quantity, size} = req.body
+        const {token, sessionId, productId, quantity, size, note} = req.body
         if (!validateToken(token)) {
             res.json(returnInvalidToken())
             return
         }
         const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
-        addItemToCart(userId, sessionId, productId, quantity, size).then(r => {
+        addItemToCart(userId, sessionId, productId, quantity, size, note).then(r => {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
@@ -362,13 +363,13 @@ export function API(app: Application) {
     })
     // I don't even know what did I write XD
     app.post("/api/shopping_session/update_item", (req: Request, res: Response) => {
-        const {token, sessionId, productId, quantity, size} = req.body
+        const {token, sessionId, productId, quantity, size, note} = req.body
         if (!validateToken(token)) {
             res.json(returnInvalidToken())
             return
         }
         const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
-        updateCartItem(userId, sessionId, productId, quantity, size).then(r => {
+        updateCartItem(userId, sessionId, productId, quantity, size, note).then(r => {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
@@ -388,6 +389,7 @@ export function API(app: Application) {
             res.json(createException(e));
         })
     })
+
     app.post("/api/order/get_user_orders", (req: Request, res: Response) => {
         const {token} = req.body
         if (!validateToken(token)) {
@@ -396,6 +398,19 @@ export function API(app: Application) {
         }
         const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
         getUserOrders(userId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.json(createException(e));
+        })
+    })
+    app.post("/api/order/get_completed_orders", (req: Request, res: Response) => {
+        const {token} = req.body
+        if (!validateToken(token)) {
+            res.json(returnInvalidToken())
+            return
+        }
+        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        getUserCompletedOrders(userId).then(r => {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
@@ -538,7 +553,7 @@ export function API(app: Application) {
             res.json(createException(e));
         })
     })
-    app.post("/api/notification/all" , (req: Request, res: Response) => {
+    app.post("/api/notification/all", (req: Request, res: Response) => {
         getAllNotifications().then(r => {
             res.json(r)
         }).catch(e => {

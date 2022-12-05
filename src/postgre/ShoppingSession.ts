@@ -8,18 +8,18 @@ import {createException, createResult} from "./index";
 export async function triggerUpdateSessionTotal(userId: number, sessionId: number) {
     const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`with total_sum as (select sum(CI.quantity * price) -
-                                                      round(sum(CI.quantity * price * discountpercent / 100)) as sum
-                                               from "ShoppingSession"
-                                                        inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
-                                                        inner join "Product" P on CI.productid = P.id
-                                                        left join "Discount" on P.discountid = "Discount".id
-                                               where sessionid = ${sessionId}
-                                                 and userid = ${userId})
-                            update "ShoppingSession"
-                            set total = total_sum.sum
-                            from total_sum
-                            where id = ${sessionId}
-                              and userid = ${userId};`)
+                                                                   round(sum(CI.quantity * price * discountpercent / 100)) as sum
+                                                            from "ShoppingSession"
+                                                                     inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
+                                                                     inner join "Product" P on CI.productid = P.id
+                                                                     left join "Discount" on P.discountid = "Discount".id
+                                                            where sessionid = ${sessionId}
+                                                              and userid = ${userId})
+                                         update "ShoppingSession"
+                                         set total = total_sum.sum
+                                         from total_sum
+                                         where id = ${sessionId}
+                                           and userid = ${userId};`)
     connection.end()
 }
 
@@ -58,19 +58,20 @@ export async function createShoppingSession(userId: number): Promise<APIResponse
     }
 }
 
-export async function getCartInfo(userId : number, sessionId: number): Promise<APIResponse> {
+export async function getCartInfo(userId: number, sessionId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        let result = await connection.query(`select count(*)                                                as "totalCategory",
-                                                    sum(CI.quantity)                                        as "totalQuantity",
-                                                    sum(CI.quantity * price)                                as "priceBeforeDiscount",
+        let result = await connection.query(`select count(*)                                                             as "totalCategory",
+                                                    sum(CI.quantity)                                                     as "totalQuantity",
+                                                    sum(CI.quantity * price)                                             as "priceBeforeDiscount",
                                                     sum(CI.quantity * price) -
-                                                    round(sum(CI.quantity * price * discountpercent / 100)) as "priceAfterDiscount"
+                                                    round(sum(CI.quantity * price * coalesce(discountpercent, 0) / 100)) as "priceAfterDiscount"
                                              from "ShoppingSession"
                                                       inner join "CartItem" CI on "ShoppingSession".id = CI.sessionid
                                                       inner join "Product" P on CI.productid = P.id
                                                       left join "Discount" on P.discountid = "Discount".id
-                                             where sessionid = ${sessionId} and userid = ${userId};`)
+                                             where sessionid = ${sessionId}
+                                               and userid = ${userId};`)
         return createResult(result.rows[0])
     } catch (e) {
         return createException(e)

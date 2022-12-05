@@ -14,16 +14,14 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         if (note == undefined) {
             note = ""
         }
-        console.log(userId)
-        console.log(sessionId)
-        console.log(provider)
-        console.log(phoneNumber)
-        console.log(address)
-        console.log(note)
         /*Check if session exist?*/
         let _isSessionExist = await getUserSessionId(userId)
         if (!_isSessionExist.isSuccess) {
             return createException("Gio hang khong ton tai!")
+        }
+        let userCurrentOrder = await getUserCurrentOrder(userId)
+        if (userCurrentOrder.isSuccess && userCurrentOrder.result.length == 1) {
+            return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")
         }
 
         console.log("Enter create order")
@@ -92,6 +90,34 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                       inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
                                              where userid = ${userId}
+                                             group by "OrderDetail".id, total, "OrderDetail".createat, status, provider,
+                                                      address, "phoneNumber"
+                                             order by createat desc;`)
+        result.rows.map(item => {
+            item.createat = new Date(item.createat).toLocaleString("vi-VN")
+        })
+        return createResult(result.rows)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function getUserCompletedOrders(userId: number): Promise<APIResponse> {
+    try {
+        const connection = await new Pool(PostgreSQLConfig)
+        let result = await connection.query(`select "OrderDetail".id,
+                                                    round(total)  as total,
+                                                    "OrderDetail".createat,
+                                                    status,
+                                                    provider,
+                                                    address,
+                                                    phonenumber   as "phoneNumber",
+                                                    sum(quantity) as "totalProduct"
+                                             from "OrderDetail"
+                                                      inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                                      inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
+                                             where userid = ${userId}
+                                               and (status like 'Bị hủy' or status like 'Hoàn thành')
                                              group by "OrderDetail".id, total, "OrderDetail".createat, status, provider,
                                                       address, "phoneNumber"
                                              order by createat desc;`)
@@ -180,7 +206,8 @@ export async function getItemsInOrder(orderId: number, userId: number): Promise<
                                                     P.displayimage               as "displayImage",
                                                     "OrderItem".size             as "size",
                                                     pricebeforediscount          as "priceBeforeDiscount",
-                                                    priceafterdiscount           as "priceAfterDiscount"
+                                                    priceafterdiscount           as "priceAfterDiscount",
+                                                    note                         as "note"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -208,7 +235,8 @@ export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse
                                                     P.displayimage               as "displayImage",
                                                     "OrderItem".size             as "size",
                                                     round(pricebeforediscount)   as "priceBeforeDiscount",
-                                                    round(priceafterdiscount)    as "priceAfterDiscount"
+                                                    round(priceafterdiscount)    as "priceAfterDiscount",
+                                                    note                         as "note"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -251,7 +279,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                                                     round(priceafterdiscount)  as "priceAfterDiscount",
                                                     "OrderItem".quantity       as "quantity",
                                                     PD.address                 as "address",
-                                                    PD.modifiedat              as "time"
+                                                    PD.modifiedat              as "time",
+                                                    "OrderItem".note           as "note"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -279,7 +308,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     quantity: element.quantity,
                     address: element.address,
                     time: element.time,
-                    userId: element.userId
+                    userId: element.userId,
+                    note: element.note
                 })
             } else {
                 let temp = map.get(element.orderId)
@@ -294,7 +324,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     paymentId: element.paymentId,
                     address: element.address,
                     time: element.time,
-                    userId: element.userId
+                    userId: element.userId,
+                    note: element.note
                 })
             }
         }
@@ -315,6 +346,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
             tempObj.paymentId = value.paymentId
             tempObj.time = value.time
             tempObj.userId = value.userId
+            tempObj.note = value.note
             dumpResult.push(tempObj)
         }
         connection.end()

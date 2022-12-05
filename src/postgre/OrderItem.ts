@@ -11,7 +11,8 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
                                                            price * "CartItem".quantity -
                                                            (price * "CartItem".quantity * coalesce(D.discountpercent, 0)) /
                                                            100                         as "priceAfterDiscount",
-                                                           "CartItem".size
+                                                           "CartItem".size,
+                                                           note as "note"
                                                     from "CartItem"
                                                              inner join "Product" P on P.id = "CartItem".productid
                                                              inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -22,10 +23,10 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
         for (const item of sessionResult.rows) {
             await connection.query(`insert into "OrderItem" (id, orderid, productid, quantity, createat,
                                                              modifiedat, size, pricebeforediscount,
-                                                             priceafterdiscount)
+                                                             priceafterdiscount, note)
                                     values (default, ${orderId}, ${item.productId}, ${item.quantity}, now(),
                                             now(), '${item.size}', ${item.priceBeforeDiscount},
-                                            ${item.priceAfterDiscount})`)
+                                            ${item.priceAfterDiscount}, ${item.note})`)
         }
         await updateOrderDetailTotal(orderId, userId)
     } catch (e) {

@@ -3,7 +3,7 @@ import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult, rollBackTransactions} from "./index";
 import {triggerUpdateSessionTotal} from "./ShoppingSession";
 
-export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number, size: string): Promise<APIResponse> {
+export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number, size: string, note: string): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const productQuantity = await connection.query(`select quantity
@@ -19,17 +19,18 @@ export async function addItemToCart(userId: number, sessionId: number, productId
             // if item in cart, update quantity
             let _isItemInTempCart = await isItemInTempCart(productId, sessionId)
             if (_isItemInTempCart.result) {
-                await updateCartItem(userId, sessionId, productId, quantity, size)
+                await updateCartItem(userId, sessionId, productId, quantity, size, note)
                 await triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             }
 
-            let insertResult = await connection.query(`insert into "CartItem" (id, sessionid, productid, quantity, size)
+            let insertResult = await connection.query(`insert into "CartItem" (id, sessionid, productid, quantity, size, note)
                                                        values (default,
                                                                ${sessionId},
                                                                ${productId},
                                                                ${quantity},
-                                                               '${size}')
+                                                               '${size}',
+                                                               '${note}')
             `)
             if (insertResult.rowCount == 1) {
                 await triggerUpdateSessionTotal(userId, sessionId).then()
@@ -80,7 +81,7 @@ export async function removeItemFromCart(itemId: number, sessionId: number): Pro
     }
 }
 
-export async function updateCartItem(userId: number, sessionId: number, productId: number, quantity: number, size: string): Promise<APIResponse> {
+export async function updateCartItem(userId: number, sessionId: number, productId: number, quantity: number, size: string, note: string): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const productQuantity = await connection.query(`select quantity
@@ -94,7 +95,8 @@ export async function updateCartItem(userId: number, sessionId: number, productI
             }
             let result = await connection.query(`update "CartItem"
                                                  set quantity = ${quantity},
-                                                     size     = '${size}'
+                                                     size     = '${size}',
+                                                     note     = '${note}'
                                                  where sessionid = ${sessionId}
                                                    and productid = ${productId}
             `)
@@ -124,9 +126,11 @@ export async function getCartItems(userId: number, sessionId: number): Promise<A
                                                       "CartItem".size             as "size",
                                                       P.displayimage              as "displayImage",
                                                       discountid                  as "discountId",
+                                                      price * "CartItem".quantity as "priceBeforeDiscount",
                                                       price * "CartItem".quantity -
-                                                      round((price * "CartItem".quantity * "Discount".discountpercent) /
-                                                            100)                  as "priceAfterDiscount"
+                                                      round((price * "CartItem".quantity * coalesce("Discount".discountpercent, 0)) /
+                                                            100)                  as "priceAfterDiscount",
+                                                      note                        as "note"
                                                from "CartItem"
                                                         inner join "ShoppingSession" on "CartItem".sessionid = "ShoppingSession".id
                                                         inner join "Product" P on P.id = "CartItem".productid

@@ -72,7 +72,7 @@ export async function getProducts(): Promise<APIResponse> {
                                                from "Product"
                                                         inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
                                                         left join "Discount" on "Product".discountid = "Discount".id
-                                                where "Product".active = true
+                                               where "Product".active = true
         `)
         result.rows.map(item => {
             item.size = item.size.toString().split(",").filter((it: string) => {
@@ -93,9 +93,24 @@ export async function getProducts(): Promise<APIResponse> {
 export async function getProduct(productId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`select *
+        const result = await connection.query(`select "Product".id,
+                                                      "Product".name             as "productName",
+                                                      "Product".description      as "productDescription",
+                                                      "ProductCategory".name     as "productCategoryName",
+                                                      "Product".quantity         as "quantity",
+                                                      "Product".price            as "price",
+                                                      "Discount".name            as "discount",
+                                                      "Discount".discountpercent as "discountPercent",
+                                                      "Product".price -
+                                                      round((coalesce("Discount".discountpercent, 0) * "Product".price) /
+                                                            100)                 as "priceAfterDiscount",
+                                                      "Product".size             as "size",
+                                                      "Product".displayimage
                                                from "Product"
-                                               where id = ${productId}`)
+                                                        inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
+                                                        left join "Discount" on "Product".discountid = "Discount".id
+                                               where "Product".active = true
+                                                 and "Product".id = ${productId}`)
 
         if (result.rows.length === 1) {
             return createResult(result.rows[0])
