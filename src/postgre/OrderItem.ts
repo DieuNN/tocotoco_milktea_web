@@ -26,7 +26,7 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
                                                              priceafterdiscount, note)
                                     values (default, ${orderId}, ${item.productId}, ${item.quantity}, now(),
                                             now(), '${item.size}', ${item.priceBeforeDiscount},
-                                            ${item.priceAfterDiscount}, ${item.note})`)
+                                            ${item.priceAfterDiscount}, '${item.note}')`)
         }
         await updateOrderDetailTotal(orderId, userId)
     } catch (e) {

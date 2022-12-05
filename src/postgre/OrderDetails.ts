@@ -20,16 +20,15 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
             return createException("Gio hang khong ton tai!")
         }
         let userCurrentOrder = await getUserCurrentOrder(userId)
-        if (userCurrentOrder.isSuccess && userCurrentOrder.result.length == 1) {
+        if (!userCurrentOrder.isSuccess || userCurrentOrder.result != null) {
             return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")
         }
 
         console.log("Enter create order")
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         console.log("End create order")
-        deleteShoppingSession(userId, sessionId).then().catch()
-        updateProductInventory(orderId, userId).then().catch()
-
+        await deleteShoppingSession(userId, sessionId).then().catch()
+        await updateProductInventory(orderId, userId).then().catch()
         return createResult(true)
     } catch (e) {
         return createException(e)
