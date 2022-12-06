@@ -141,7 +141,7 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
                                                       address,
                                                       phonenumber   as "phoneNumber",
                                                       sum(quantity) as "totalProduct",
-                                                      note          as "note"
+                                                      PD.note       as "note"
                                                from "OrderDetail"
                                                         inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                         inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
@@ -149,8 +149,11 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
                                                  and "OrderDetail".id = ${orderId}
                                                group by "OrderDetail".id, total, "OrderDetail".createat, status,
                                                         provider,
-                                                        address, "phoneNumber"
+                                                        address, "phoneNumber", PD.note
                                                order by createat desc;`)
+        let items = await getItemsInOrder(orderId, userId)
+        result.rows[0].displayImage = items.result[0].displayImage
+        console.log(result.rows[0])
         if (result.rowCount != 1) {
             return createException("Khong tim thay order " + orderId)
         } else {
