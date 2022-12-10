@@ -34,6 +34,7 @@ import {
 import {getMonthlyChart} from "./postgre/Statistical";
 import {orderRoutes} from "./routes/OrderRoutes";
 import {sendNotification, sendNotificationForAllUser} from "./routes/NotificationRoute";
+import {sendResetPasswordEmail, userResetPassword} from "./routes/AuthenticationRoute";
 
 
 export const app: Application = express();
@@ -128,8 +129,6 @@ app.use((req, res) => {
     res.status(404).render('404')
 })
 
-
-// sendNotification("Dieu test luc 19:24", "Day la thong bao test 2", "ce4si0K1ya1roSxXXsvfD9:APA91bGchv15n-SB2R0NThzqUguy0SBv64yIy0jirQ3oy0-MrMU4wF99MkPz8Mq7beYp3LJ02uWiTnT8CYhBS0P83YnnaDMTUfJJy31y9OwpTAIUwa14twrxahQcNzJm1DlgRP3zMfOB")
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
 

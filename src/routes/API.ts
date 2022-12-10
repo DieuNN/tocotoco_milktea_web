@@ -21,7 +21,7 @@ import {
     getLovedItems,
     createException, getAllStatistical
 } from "../postgre";
-import {getUserAddress, getUserId} from "../postgre/User";
+import {getUserAddress, getUserIdByUsername} from "../postgre/User";
 import {findProductsByName, getProductsByCategoryId} from "../postgre/Product";
 import {updateCartItem} from "../postgre/CartItem";
 import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
@@ -37,6 +37,8 @@ import dotenv from "dotenv";
 import {addLovedItem, deleteLovedItem, isUserLovedProduct} from "../postgre/LovedProducts";
 import {getMonthlyChart, getYearlyChart} from "../postgre/Statistical";
 import {getAllNotifications, getNewsNotifications, getPromotionNotifications} from "../postgre/Notification";
+import {sendResetPasswordEmail, userResetPassword} from "./AuthenticationRoute";
+import {resetPassword} from "../postgre/ResetPassword";
 
 dotenv.config({
     path: "process.env"
@@ -84,7 +86,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return;
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         updateUserInfo(id, {
             id: null,
             username: username,
@@ -107,7 +109,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         updateUserPassword(id, oldPassword, newPassword).then(r => {
             res.json(r)
         }).catch(e => {
@@ -120,7 +122,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         updateUserAddress(id, {
             id: null,
             address: address,
@@ -136,7 +138,7 @@ export function API(app: Application) {
     // TODO: Should we need this?
     app.post("/api/user_id", async (req: Request, res: Response) => {
         const {username, token} = req.body
-        getUserId(username, token).then(r => {
+        getUserIdByUsername(username, token).then(r => {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
@@ -149,7 +151,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         getUserAddress(id).then(r => {
             res.json(r)
         }).catch(e => {
@@ -162,7 +164,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         getUserCurrentOrder(id).then(r => {
             res.json(r)
         }).catch(e => {
@@ -269,7 +271,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         getUserSessionId(id).then(r => {
             res.json(r)
         }).catch(e => {
@@ -282,7 +284,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         createShoppingSession(id).then(r => {
             res.json(r)
         }).catch(e => {
@@ -295,7 +297,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         deleteShoppingSession(userId, sessionId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -308,7 +310,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const {id} = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+        const {id} = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         getCartInfo(id, sessionId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -321,7 +323,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         addItemToCart(userId, sessionId, productId, quantity, size, note).then(r => {
             res.json(r)
         }).catch(e => {
@@ -354,7 +356,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         getCartItems(userId, sessionId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -368,7 +370,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         updateCartItem(userId, sessionId, productId, quantity, size, note).then(r => {
             res.json(r)
         }).catch(e => {
@@ -382,7 +384,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         confirmOrder(userId, sessionId, provider, phoneNumber, address, note).then(r => {
             res.json(r)
         }).catch(e => {
@@ -396,7 +398,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         getUserOrders(userId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -409,7 +411,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         getUserCompletedOrders(userId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -422,7 +424,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         getOrderDetail(userId, orderId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -435,7 +437,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         userCancelOrder(userId, orderId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -448,7 +450,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         getItemsInOrder(orderId, userId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -464,7 +466,7 @@ export function API(app: Application) {
         }
         let user: JWTPayload;
         try {
-            user = jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+            user = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
         } catch (e) {
             res.json(createException("Token không hợp lệ!"))
             return
@@ -481,12 +483,36 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         addLovedItem(userId, productId).then(r => {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
         })
+    })
+    app.post("/api/user/send_reset_email", (req: Request, res: Response) => {
+        const {email} = req.body
+        sendResetPasswordEmail(email).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
+    })
+    app.get("/api/user/reset_password/", (req: Request, res: Response) => {
+        let token = req.query.token as string
+        if (!validateToken(token)) {
+            res.end("INVALID TOKEN")
+        }
+        // im so fucking lazy :>
+        const email = jwt.verify(token, process.env.JWT_SECRET!) as any
+        console.log(email)
+        userResetPassword(email.email).then(r=> {
+            console.log(r)
+            res.end("Mật khẩu đã được đặt về mặc định là 'password' (không có dấu nháy đơn)!")
+        }).catch(e=> {
+            res.end("Lỗi không thể đặt lại mật khẩu: "+e.toString())
+        })
+
     })
     app.post("/api/fav/delete", (req: Request, res: Response) => {
         const {token, productId} = req.body
@@ -494,7 +520,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         deleteLovedItem(userId, productId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -507,7 +533,7 @@ export function API(app: Application) {
             res.json(returnInvalidToken())
             return
         }
-        const userId = (jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload).id
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
         isUserLovedProduct(userId, productId).then(r => {
             res.json(r)
         }).catch(e => {
@@ -564,7 +590,7 @@ export function API(app: Application) {
 
 function validateToken(token: string): boolean {
     try {
-        jwt.verify(token, process.env.JWT_SCRET!)
+        jwt.verify(token, process.env.JWT_SECRET!)
         return true
     } catch (e) {
         return false;

@@ -29,7 +29,7 @@ async function isPhoneNumberHasTaken(phoneNumber: string): Promise<boolean> {
     }
 }
 
-async function isEmailHasTaken(email: string): Promise<boolean> {
+export async function isEmailHasTaken(email: string): Promise<boolean> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select count(*)
@@ -105,7 +105,7 @@ export async function getUsers() {
 }
 
 export async function getUser(token: string): Promise<APIResponse> {
-    const user = await jwt.verify(token, process.env.JWT_SCRET!) as JWTPayload
+    const user = await jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
     const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`select "User".id,
                                                 "User".username,
@@ -203,9 +203,9 @@ export async function getUserAddress(id: number): Promise<APIResponse> {
     }
 }
 
-export async function getUserId(username: string, token: string): Promise<APIResponse> {
+export async function getUserIdByUsername(username: string, token: string): Promise<APIResponse> {
     try {
-        const user = jwt.verify(token, process.env.JWT_SCRET!)
+        const user = jwt.verify(token, process.env.JWT_SECRET!)
         console.log(user)
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select id
@@ -220,6 +220,8 @@ export async function getUserId(username: string, token: string): Promise<APIRes
         return createException(e)
     }
 }
+
+
 
 
 export async function getUserLoginInfo(username: string, password: string, type: string, token_device: string): Promise<APIResponse> {
@@ -265,7 +267,7 @@ export async function getUserLoginInfo(username: string, password: string, type:
 
             return createException("Tài khoản của bạn bị tạm khóa, liên hệ với cửa hàng để biết thêm thông tin!")
         }
-        const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SCRET!.toString())
+        const _jwt = await jwt.sign(result.rows[0], process.env.JWT_SECRET!.toString())
         await updateUserTokenDevice(result.rows[0].id, token_device)
         return {
             isSuccess: true,

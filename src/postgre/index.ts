@@ -22,7 +22,7 @@ import {
     updateUserInfo,
     updateUserAddress,
     updateUserPassword,
-    getUserId,
+    getUserIdByUsername,
     updateUserMomoPayment,
     addUserMomoPayment
 
@@ -50,7 +50,7 @@ export {
     getDiscount,
     createUser, getUsers, getUser, deleteUser, updateUserAddress, updateUserInfo, getUserLoginInfo,
     addProduct, updateProduct, getProduct, getProducts,
-    updateUserPassword, updateUserMomoPayment, getUserId, addUserMomoPayment, addItemToCart, createShoppingSession,
+    updateUserPassword, updateUserMomoPayment, getUserIdByUsername, addUserMomoPayment, addItemToCart, createShoppingSession,
     removeItemFromCart, deleteShoppingSession, getCartItems,
     getLovedItems,
     getAllStatistical

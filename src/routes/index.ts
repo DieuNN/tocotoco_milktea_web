@@ -1,6 +1,6 @@
 import {homeRoute} from "./HomeRoute";
-import {loginPostRoute, loginRoute} from "./LoginRoute";
-import {logoutRoute} from "./LogoutRoute";
+import {loginPostRoute, loginRoute} from "./AuthenticationRoute";
+import {logoutRoute} from "./AuthenticationRoute";
 import {adminLoginLogRoute} from "./AdminLoginLogRoute";
 import {productCategoryRoute} from "./ProductCategoryRoute";
 import {API} from "./API";
