@@ -42,7 +42,8 @@ export async function getDiscount(id: number): Promise<APIResponse> {
         const connect = await new Pool(PostgreSQLConfig)
         let result = await connect.query(`select *
                                           from "Discount"
-                                          where id = ${id}`)
+                                          where id = ${id}
+                                          order by id`)
         if (result.rowCount === 1) {
             return createResult(result.rows[0])
         } else {

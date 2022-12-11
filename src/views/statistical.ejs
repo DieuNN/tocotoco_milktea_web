@@ -107,6 +107,7 @@
                 <th>Tên khách hàng</th>
                 <th>Số điện thoại</th>
                 <th>Trạng thái</th>
+                <th>Phương thức thanh toán</th>
                 <th>Hoạt động</th>
             </tr>
             </thead>
@@ -118,6 +119,7 @@
                 <th>Tên khách hàng</th>
                 <th>Số điện thoại</th>
                 <th>Trạng thái</th>
+                <th>Phương thức thanh toán</th>
                 <th>Hoạt động</th>
             </tr>
             </tfoot>
@@ -140,6 +142,7 @@
                                 <strong>Số điện thoại: <%= orders[i].phoneNumber %></strong>
                                 <strong>Địa chỉ: <%= orders[i].address %> </strong>
                                 <strong>Trạng thái đơn hàng: <%= orders[i].status %></strong>
+                                <strong>Trạng thái đơn hàng: <%= orders[i].provider %></strong>
                                 <strong>Lần chỉnh sửa cuối: <%= orders[i].time%></strong>
                                 <strong>Chi tiết: </strong>
                                 <div>
@@ -187,6 +190,7 @@
                     <td><%= orders[i].username %></td>
                     <td><%= orders[i].phoneNumber %></td>
                     <td><%= orders[i].status %></td>
+                    <td><%= orders[i].provider %></td>
                     <td style="text-align: center">
                         <!-- Button trigger modal -->
                         <a class="link-primary" data-bs-toggle="modal"

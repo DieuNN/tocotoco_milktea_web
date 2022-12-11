@@ -92,11 +92,17 @@ export async function createUser(user: User): Promise<APIResponse> {
 
 export async function getUsers() {
     const connection = await new Pool(PostgreSQLConfig)
-    let result = await connection.query(`select "User".id, name, email, "User".phoneNumber, createAt, address
+    let result = await connection.query(`select "User".id, name, email, "User".phoneNumber, createAt, address, active
                                          from "User"
-                                                  inner join "UserAddress" on "User".id = "UserAddress".userId`)
-
-    // let result = await connection.query(`select * from "User"`)
+                                                  inner join "UserAddress" on "User".id = "UserAddress".userId
+                                         order by id`)
+    result.rows.map(item => {
+        if (item.active == true) {
+            item.active = "Đang hoạt động"
+        } else {
+            item.active = "Bị khóa"
+        }
+    })
     return {
         isSuccess: true,
         result: result.rows,
@@ -220,8 +226,6 @@ export async function getUserIdByUsername(username: string, token: string): Prom
         return createException(e)
     }
 }
-
-
 
 
 export async function getUserLoginInfo(username: string, password: string, type: string, token_device: string): Promise<APIResponse> {
@@ -361,6 +365,36 @@ export async function getUserTokenDevice(userId: number): Promise<string> {
         return result.rows[0].tokenDevice
     } catch (e) {
         return ""
+    }
+}
+
+export async function checkActiveStatus(userId: number): Promise<APIResponse> {
+    const connection = await new Pool(PostgreSQLConfig)
+    try {
+        let result = await connection.query(`select active
+                                from "User"
+                                where id = ${userId}`)
+        return createResult(result.rows[0].active)
+    } catch (e) {
+        return createException(e)
+    }
+}
+
+export async function updateUserActiveStatus(userId: number): Promise<APIResponse> {
+    const connection = await new Pool(PostgreSQLConfig)
+    try {
+        let sqlQuery = `
+            update "User"
+            set active = not active
+            where id = ${userId}
+        `
+        await connection.query(`begin`)
+        await connection.query(sqlQuery)
+        await connection.query(`commit`)
+        return createResult(true)
+    } catch (e) {
+        await connection.query(`rollback`)
+        return createException(e)
     }
 }
 

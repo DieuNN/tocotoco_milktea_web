@@ -282,7 +282,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                                                     "OrderItem".quantity       as "quantity",
                                                     PD.address                 as "address",
                                                     PD.modifiedat              as "time",
-                                                    "OrderItem".note           as "note"
+                                                    "OrderItem".note           as "note",
+                                                    provider                   as "provider"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
@@ -311,7 +312,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     address: element.address,
                     time: element.time,
                     userId: element.userId,
-                    note: element.note
+                    note: element.note,
+                    provider : element.provider
                 })
             } else {
                 let temp = map.get(element.orderId)
@@ -327,7 +329,8 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     address: element.address,
                     time: element.time,
                     userId: element.userId,
-                    note: element.note
+                    note: element.note,
+                    provider : element.provider
                 })
             }
         }
@@ -349,6 +352,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
             tempObj.time = value.time
             tempObj.userId = value.userId
             tempObj.note = value.note
+            tempObj.provider = value.provider
             dumpResult.push(tempObj)
         }
         connection.end()

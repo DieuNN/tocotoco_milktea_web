@@ -35,6 +35,8 @@ import {getMonthlyChart} from "./postgre/Statistical";
 import {orderRoutes} from "./routes/OrderRoutes";
 import {sendNotification, sendNotificationForAllUser} from "./routes/NotificationRoute";
 import {sendResetPasswordEmail, userResetPassword} from "./routes/AuthenticationRoute";
+import {usersRoute} from "./routes/UsersRoute";
+import {checkActiveStatus} from "./postgre/User";
 
 
 export const app: Application = express();
@@ -124,10 +126,15 @@ notificationRoute(app, upload)
 /*Order routes*/
 orderRoutes(app)
 
+/*Users routes*/
+usersRoute(app)
+
 /* 404 page */
 app.use((req, res) => {
     res.status(404).render('404')
 })
+
+checkActiveStatus(12)
 
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;

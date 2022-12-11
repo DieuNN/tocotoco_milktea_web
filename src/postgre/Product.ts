@@ -69,10 +69,12 @@ export async function getProducts(): Promise<APIResponse> {
                                                             100)                 as "priceAfterDiscount",
                                                       "Product".size             as "size",
                                                       "Product".displayimage     as "displayImage"
+
                                                from "Product"
                                                         inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
                                                         left join "Discount" on "Product".discountid = "Discount".id
                                                where "Product".active = true
+                                               order by id;
         `)
         result.rows.map(item => {
             item.size = item.size.toString().split(",").filter((it: string) => {

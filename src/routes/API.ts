@@ -21,7 +21,7 @@ import {
     getLovedItems,
     createException, getAllStatistical
 } from "../postgre";
-import {getUserAddress, getUserIdByUsername} from "../postgre/User";
+import {checkActiveStatus, getUserAddress, getUserIdByUsername} from "../postgre/User";
 import {findProductsByName, getProductsByCategoryId} from "../postgre/Product";
 import {updateCartItem} from "../postgre/CartItem";
 import {getCartInfo, getUserSessionId} from "../postgre/ShoppingSession";
@@ -506,13 +506,25 @@ export function API(app: Application) {
         // im so fucking lazy :>
         const email = jwt.verify(token, process.env.JWT_SECRET!) as any
         console.log(email)
-        userResetPassword(email.email).then(r=> {
+        userResetPassword(email.email).then(r => {
             console.log(r)
             res.end("Mật khẩu đã được đặt về mặc định là 'password' (không có dấu nháy đơn)!")
-        }).catch(e=> {
-            res.end("Lỗi không thể đặt lại mật khẩu: "+e.toString())
+        }).catch(e => {
+            res.end("Lỗi không thể đặt lại mật khẩu: " + e.toString())
         })
-
+    })
+    app.post("/api/user/active_status", (req: Request, res: Response) => {
+        const {token, productId} = req.body
+        if (!validateToken(token)) {
+            res.json(returnInvalidToken())
+            return
+        }
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
+        checkActiveStatus(userId).then(r => {
+            res.json(r)
+        }).catch(e => {
+            res.end(e.toString())
+        })
     })
     app.post("/api/fav/delete", (req: Request, res: Response) => {
         const {token, productId} = req.body

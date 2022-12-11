@@ -28,6 +28,7 @@
                         <th>Tên khách hàng</th>
                         <th>Số điện thoại</th>
                         <th>Trạng thái</th>
+                        <th>Phương thức thanh toán</th>
                         <th>Hoạt động</th>
                     </tr>
                     </thead>
@@ -39,6 +40,7 @@
                         <th>Tên khách hàng</th>
                         <th>Số điện thoại</th>
                         <th>Trạng thái</th>
+                        <th>Phương thức thanh toán</th>
                         <th>Hoạt động</th>
                     </tr>
                     </tfoot>
@@ -197,6 +199,7 @@
                             <td><%= orders[i].username %></td>
                             <td><%= orders[i].phoneNumber %></td>
                             <td><%= orders[i].status %></td>
+                            <td><%= orders[i].provider %></td>
                             <td style="text-align: center">
                                 <!-- Button trigger detail modal -->
                                 <a class="link-primary" data-bs-toggle="modal" style="margin-right: 16px;"
