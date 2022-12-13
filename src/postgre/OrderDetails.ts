@@ -28,8 +28,8 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         console.log("Enter create order")
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         console.log("End create order")
-        // await deleteShoppingSession(userId, sessionId).then().catch()
-        // await updateProductInventory(orderId, userId).then().catch()
+        await deleteShoppingSession(userId, sessionId).then().catch()
+        await updateProductInventory(orderId, userId).then().catch()
         return createResult(true)
     } catch (e) {
         return createException(e)
