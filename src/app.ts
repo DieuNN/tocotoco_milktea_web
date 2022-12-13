@@ -29,7 +29,7 @@ import {
     getItemsInOrder,
     getOrderDetail,
     getOrders,
-    getUserCurrentOrder
+    getUserCurrentOrder, getUserOrders
 } from "./postgre/OrderDetails";
 import {getMonthlyChart} from "./postgre/Statistical";
 import {orderRoutes} from "./routes/OrderRoutes";
@@ -134,7 +134,9 @@ app.use((req, res) => {
     res.status(404).render('404')
 })
 
-checkActiveStatus(12)
+getUserOrders(18).then(r=> {
+    console.log(r)
+})
 
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;

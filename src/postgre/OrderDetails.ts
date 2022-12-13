@@ -78,19 +78,21 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderDetail".id,
-                                                    round(total)  as total,
+                                                    round(total)              as total,
                                                     "OrderDetail".createat,
                                                     status,
                                                     provider,
                                                     address,
-                                                    phonenumber   as "phoneNumber",
-                                                    sum(quantity) as "totalProduct"
+                                                    phonenumber               as "phoneNumber",
+                                                    sum("OrderItem".quantity) as "totalProduct",
+                                                    displayimage              as "displayImage"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                       inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
+                                                      inner join "Product" P on "OrderItem".productid = P.id
                                              where userid = ${userId}
                                              group by "OrderDetail".id, total, "OrderDetail".createat, status, provider,
-                                                      address, "phoneNumber"
+                                                      address, "phoneNumber", displayimage
                                              order by createat desc;`)
         result.rows.map(item => {
             item.createat = new Date(item.createat).toLocaleString("vi-VN")
