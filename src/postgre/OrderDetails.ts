@@ -19,16 +19,17 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         if (!_isSessionExist.isSuccess) {
             return createException("Gio hang khong ton tai!")
         }
+        console.log(userId)
         let userCurrentOrder = await getUserCurrentOrder(userId)
-        if (!userCurrentOrder.isSuccess || userCurrentOrder.result != null) {
+        console.log("TEST: ", userCurrentOrder)
+        if (userCurrentOrder.result != null) {
             return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")
         }
-
         console.log("Enter create order")
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         console.log("End create order")
-        await deleteShoppingSession(userId, sessionId).then().catch()
-        await updateProductInventory(orderId, userId).then().catch()
+        // await deleteShoppingSession(userId, sessionId).then().catch()
+        // await updateProductInventory(orderId, userId).then().catch()
         return createResult(true)
     } catch (e) {
         return createException(e)
@@ -315,7 +316,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     time: element.time,
                     userId: element.userId,
                     note: element.note,
-                    provider : element.provider
+                    provider: element.provider
                 })
             } else {
                 let temp = map.get(element.orderId)
@@ -332,7 +333,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
                     time: element.time,
                     userId: element.userId,
                     note: element.note,
-                    provider : element.provider
+                    provider: element.provider
                 })
             }
         }

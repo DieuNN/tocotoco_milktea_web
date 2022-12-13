@@ -134,10 +134,6 @@ app.use((req, res) => {
     res.status(404).render('404')
 })
 
-getUserOrders(18).then(r=> {
-    console.log(r)
-})
-
 
 let client, _firebaseApp = firebaseApp, _firebaseAdminApp = firebaseAdminApp;
 
