@@ -3,8 +3,9 @@ import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
 export async function createPaymentDetail(orderId: number, provider: String, status: string, phoneNumber: string, address: string, note: string): Promise<number> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`insert into "PaymentDetails" (id, orderid, amount, status, createat,
                                                                              modifiedat, provider, address,
                                                                              phonenumber, note)
@@ -18,23 +19,28 @@ export async function createPaymentDetail(orderId: number, provider: String, sta
                                                        '${address}',
                                                        '${phoneNumber}', '${note}')
                                                returning id`)
+        await connection.query(`commit`)
         return result.rows[0].id
     } catch (e) {
+        await connection.query(`rollback`)
         return 0
     }
 }
 
 //
-export async function updatePaymentDetailStatus(paymentId: number, orderId: number, status: string): Promise<APIResponse> {
+export async function updatePaymentDetailStatus(paymentId: number, orderId: number, status: string): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`update "PaymentDetails"
                                                set status     = '${status}',
                                                    modifiedat = now()
                                                where id = ${paymentId}
                                                  and orderid = ${orderId}`)
+        await connection.query(`rollback`)
         return createResult(result.rowCount == 1)
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }

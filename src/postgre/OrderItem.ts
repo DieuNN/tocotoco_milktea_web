@@ -3,8 +3,9 @@ import {PostgreSQLConfig} from "../config/posgre";
 import {createException, removeItemFromCart} from "./index";
 
 export async function addCartItemsToOrder(orderId: number, sessionId: number, userId: number) {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let sessionResult = await connection.query(`select productid                   as "productId",
                                                            "CartItem".quantity         as "quantity",
                                                            price * "CartItem".quantity as "priceBeforeDiscount",
@@ -28,15 +29,19 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
                                             now(), '${item.size}', ${item.priceBeforeDiscount},
                                             ${item.priceAfterDiscount}, '${item.note}')`)
         }
+        await connection.query(`commit`)
         await updateOrderDetailTotal(orderId, userId)
     } catch (e) {
+        await connection.query(`rollback`)
         console.log(e)
     }
 }
 
 async function updateOrderDetailTotal(orderId: number, userId: number) {
     const connection = await new Pool(PostgreSQLConfig)
-    await connection.query(`with total_sum as (select sum(priceafterdiscount)
+    try {
+        await connection.query(`begin`)
+        await connection.query(`with total_sum as (select sum(priceafterdiscount)
                                          from "OrderDetail"
                                                   inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
                                          where "OrderDetail".id = ${orderId})
@@ -46,4 +51,8 @@ async function updateOrderDetailTotal(orderId: number, userId: number) {
                       where id = ${orderId}
                         and userid = ${userId}
     ;`)
+        await connection.query(`commit`)
+    } catch (e) {
+        await connection.query(`rollback`)
+    }
 }

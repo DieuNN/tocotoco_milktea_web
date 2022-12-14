@@ -60,7 +60,7 @@ export function logoutRoute(app: Application) {
     })
 }
 
-export async function sendResetPasswordEmail(email: string): Promise<APIResponse> {
+export async function sendResetPasswordEmail(email: string): Promise<APIResponse<boolean>> {
     let _isEmailExist = await isEmailHasTaken(email)
 
     if (!_isEmailExist) {
@@ -108,7 +108,7 @@ export async function sendResetPasswordEmail(email: string): Promise<APIResponse
 
 }
 
-export async function userResetPassword(email: string): Promise<APIResponse> {
+export async function userResetPassword(email: string): Promise<APIResponse<any>> {
     try {
         let _isEmailExist = await isEmailHasTaken(email)
 

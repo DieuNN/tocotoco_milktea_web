@@ -31,9 +31,7 @@ import {
     addProduct, getProducts, getProduct, updateProduct
 } from "./Product";
 import {createShoppingSession, deleteShoppingSession} from "./ShoppingSession";
-import {addItemToCart, removeItemFromCart, getCartItems, updateCartItem} from "./CartItem";
-import {Pool} from "pg";
-import {PostgreSQLConfig} from "../config/posgre";
+import {addItemToCart, removeItemFromCart, getCartItems} from "./CartItem";
 import {getLovedItems} from "./LovedProducts";
 import {getAllStatistical} from "./Statistical";
 
@@ -56,7 +54,7 @@ export {
     getAllStatistical
 }
 
-export function createException(e: any): APIResponse {
+export function createException(e: any): APIResponse<any> {
     return {
         isSuccess: false,
         errorMessage: "Lỗi server: " + e,
@@ -64,7 +62,7 @@ export function createException(e: any): APIResponse {
     }
 }
 
-export function createResult(result: any): APIResponse {
+export function createResult(result: any): APIResponse<any> {
     return {
         isSuccess: true,
         errorMessage: null,
@@ -72,8 +70,3 @@ export function createResult(result: any): APIResponse {
     }
 }
 
-export async function rollBackTransactions() {
-    const connection = await new Pool(PostgreSQLConfig)
-    await connection.query(`ROLLBACK`)
-    connection.end()
-}

@@ -54,7 +54,8 @@ export function discountRoute(app: Application, upload: multer.Multer) {
                     displayImage: r,
                     createAt: "",
                     modifiedAt: "",
-                    discountPercent: discountPercent
+                    discountPercent: discountPercent,
+                    active: true
                 }).then(r1 => {
                     res.redirect("/discount")
                 }).catch(e => {
@@ -100,7 +101,8 @@ export function discountRoute(app: Application, upload: multer.Multer) {
                     displayImage: r,
                     createAt: "",
                     modifiedAt: "",
-                    discountPercent: discountPercent
+                    discountPercent: discountPercent,
+                    active: true
                 }).then(r1 => {
                     console.log(r1)
                     res.redirect("/discount")

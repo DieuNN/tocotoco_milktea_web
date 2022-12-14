@@ -1,9 +1,8 @@
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
-import {createException, createResult, rollBackTransactions} from "./index";
-import {triggerUpdateSessionTotal} from "./ShoppingSession";
+import {createException, createResult} from "./index";
 
-export async function getLovedItems(userId: number): Promise<APIResponse> {
+export async function getLovedItems(userId: number): Promise<APIResponse<LovedProduct[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "LovedItems".id                                  as "id",
@@ -32,25 +31,28 @@ export async function getLovedItems(userId: number): Promise<APIResponse> {
     }
 }
 
-export async function addLovedItem(userId: number, productId: number): Promise<APIResponse> {
+export async function addLovedItem(userId: number, productId: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
         if ((await isItemAlreadyInList(userId, productId))) {
             return createException("San pham nay da co trong list")
         }
+        await connection.query(`begin`)
         let result = await connection.query(`insert into "LovedItems" (id, userid, productid)
                                              values (default, ${userId}, ${productId})`)
+        await connection.query(`commit`)
         return createResult(result.rowCount != 0)
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function deleteLovedItem(userId: number, productId: number): Promise<APIResponse> {
+export async function deleteLovedItem(userId: number, productId: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let _isItemInList = await isItemAlreadyInList(userId, productId)
-        console.log(_isItemInList)
         if (!_isItemInList) {
             return createException("San pham nay chua co trong list")
         }
@@ -58,12 +60,14 @@ export async function deleteLovedItem(userId: number, productId: number): Promis
                                              from "LovedItems"
                                              where userid = ${userId}
                                                and productid = ${productId}`)
+        await connection.query(`commit`)
         if (result.rowCount == 0) {
             return createException("Khong tim thay item ID")
         } else {
             return createResult(true)
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
@@ -82,7 +86,7 @@ async function isItemAlreadyInList(userId: number, productId: number): Promise<b
 }
 
 
-export async function isUserLovedProduct(userId: number, productId: number): Promise<APIResponse> {
+export async function isUserLovedProduct(userId: number, productId: number): Promise<APIResponse<boolean>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select *

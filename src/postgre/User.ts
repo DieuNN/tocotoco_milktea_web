@@ -1,6 +1,6 @@
 import {PostgreSQLConfig} from "../config/posgre";
 import md5 from 'md5'
-import {createException, createResult, rollBackTransactions} from "./index";
+import {createException, createResult} from "./index";
 import {Pool} from "pg";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -41,7 +41,7 @@ export async function isEmailHasTaken(email: string): Promise<boolean> {
     }
 }
 
-export async function createUser(user: User): Promise<APIResponse> {
+export async function createUser(user: User): Promise<APIResponse<boolean>> {
     const connection = await new Pool(PostgreSQLConfig)
     const encryptedPassword = md5(user.password!)
 
@@ -54,8 +54,11 @@ export async function createUser(user: User): Promise<APIResponse> {
         return createException("Số điện thoại đã đuợc sử dụng")
     }
 
-    let insertNewUserId = await connection.query(`insert into "User" (id, email, password, name, phonenumber, createat,
-                                                                      modifiedat, username)
+    try {
+        await connection.query(`begin`)
+        let insertNewUserId = await connection.query(`insert into "User" (id, email, password, name, phonenumber,
+                                                                          createat,
+                                                                          modifiedat, username)
                                                       values (DEFAULT,
                                                               '${user.email}',
                                                               '${encryptedPassword}',
@@ -63,30 +66,35 @@ export async function createUser(user: User): Promise<APIResponse> {
                                                               '${user.phoneNumber}',
                                                               now(),
                                                               now(),
-                                                              '${user.username}') returning id`)
-    let insertIndex = insertNewUserId.rows[0].id
-    let insertUserAddress = await connection.query(`insert into "UserAddress"
-                                                    values (DEFAULT,
-                                                            ${insertIndex},
-                                                            '',
-                                                            '')`)
-    addUserMomoPayment(insertIndex, "").then()
-
-    if ((insertNewUserId.rowCount === 1
-        && (insertUserAddress.rowCount === 1))) {
-        return {
-            isSuccess: true,
-            result: true,
-            errorMessage: null
+                                                              '${user.username}')
+                                                      returning id`)
+        let insertIndex = insertNewUserId.rows[0].id
+        let insertUserAddress = await connection.query(`insert into "UserAddress"
+                                                        values (DEFAULT,
+                                                                ${insertIndex},
+                                                                '',
+                                                                '')`)
+        await connection.query(`commit`)
+        addUserMomoPayment(insertIndex, "").then()
+        if ((insertNewUserId.rowCount === 1
+            && (insertUserAddress.rowCount === 1))) {
+            return {
+                isSuccess: true,
+                result: true,
+                errorMessage: null
+            }
+        } else {
+            return {
+                isSuccess: false,
+                result: null,
+                errorMessage: "Không thể đăng ký tài khoản do lỗi server!"
+            }
         }
-    } else {
-        rollBackTransactions().then()
-        return {
-            isSuccess: false,
-            result: null,
-            errorMessage: "Không thể đăng ký tài khoản do lỗi server!"
-        }
+    } catch (e) {
+        await connection.query(`rollback`)
+        return createException(e)
     }
+
 
 }
 
@@ -110,7 +118,7 @@ export async function getUsers() {
     }
 }
 
-export async function getUser(token: string): Promise<APIResponse> {
+export async function getUser(token: string): Promise<APIResponse<User>> {
     const user = await jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
     const connection = await new Pool(PostgreSQLConfig)
     let result = await connection.query(`select "User".id,
@@ -140,9 +148,10 @@ export async function getUser(token: string): Promise<APIResponse> {
 
 }
 
-export async function updateUserInfo(oldId: number, user: User): Promise<APIResponse> {
+export async function updateUserInfo(oldId: number, user: User): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let result = await connection.query(`update "User"
                                              set name        = '${user.name}',
                                                  username    = '${user.username}',
@@ -151,49 +160,56 @@ export async function updateUserInfo(oldId: number, user: User): Promise<APIResp
                                                  modifiedAt  = now()
                                              where id = ${oldId}
         `)
+        await connection.query(`commit`)
         if (result.rowCount == 1) {
             return createResult(true)
         } else {
             return createException("Khong tim thay user voi ID " + oldId)
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
 
-export async function deleteUser(id: number): Promise<APIResponse> {
+export async function deleteUser(id: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let result = await connection.query(`delete
                                              from "User"
                                              where id = ${id}`)
+        await connection.query(`commit`)
         return createResult(result.rowCount == 1)
-
     } catch (e) {
+        await connection.query(`end`)
         return createException(e)
     }
 }
 
-export async function updateUserAddress(id: number, userAddress: UserAddress): Promise<APIResponse> {
+export async function updateUserAddress(id: number, userAddress: UserAddress): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let result = await connection.query(`update "UserAddress"
                                              set phoneNumber = '${userAddress.phoneNumber}',
                                                  address     = '${userAddress.address}'
                                              where id = ${id}
         `)
+        await connection.query(`commit`)
         if (result.rowCount === 1) {
             return createResult(true)
         } else {
             return createException("Khong co nguoi dung voi ID " + id);
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e);
     }
 }
 
-export async function getUserAddress(id: number): Promise<APIResponse> {
+export async function getUserAddress(id: number): Promise<APIResponse<UserAddress>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select *
@@ -209,7 +225,7 @@ export async function getUserAddress(id: number): Promise<APIResponse> {
     }
 }
 
-export async function getUserIdByUsername(username: string, token: string): Promise<APIResponse> {
+export async function getUserIdByUsername(username: string, token: string): Promise<APIResponse<User>> {
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET!)
         console.log(user)
@@ -228,7 +244,7 @@ export async function getUserIdByUsername(username: string, token: string): Prom
 }
 
 
-export async function getUserLoginInfo(username: string, password: string, type: string, token_device: string): Promise<APIResponse> {
+export async function getUserLoginInfo(username: string, password: string, type: string, token_device: string): Promise<APIResponse<JWTPayload>> {
     let encryptedPassword: string = md5(password)
     const connection = await new Pool(PostgreSQLConfig)
     let result;
@@ -289,36 +305,46 @@ export async function getUserLoginInfo(username: string, password: string, type:
 
 async function updateUserTokenDevice(id: number, token_device: string) {
     const connection = await new Pool(PostgreSQLConfig)
-    await connection.query(`update "User"
-                            set tokendevice = '${token_device}'
-                            where id = ${id}`)
+    try {
+        await connection.query(`begin`)
+        await connection.query(`update "User"
+                                set tokendevice = '${token_device}'
+                                where id = ${id}`)
+        await connection.query(`commit`)
+    } catch (e) {
+        await connection.query(`rollback`)
+    }
 }
 
 
-export async function updateUserPassword(id: number, oldPassword: string, newPassword: string): Promise<APIResponse> {
+export async function updateUserPassword(id: number, oldPassword: string, newPassword: string): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
         let encryptedOldPassword: string = md5(oldPassword)
         let encryptedNewPassword: string = md5(newPassword)
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let result = await connection.query(`
             update
                 "User"
             set password = '${encryptedNewPassword}'
             where id = ${id}
               and password = '${encryptedOldPassword}'`)
+        await connection.query(`commit`)
         if (result.rowCount === 1) {
             return createResult(true)
         } else {
             return createException("Khong tim thay thong tin");
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function addUserMomoPayment(userId: number, momoAccount: string): Promise<APIResponse> {
+export async function addUserMomoPayment(userId: number, momoAccount: string): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`
             insert
             into "UserMomoPayment"
@@ -327,31 +353,36 @@ export async function addUserMomoPayment(userId: number, momoAccount: string): P
                        ,
                     '${momoAccount}')
         `)
+        await connection.query(`commit`)
         if (result.rowCount == 1) {
             return createResult(true)
         } else {
             return createException("Khong tim thay ID")
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function updateUserMomoPayment(userId: number, momoAccountId: number, momoAccount: string): Promise<APIResponse> {
+export async function updateUserMomoPayment(userId: number, momoAccountId: number, momoAccount: string): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`
             update
                 "UserMomoPayment"
             set momoaccount = '${momoAccount}'
             where userid = '${userId}'
               and id = '${momoAccountId}'`)
+        await connection.query(`commit`)
         if (result.rowCount === 1) {
             return createResult(true)
         } else {
             return createException("Khong tim thay ID")
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
@@ -368,19 +399,19 @@ export async function getUserTokenDevice(userId: number): Promise<string> {
     }
 }
 
-export async function checkActiveStatus(userId: number): Promise<APIResponse> {
+export async function checkActiveStatus(userId: number): Promise<APIResponse<boolean>> {
     const connection = await new Pool(PostgreSQLConfig)
     try {
         let result = await connection.query(`select active
-                                from "User"
-                                where id = ${userId}`)
+                                             from "User"
+                                             where id = ${userId}`)
         return createResult(result.rows[0].active)
     } catch (e) {
         return createException(e)
     }
 }
 
-export async function updateUserActiveStatus(userId: number): Promise<APIResponse> {
+export async function updateUserActiveStatus(userId: number): Promise<APIResponse<boolean>> {
     const connection = await new Pool(PostgreSQLConfig)
     try {
         let sqlQuery = `

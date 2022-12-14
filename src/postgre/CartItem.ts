@@ -1,11 +1,11 @@
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
-import {createException, createResult, rollBackTransactions} from "./index";
+import {createException, createResult,} from "./index";
 import {triggerUpdateSessionTotal} from "./ShoppingSession";
 
-export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number, size: string, note: string): Promise<APIResponse> {
+export async function addItemToCart(userId: number, sessionId: number, productId: number, quantity: number, size: string, note: string): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
         const productQuantity = await connection.query(`select quantity
                                                         from "Product"
                                                         where id = ${productId}`)
@@ -23,7 +23,7 @@ export async function addItemToCart(userId: number, sessionId: number, productId
                 await triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
             }
-
+            await connection.query(`begin`)
             let insertResult = await connection.query(`insert into "CartItem" (id, sessionid, productid, quantity, size, note)
                                                        values (default,
                                                                ${sessionId},
@@ -32,6 +32,7 @@ export async function addItemToCart(userId: number, sessionId: number, productId
                                                                '${size}',
                                                                '${note}')
             `)
+            await connection.query(`commit`)
             if (insertResult.rowCount == 1) {
                 await triggerUpdateSessionTotal(userId, sessionId).then()
                 return createResult(true)
@@ -40,13 +41,12 @@ export async function addItemToCart(userId: number, sessionId: number, productId
             }
         }
     } catch (e) {
-        // ???
-        rollBackTransactions().then()
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function isItemInTempCart(productId: number, sessionId: number): Promise<APIResponse> {
+export async function isItemInTempCart(productId: number, sessionId: number): Promise<APIResponse<boolean>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select count(*)
@@ -64,26 +64,30 @@ export async function isItemInTempCart(productId: number, sessionId: number): Pr
 }
 
 
-export async function removeItemFromCart(itemId: number, sessionId: number): Promise<APIResponse> {
+export async function removeItemFromCart(itemId: number, sessionId: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`delete
                                                from "CartItem"
                                                where id = ${itemId}
                                                  and sessionid = ${sessionId}`)
+        await connection.query(`commit`)
         if (result.rowCount === 1) {
             return createResult(true)
         } else {
             return createException("Khong tim thay ID")
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function updateCartItem(userId: number, sessionId: number, productId: number, quantity: number, size: string, note: string): Promise<APIResponse> {
+export async function updateCartItem(userId: number, sessionId: number, productId: number, quantity: number, size: string, note: string): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+
         const productQuantity = await connection.query(`select quantity
                                                         from "Product"
                                                         where id = ${productId}`)
@@ -93,6 +97,7 @@ export async function updateCartItem(userId: number, sessionId: number, productI
             if (quantity > productQuantity.rows[0].quantity) {
                 return createException("So luong khong hop le! Kho con " + productQuantity.rows[0].quantity + ", so luong nhap: " + quantity)
             }
+            await connection.query(`begin`)
             let result = await connection.query(`update "CartItem"
                                                  set quantity = ${quantity},
                                                      size     = '${size}',
@@ -100,6 +105,7 @@ export async function updateCartItem(userId: number, sessionId: number, productI
                                                  where sessionid = ${sessionId}
                                                    and productid = ${productId}
             `)
+            await connection.query(`commit`)
             if (result.rowCount != 0) {
                 return createResult(true)
             } else {
@@ -107,11 +113,12 @@ export async function updateCartItem(userId: number, sessionId: number, productI
             }
         }
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function getCartItems(userId: number, sessionId: number): Promise<APIResponse> {
+export async function getCartItems(userId: number, sessionId: number): Promise<APIResponse<CartItem[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "CartItem".id               as "id",

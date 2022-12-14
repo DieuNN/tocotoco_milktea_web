@@ -38,7 +38,6 @@ import {sendResetPasswordEmail, userResetPassword} from "./routes/Authentication
 import {usersRoute} from "./routes/UsersRoute";
 import {checkActiveStatus} from "./postgre/User";
 
-
 export const app: Application = express();
 const credentials = {
     key: fs.readFileSync('./key.pem'),
@@ -90,6 +89,9 @@ app.use(express.urlencoded({extended: true}))
 app.use(cookie_parser())
 app.use(requestIp.mw())
 
+app.get("/empty", (req: Request, res: Response) => {
+    res.render("empty_main")
+})
 
 var session: any;
 

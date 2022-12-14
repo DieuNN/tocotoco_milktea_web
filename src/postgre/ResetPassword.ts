@@ -3,7 +3,7 @@ import {createException, createResult} from "./index";
 import {Pool} from "pg";
 import md5 from "md5";
 
-export async function resetPassword(userId: number): Promise<APIResponse> {
+export async function resetPassword(userId: number): Promise<APIResponse<boolean>> {
     const connection = await new Pool(PostgreSQLConfig)
     const encryptedPassword = md5("password")
     try {

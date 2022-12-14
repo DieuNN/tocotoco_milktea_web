@@ -23,8 +23,8 @@ const nonProductionConf: ClientConfig = {
         cert: fs.readFileSync('./cert.pem').toString(),
         key: fs.readFileSync('./key.pem').toString(),
     },
-    query_timeout: 60000,
-    connectionTimeoutMillis: 60000,
+    query_timeout: 0,
+    connectionTimeoutMillis: 0,
 }
 export const PostgreSQLConfig
     :

@@ -9,7 +9,7 @@ import {sendNotification} from "../routes/NotificationRoute";
 
 /* Move temporary cart to order details, cuz ppl confirmed buying */
 
-export async function confirmOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note?: string | null): Promise<APIResponse> {
+export async function confirmOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note?: string | null): Promise<APIResponse<boolean>> {
     try {
         if (note == undefined) {
             note = ""
@@ -29,7 +29,7 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
         console.log("End create order")
         await deleteShoppingSession(userId, sessionId).then().catch()
-        await updateProductInventory(orderId, userId).then().catch()
+        await updateProductInventory(orderId.result, userId).then().catch()
         return createResult(true)
     } catch (e) {
         return createException(e)
@@ -38,20 +38,25 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
 
 export async function updateProductInventory(orderId: number, userId: number) {
     const connection = await new Pool(PostgreSQLConfig)
-    let productsId = await connection.query(`select productid, quantity
+    try {
+        await connection.query(`begin`)
+        let productsId = await connection.query(`select productid, quantity
                                              from "OrderDetail"
                                                       inner join "OrderItem" OI on "OrderDetail".id = OI.orderid
                                              where orderid = ${orderId}
                                                and userid = ${userId};`)
-    for (let item of productsId.rows) {
-        connection.query(`update "Product"
+        for (let item of productsId.rows) {
+            connection.query(`update "Product"
                           set quantity = quantity - ${item.quantity}
                           where id = ${item.productid}`)
+        }
+        await connection.query(`commit`)
+    } catch (e) {
+        await connection.query(`rollback`)
     }
-    connection.end()
 }
 
-async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<any> {
+async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<APIResponse<number>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         console.log("Enter create empty order")
@@ -69,13 +74,19 @@ async function createOrder(userId: number, sessionId: number, provider: string, 
 
 async function updatePaymentId(orderId: number, paymentId: number) {
     const connection = await new Pool(PostgreSQLConfig)
-    await connection.query(`update "OrderDetail"
+    try {
+        await connection.query(`begin`)
+        await connection.query(`update "OrderDetail"
                             set paymentid = ${paymentId}
                             where id = ${orderId}`)
+        await connection.query(`commit`)
+    } catch (e) {
+        await connection.query(`rollback`)
+    }
 
 }
 
-export async function getUserOrders(userId: number): Promise<APIResponse> {
+export async function getUserOrders(userId: number): Promise<APIResponse<Order[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderDetail".id,
@@ -104,7 +115,7 @@ export async function getUserOrders(userId: number): Promise<APIResponse> {
     }
 }
 
-export async function getUserCompletedOrders(userId: number): Promise<APIResponse> {
+export async function getUserCompletedOrders(userId: number): Promise<APIResponse<Order[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderDetail".id,
@@ -114,10 +125,12 @@ export async function getUserCompletedOrders(userId: number): Promise<APIRespons
                                                     provider,
                                                     address,
                                                     phonenumber   as "phoneNumber",
-                                                    sum(quantity) as "totalProduct"
+                                                    sum("OrderItem".quantity) as "totalProduct",
+                                                    displayimage as "displayImage"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                       inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
+                                                      inner join "Product" P on P.id = "OrderItem".productid
                                              where userid = ${userId}
                                                and (status like 'Bị hủy' or status like 'Hoàn thành')
                                              group by "OrderDetail".id, total, "OrderDetail".createat, status, provider,
@@ -133,30 +146,29 @@ export async function getUserCompletedOrders(userId: number): Promise<APIRespons
 }
 
 
-export async function getOrderDetail(userId: number, orderId: number): Promise<APIResponse> {
+export async function getOrderDetail(userId: number, orderId: number): Promise<APIResponse<Order[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "OrderDetail".id,
-                                                      round(total)  as total,
+                                                      round(total)              as total,
                                                       "OrderDetail".createat,
                                                       status,
                                                       provider,
                                                       address,
-                                                      phonenumber   as "phoneNumber",
-                                                      sum(quantity) as "totalProduct",
-                                                      PD.note       as "note"
+                                                      phonenumber               as "phoneNumber",
+                                                      sum("OrderItem".quantity) as "totalProduct",
+                                                      PD.note                   as "note",
+                                                      displayimage              as "displayImage"
                                                from "OrderDetail"
                                                         inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                         inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
+                                                        inner join "Product" P on P.id = "OrderItem".productid
                                                where userid = ${userId}
                                                  and "OrderDetail".id = ${orderId}
                                                group by "OrderDetail".id, total, "OrderDetail".createat, status,
                                                         provider,
                                                         address, "phoneNumber", PD.note
                                                order by createat desc;`)
-        let items = await getItemsInOrder(orderId, userId)
-        result.rows[0].displayImage = items.result[0].displayImage
-        console.log(result.rows[0])
         if (result.rowCount != 1) {
             return createException("Khong tim thay order " + orderId)
         } else {
@@ -167,7 +179,7 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
     }
 }
 
-export async function adminGetOrderDetails(orderId: number): Promise<APIResponse> {
+export async function adminGetOrderDetails(orderId: number): Promise<APIResponse<any>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "OrderDetail".id,
@@ -196,7 +208,7 @@ export async function adminGetOrderDetails(orderId: number): Promise<APIResponse
     }
 }
 
-export async function getItemsInOrder(orderId: number, userId: number): Promise<APIResponse> {
+export async function getItemsInOrder(orderId: number, userId: number): Promise<APIResponse<OrderItem[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderItem".id               as "id",
@@ -225,7 +237,7 @@ export async function getItemsInOrder(orderId: number, userId: number): Promise<
     }
 }
 
-export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse> {
+export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse<any>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderItem".id               as "id",
@@ -255,21 +267,22 @@ export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse
 }
 
 export async function createEmptyOrder(userId: number): Promise<any> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         let result = await connection.query(`insert into "OrderDetail" (id, userid, total, paymentid, createat, modifiedat)
                                              values (default, ${userId}, 0, null, now(), now())
                                              returning id`)
-        console.log(result.rows)
+        await connection.query(`commit`)
         return result.rows[0].id
     } catch (e) {
-        console.log(e)
+        await connection.query(`rollback`)
         return 0
     }
 }
 
 
-export async function getOrders(type: string | null): Promise<APIResponse> {
+export async function getOrders(type: string | null): Promise<APIResponse<any>> {
     try {
         if (type == null) type = "%%"
         const connection = await new Pool(PostgreSQLConfig)
@@ -370,7 +383,7 @@ export async function getOrders(type: string | null): Promise<APIResponse> {
     }
 }
 
-export async function getUserCurrentOrder(userId: number): Promise<APIResponse> {
+export async function getUserCurrentOrder(userId: number): Promise<APIResponse<Order>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select orderid       as "orderId",
@@ -398,13 +411,19 @@ export async function getUserCurrentOrder(userId: number): Promise<APIResponse> 
 
 export async function deleteOrder(orderId: number, paymentId: number) {
     const connection = await new Pool(PostgreSQLConfig)
-    await connection.query(`delete
+    try {
+        await connection.query(`begin`)
+        await connection.query(`delete
                             from "OrderDetail"
                             where id = ${orderId}
                               and paymentid = ${paymentId}`)
-    await connection.query(`delete
+        await connection.query(`delete
                             from "PaymentDetails"
                             where id = ${paymentId}`)
+        await connection.query(`commit`)
+    } catch (e) {
+        await connection.query(`rollback`)
+    }
 }
 
 async function getPaymentId(orderId: number): Promise<number | null> {
@@ -425,25 +444,27 @@ async function getPaymentId(orderId: number): Promise<number | null> {
     }
 }
 
-export async function userCancelOrder(userId: number, orderId: number): Promise<APIResponse> {
+export async function userCancelOrder(userId: number, orderId: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
         let paymentId = await getPaymentId(orderId)
         if (paymentId == null) {
             return createException("Không tìm thấy order của bạn")
         }
+        await connection.query(`begin`)
         let result = await connection.query(`update "PaymentDetails"
                                              set status     = 'Bị hủy',
                                                  modifiedat = now()
                                              where id = ${paymentId}
                                                and orderid = ${orderId}
                                                and status like 'Đợi xác nhận'`)
-        console.log(result.rows)
+        await connection.query(`commit`)
         if (result.rowCount != 1) {
             return createException("Bạn không thể hủy đơn này!")
         }
         return createResult("Hủy thành công!")
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }

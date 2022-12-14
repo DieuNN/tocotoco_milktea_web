@@ -609,7 +609,7 @@ function validateToken(token: string): boolean {
     }
 }
 
-function returnInvalidToken(): APIResponse {
+function returnInvalidToken(): APIResponse<any> {
     return createException("Token không hợp lệ!")
 }
 

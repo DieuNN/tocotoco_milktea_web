@@ -18,14 +18,19 @@ declare type ProductCategory = {
 
 declare type Product = {
     id: number | null,
-    name: string,
-    description: string,
-    categoryId: number,
+    productName: string,
+    productDescription: string,
+    productCategoryName: string | null,
+    productCategoryId: number,
     quantity: number,
     price: number,
-    discountId: number | null,
+    discount: string | null,
+    discountId: number | null
+    discountPercent: number | null,
+    priceAfterDiscount: number | null,
     displayImage: string,
-    size: string
+    size: string,
+    active: boolean
 }
 
 declare type Discount = {
@@ -35,7 +40,8 @@ declare type Discount = {
     discountPercent: number,
     createAt: string,
     modifiedAt: string,
-    displayImage: string
+    displayImage: string,
+    active: boolean
 }
 
 declare type User = {
@@ -59,21 +65,96 @@ declare type UserAddress = {
 
 declare type CartItem = {
     id: number | null,              // Mã sản phẩm trong giỏ hàng tạm
-    sessionId : null | number,      // Mã giỏ hàng tạm
-    productId : number | null,      // Mã sản phẩm
-    quantity : number,              // Số lượng sản phẩm trong giỏ hàng
-    productName : string,           // Tên sản phẩm
-    productDescription : string,    // Mô tả sản phẩm
-    totalPrice : number,            // Tổng giá trị của sản phẩm (số lượng * giá)
-    price: number ,                 // Giá của 1 sản phẩm
-    productCategoryName : string    // Tên loại sản phẩm
+    sessionId: null | number,      // Mã giỏ hàng tạm
+    productId: number | null,      // Mã sản phẩm
+    quantity: number | null,              // Số lượng sản phẩm trong giỏ hàng
+    productName: string | null,           // Tên sản phẩm
+    description: string | null,    // Mô tả sản phẩm
+    total: number | null,            // Tổng giá trị của sản phẩm (số lượng * giá)
+    price: number | null,                 // Giá của 1 sản phẩm
+    productCategoryName: string | null,   // Tên loại sản phẩm,
+    size: string | null,
+    displayImage: string | null,
+    discountId: number | null,
+    priceBeforeDiscount: number | null,
+    priceAfterDiscount: number | null,
+    note: string | null
 }
 
-declare type APIResponse = {
+declare type APIResponse<T> = {
     isSuccess: boolean
-    result: null | any,
+    result: null | any | T,
     errorMessage: null | any
 }
+
+declare type AdminLoginLog = {
+    id: number | null,
+    time: string | null,
+    ip: string | null
+}
+
+declare type LovedProduct = {
+    id: number,
+    productId: number,
+    productName: string,
+    productDescription: string,
+    productCategoryName: string,
+    discountPercent: number,
+    priceBeforeDiscount: number,
+    priceAfterDiscount: number,
+    displayImage: string,
+    size: string
+}
+
+declare type NotificationType = {
+    "id": number,
+    "title": string,
+    "message": string,
+    "type": string,
+    "image": string
+}
+
+declare type Order = {
+    id: number,
+    total: number,
+    createat: string,
+    status: string,
+    provider: string,
+    address: string,
+    phoneNumber: string,
+    totalProduct: number,
+    displayImage: string
+}
+
+declare type OrderItem = {
+    id: number,
+    orderId: number,
+    productId: number,
+    quantity: number,
+    productName: string,
+    description: string,
+    total: number,
+    price: number,
+    productCategoryName: string,
+    displayImage: string,
+    size: string,
+    priceBeforeDiscount: number,
+    priceAfterDiscount: number,
+    note: string
+}
+
+declare type CartInfo = {
+    totalCategory: number,
+    totalQuantity: number,
+    priceBeforeDiscount: number,
+    priceAfterDiscount: number
+}
+
+
+
+
+
+
 
 
 

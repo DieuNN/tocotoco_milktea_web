@@ -2,7 +2,7 @@ import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
-export async function getAllStatistical(): Promise<APIResponse> {
+export async function getAllStatistical(): Promise<APIResponse<any>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const queryResult = await connection.query(`select *

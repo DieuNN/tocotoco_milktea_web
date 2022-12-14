@@ -73,14 +73,19 @@ export function productRoute(app: Application, upload: multer.Multer) {
             getDownloadURL(uploadTask.snapshot.ref).then(r => {
                 addProduct({
                     id: null,
-                    name: name,
-                    description: description,
-                    categoryId: productCategory,
+                    productName: name,
+                    productDescription: description,
+                    productCategoryId: productCategory,
                     quantity: quantity,
                     price: price,
                     size: sizeS + "," + sizeM + "," + sizeL,
                     discountId: discount,
-                    displayImage: r
+                    displayImage: r,
+                    productCategoryName : null,
+                    discount : null,
+                    active : true,
+                    discountPercent : null,
+                    priceAfterDiscount : null
                 }).then(r => {
                     console.log(r)
                     res.redirect("/product")
@@ -142,14 +147,19 @@ export function productRoute(app: Application, upload: multer.Multer) {
             getDownloadURL(uploadTask.snapshot.ref).then(r => {
                 updateProduct({
                     id: null,
-                    name: name,
-                    description: description,
-                    categoryId: productCategory,
+                    productName: name,
+                    productDescription: description,
+                    productCategoryId: productCategory,
                     quantity: quantity,
                     price: price,
                     size: sizeS + "," + sizeM + "," + sizeL,
                     discountId: discount,
-                    displayImage: r
+                    displayImage: r,
+                    productCategoryName : null,
+                    discount : null,
+                    active : true,
+                    discountPercent : null,
+                    priceAfterDiscount : null
                 }, oldId).then(r => {
                     console.log(r)
                     res.redirect("/product")

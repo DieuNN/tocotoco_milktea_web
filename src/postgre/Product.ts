@@ -2,39 +2,45 @@ import {Pool} from 'pg'
 import {PostgreSQLConfig} from "../config/posgre";
 import {createException, createResult} from "./index";
 
-export async function addProduct(product: Product): Promise<APIResponse> {
+export async function addProduct(product: Product): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`insert into "Product"
                                                values (default,
-                                                       '${product.name}',
-                                                       '${product.description}',
-                                                       '${product.categoryId}',
+                                                       '${product.productName}',
+                                                       '${product.productDescription}',
+                                                       '${product.productCategoryId}',
                                                        '${product.quantity}',
                                                        '${product.price}',
                                                        ${product.discountId},
                                                        '${product.displayImage}',
                                                        '${product.size}')`)
+        await connection.query(`commit`)
         return createResult(true)
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function deleteProduct(id: number): Promise<APIResponse> {
+export async function deleteProduct(id: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`update "Product"
                                                set active = false
                                                where id = ${id}`)
-        connection.end()
+        await connection.query(`commit`)
         return createResult(true)
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function updateProductQuantity(id: number, quantity: number): Promise<APIResponse> {
+/*?????*/
+export async function updateProductQuantity(id: number, quantity: number): Promise<APIResponse<boolean>> {
     if (quantity < 0) {
         return createException("So luong cap nhat " + quantity + " khong hop le!")
     }
@@ -53,7 +59,7 @@ export async function updateProductQuantity(id: number, quantity: number): Promi
     }
 }
 
-export async function getProducts(): Promise<APIResponse> {
+export async function getProducts(): Promise<APIResponse<Product>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "Product".id,
@@ -92,7 +98,7 @@ export async function getProducts(): Promise<APIResponse> {
 }
 
 
-export async function getProduct(productId: number): Promise<APIResponse> {
+export async function getProduct(productId: number): Promise<APIResponse<Product>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "Product".id,
@@ -125,13 +131,14 @@ export async function getProduct(productId: number): Promise<APIResponse> {
     }
 }
 
-export async function updateProduct(product: Product, productId: number): Promise<APIResponse> {
+export async function updateProduct(product: Product, productId: number): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig)
     try {
-        const connection = await new Pool(PostgreSQLConfig)
+        await connection.query(`begin`)
         const result = await connection.query(`update "Product"
-                                               set name        = '${product.name}',
-                                                   description = '${product.description}',
-                                                   categoryid  = ${product.categoryId},
+                                               set name        = '${product.productName}',
+                                                   description = '${product.productDescription}',
+                                                   categoryid  = ${product.productCategoryId},
                                                    quantity    = ${product.quantity},
                                                    price       = ${product.price},
                                                    discountid  = ${product.discountId},
@@ -139,13 +146,15 @@ export async function updateProduct(product: Product, productId: number): Promis
                                                    size        = '${product.size}'
                                                where id = ${productId}`
         )
+        await connection.query(`commit`)
         return createResult(result.rowCount === 1)
     } catch (e) {
+        await connection.query(`rollback`)
         return createException(e)
     }
 }
 
-export async function getProductsByCategoryId(categoryId: number): Promise<APIResponse> {
+export async function getProductsByCategoryId(categoryId: number): Promise<APIResponse<Product[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select *
@@ -156,8 +165,8 @@ export async function getProductsByCategoryId(categoryId: number): Promise<APIRe
         return createException(e)
     }
 }
-
-export async function applyDiscount(productId: number, discountId: number): Promise<APIResponse> {
+/*TODO*/
+export async function applyDiscount(productId: number, discountId: number): Promise<APIResponse<boolean>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`update "Product"
@@ -169,7 +178,7 @@ export async function applyDiscount(productId: number, discountId: number): Prom
     }
 }
 
-export async function findProductsByName(query: string): Promise<APIResponse> {
+export async function findProductsByName(query: string): Promise<APIResponse<Product[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "Product".id,
