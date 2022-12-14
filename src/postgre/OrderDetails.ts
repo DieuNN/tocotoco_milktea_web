@@ -1,6 +1,6 @@
 import {Pool} from "pg";
 import {PostgreSQLConfig} from "../config/posgre";
-import {createException, createResult, deleteShoppingSession} from "./index";
+import {addItemToCart, createException, createResult, createShoppingSession, deleteShoppingSession} from "./index";
 import {createPaymentDetail, updatePaymentDetailStatus} from "./PaymentDetails";
 import {addCartItemsToOrder} from "./OrderItem";
 import {getUserSessionId} from "./ShoppingSession";
@@ -19,7 +19,6 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         if (!_isSessionExist.isSuccess) {
             return createException("Gio hang khong ton tai!")
         }
-        console.log(userId)
         let userCurrentOrder = await getUserCurrentOrder(userId)
         console.log("TEST: ", userCurrentOrder)
         if (userCurrentOrder.result != null) {
@@ -41,14 +40,14 @@ export async function updateProductInventory(orderId: number, userId: number) {
     try {
         await connection.query(`begin`)
         let productsId = await connection.query(`select productid, quantity
-                                             from "OrderDetail"
-                                                      inner join "OrderItem" OI on "OrderDetail".id = OI.orderid
-                                             where orderid = ${orderId}
-                                               and userid = ${userId};`)
+                                                 from "OrderDetail"
+                                                          inner join "OrderItem" OI on "OrderDetail".id = OI.orderid
+                                                 where orderid = ${orderId}
+                                                   and userid = ${userId};`)
         for (let item of productsId.rows) {
             connection.query(`update "Product"
-                          set quantity = quantity - ${item.quantity}
-                          where id = ${item.productid}`)
+                              set quantity = quantity - ${item.quantity}
+                              where id = ${item.productid}`)
         }
         await connection.query(`commit`)
     } catch (e) {
@@ -59,16 +58,14 @@ export async function updateProductInventory(orderId: number, userId: number) {
 async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<APIResponse<number>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        console.log("Enter create empty order")
         let orderId = await createEmptyOrder(userId)
-        console.log("End create empty order")
         let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address, note)
         await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
         connection.end()
         return orderId
     } catch (e) {
-        return createException(e)
+        throw createException(e)
     }
 }
 
@@ -77,8 +74,8 @@ async function updatePaymentId(orderId: number, paymentId: number) {
     try {
         await connection.query(`begin`)
         await connection.query(`update "OrderDetail"
-                            set paymentid = ${paymentId}
-                            where id = ${orderId}`)
+                                set paymentid = ${paymentId}
+                                where id = ${orderId}`)
         await connection.query(`commit`)
     } catch (e) {
         await connection.query(`rollback`)
@@ -119,14 +116,14 @@ export async function getUserCompletedOrders(userId: number): Promise<APIRespons
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let result = await connection.query(`select "OrderDetail".id,
-                                                    round(total)  as total,
+                                                    round(total)              as total,
                                                     "OrderDetail".createat,
                                                     status,
                                                     provider,
                                                     address,
-                                                    phonenumber   as "phoneNumber",
+                                                    phonenumber               as "phoneNumber",
                                                     sum("OrderItem".quantity) as "totalProduct",
-                                                    displayimage as "displayImage"
+                                                    displayimage              as "displayImage"
                                              from "OrderDetail"
                                                       inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
                                                       inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid
@@ -146,7 +143,7 @@ export async function getUserCompletedOrders(userId: number): Promise<APIRespons
 }
 
 
-export async function getOrderDetail(userId: number, orderId: number): Promise<APIResponse<Order[]>> {
+export async function getOrderDetail(userId: number, orderId: number): Promise<APIResponse<Order>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         const result = await connection.query(`select "OrderDetail".id,
@@ -167,7 +164,7 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
                                                  and "OrderDetail".id = ${orderId}
                                                group by "OrderDetail".id, total, "OrderDetail".createat, status,
                                                         provider,
-                                                        address, "phoneNumber", PD.note
+                                                        address, "phoneNumber", PD.note, displayimage
                                                order by createat desc;`)
         if (result.rowCount != 1) {
             return createException("Khong tim thay order " + orderId)
@@ -175,7 +172,7 @@ export async function getOrderDetail(userId: number, orderId: number): Promise<A
             return createResult(result.rows[0])
         }
     } catch (e) {
-        return createException(e)
+        throw createException(e)
     }
 }
 
@@ -414,12 +411,12 @@ export async function deleteOrder(orderId: number, paymentId: number) {
     try {
         await connection.query(`begin`)
         await connection.query(`delete
-                            from "OrderDetail"
-                            where id = ${orderId}
-                              and paymentid = ${paymentId}`)
+                                from "OrderDetail"
+                                where id = ${orderId}
+                                  and paymentid = ${paymentId}`)
         await connection.query(`delete
-                            from "PaymentDetails"
-                            where id = ${paymentId}`)
+                                from "PaymentDetails"
+                                where id = ${paymentId}`)
         await connection.query(`commit`)
     } catch (e) {
         await connection.query(`rollback`)
@@ -467,4 +464,43 @@ export async function userCancelOrder(userId: number, orderId: number): Promise<
         await connection.query(`rollback`)
         return createException(e)
     }
+}
+
+/*Experimental*/
+export async function reOrder(userId: number, orderId: number, note: string): Promise<APIResponse<any>> {
+    try {
+
+        if (note == undefined) {
+            note = ""
+        }
+        /*Check if session exist?*/
+        await createShoppingSession(userId);
+        let shoppingSessionId = ((await getUserSessionId(userId)).result.id);
+        console.log(shoppingSessionId)
+        let userCurrentOrder = await getUserCurrentOrder(userId)
+        console.log("TEST: ", userCurrentOrder)
+        if (userCurrentOrder.result != null) {
+            await deleteShoppingSession(userId, shoppingSessionId)
+            return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")
+        }
+        /*ADD PRODUCT TO SESSION*/
+        let items = (await getItemsInOrder(orderId, userId)).result as OrderItem[]
+        for (let item of items) {
+            await addItemToCart(userId, shoppingSessionId, item.productId, item.quantity, item.size, item.note)
+        }
+
+        // create order
+        console.log(await getOrderDetail(userId, orderId))
+        let orderDetail = (await getOrderDetail(userId, orderId)).result as Order
+        console.log(orderDetail)
+        let info = await createOrder(userId, shoppingSessionId, orderDetail.provider, orderDetail.phoneNumber, orderDetail.address, note)
+        await deleteShoppingSession(userId, shoppingSessionId)
+        await updateProductInventory(info.result, userId)
+        return createResult("Đặt hàng lại thành công!")
+    } catch (e) {
+        console.log(e)
+        return createException("Có lỗi khi đặt lại đơn hàng, kiểm tra lại!")
+    }
+
+
 }

@@ -23,6 +23,7 @@ export async function createPaymentDetail(orderId: number, provider: String, sta
         return result.rows[0].id
     } catch (e) {
         await connection.query(`rollback`)
+        throw createException("Cant create order detail")
         return 0
     }
 }

@@ -8,7 +8,6 @@ import {sendNotification} from "./NotificationRoute";
 export function orderRoutes(app: Application) {
     app.get("/pending-orders", (req: Request, res: Response) => {
         getOrders("Đợi xác nhận").then(r => {
-            console.log(r.result)
             res.render("pending_orders", {orders: r.result})
         })
     })

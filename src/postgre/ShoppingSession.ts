@@ -63,7 +63,7 @@ export async function createShoppingSession(userId: number): Promise<APIResponse
         return createResult(result.rowCount == 1)
     } catch (e) {
         await connection.query(`rollback`)
-        return createException(e)
+        throw createException(e)
     }
 }
 
@@ -100,7 +100,7 @@ export async function getUserSessionId(userId: number): Promise<APIResponse<numb
             return createResult(result.rows[0])
         }
     } catch (e) {
-        return createException(e)
+        throw createException(e)
     }
 }
 

@@ -29,7 +29,7 @@ import {
     getItemsInOrder,
     getOrderDetail,
     getOrders,
-    getUserCurrentOrder, getUserOrders
+    getUserCurrentOrder, getUserOrders, reOrder
 } from "./postgre/OrderDetails";
 import {getMonthlyChart} from "./postgre/Statistical";
 import {orderRoutes} from "./routes/OrderRoutes";
@@ -157,6 +157,10 @@ async function handleDisconnect() {
         }
     })
 }
+
+reOrder(38, 95, "Don hang dat lai").then(r=> {
+    console.log(r)
+})
 
 handleDisconnect().then()
 

@@ -30,7 +30,7 @@ import {
     getItemsInOrder,
     getOrderDetail, getUserCompletedOrders,
     getUserCurrentOrder,
-    getUserOrders, userCancelOrder
+    getUserOrders, reOrder, userCancelOrder
 } from "../postgre/OrderDetails";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -389,6 +389,19 @@ export function API(app: Application) {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
+        })
+    })
+    app.post("/api/order/re_order", (req: Request, res: Response) => {
+        const {token, orderId, note} = req.body
+        if (!validateToken(token)) {
+            res.json(returnInvalidToken())
+            return
+        }
+        const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
+        reOrder(userId, orderId, note).then(r=> {
+            res.json(r)
+        }).catch(e=> {
+            res.end(e.toString())
         })
     })
 
