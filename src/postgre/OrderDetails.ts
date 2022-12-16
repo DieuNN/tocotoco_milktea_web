@@ -20,7 +20,6 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
             return createException("Gio hang khong ton tai!")
         }
         let userCurrentOrder = await getUserCurrentOrder(userId)
-        console.log("TEST: ", userCurrentOrder)
         if (userCurrentOrder.result != null) {
             return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")
         }
@@ -478,7 +477,6 @@ export async function reOrder(userId: number, orderId: number, note: string): Pr
         let shoppingSessionId = ((await getUserSessionId(userId)).result.id);
         console.log(shoppingSessionId)
         let userCurrentOrder = await getUserCurrentOrder(userId)
-        console.log("TEST: ", userCurrentOrder)
         if (userCurrentOrder.result != null) {
             await deleteShoppingSession(userId, shoppingSessionId)
             return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")

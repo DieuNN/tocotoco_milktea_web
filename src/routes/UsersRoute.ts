@@ -11,7 +11,6 @@ export function usersRoute(app: Application) {
         })
     });
     app.post("/users/active", (req: Request, res: Response) => {
-        console.log(req.body.id)
         updateUserActiveStatus(req.body.id).then(r=> {
             res.redirect("/users")
         })

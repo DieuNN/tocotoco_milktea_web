@@ -34,7 +34,19 @@ export async function addProductCategory(productCategory: ProductCategory): Prom
 export async function getProductCategories(): Promise<APIResponse<ProductCategory>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        let result = await connection.query('select * from "ProductCategory"')
+        let result = await connection.query(`select "ProductCategory".id,
+                                                    "ProductCategory".displayimage,
+                                                    createat,
+                                                    "ProductCategory".description,
+                                                    "ProductCategory".name,
+                                                    modifiedat,
+                                                    count("ProductCategory".id)
+                                             from "ProductCategory"
+                                                      inner join "Product" P on "ProductCategory".id = P.categoryid
+                                             group by "ProductCategory".id, "ProductCategory".displayimage, createat,
+                                                      "ProductCategory".description, "ProductCategory".name, modifiedat
+                                             order by id`)
+
         result.rows.map(item => {
             item.createat = new Date(item.createat).toLocaleString("vi-VN", {timeZone: "Asia/Saigon"})
             item.modifiedat = new Date(item.modifiedat).toLocaleString("vi-VN", {timeZone: "Asia/Saigon"})

@@ -112,7 +112,6 @@ export async function userResetPassword(email: string): Promise<APIResponse<any>
     try {
         let _isEmailExist = await isEmailHasTaken(email)
 
-        console.log(_isEmailExist)
         if (!_isEmailExist) {
             return createException("Không tìm thấy email của bạn")
         }

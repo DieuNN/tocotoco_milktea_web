@@ -9,7 +9,6 @@ export async function addItemToCart(userId: number, sessionId: number, productId
         const productQuantity = await connection.query(`select quantity
                                                         from "Product"
                                                         where id = ${productId}`)
-        // console.log(productQuantity)
         if (productQuantity.rows.length === 0) {
             return createException("Khong thay san pham voi ID la " + productId);
         } else {

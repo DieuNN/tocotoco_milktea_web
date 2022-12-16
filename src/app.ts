@@ -158,10 +158,6 @@ async function handleDisconnect() {
     })
 }
 
-reOrder(38, 95, "Don hang dat lai").then(r=> {
-    console.log(r)
-})
-
 handleDisconnect().then()
 
 const server: http.Server = http.createServer(app);

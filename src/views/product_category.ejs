@@ -109,6 +109,7 @@
                         <th scope="col">Mô tả</th>
                         <th scope="col">Ngày tạo</th>
                         <th scope="col">Ngày sửa</th>
+                        <th scope="col">Số sản phẩm thuộc loại này</th>
                         <th scope="row">Hoạt động</th>
                     </tr>
                     </thead>
@@ -134,6 +135,9 @@
                             </td>
                             <td>
                                 <%= categories[i].modifiedat %>
+                            </td>
+                            <td>
+                                <%= categories[i].count %>
                             </td>
                             <td>
                                 <!-- Detail Modal -->
