@@ -38,11 +38,11 @@ export async function updatePaymentDetailStatus(paymentId: number, orderId: numb
                                                    modifiedat = now()
                                                where id = ${paymentId}
                                                  and orderid = ${orderId}`)
-        await connection.query(`rollback`)
+        await connection.query(`commit`)
         return createResult(result.rowCount == 1)
     } catch (e) {
         await connection.query(`rollback`)
-        return createException(e)
+        throw createException(e)
     }
 }
 
