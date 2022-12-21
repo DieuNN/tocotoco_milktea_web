@@ -24,7 +24,6 @@ export async function createPaymentDetail(orderId: number, provider: String, sta
     } catch (e) {
         await connection.query(`rollback`)
         throw createException("Cant create order detail")
-        return 0
     }
 }
 
@@ -46,15 +45,3 @@ export async function updatePaymentDetailStatus(paymentId: number, orderId: numb
     }
 }
 
-//
-// export async function updatePaymentDetailProvider(paymentId: number, provider: string): Promise<APIResponse> {
-//     try {
-//         const connection = await new Pool(PostgreSQLConfig)
-//         const result = await connection.query(`update "PaymentDetails"
-//                                                set provider = '${provider}'
-//                                                where id = ${paymentId}`)
-//         return createResult(result.rowCount === 1)
-//     } catch (e) {
-//         return createException(e)
-//     }
-// }

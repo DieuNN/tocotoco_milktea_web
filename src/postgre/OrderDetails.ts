@@ -24,44 +24,49 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
             return createException("Bạn có đơn hàng chưa hoàn thành nên chưa thể tiếp tục đặt đơn")
         }
         console.log("Enter create order")
-        let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note).then()
+        let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note)
         console.log("End create order")
-        await deleteShoppingSession(userId, sessionId).then().catch()
-        await updateProductInventory(orderId.result, userId).then().catch()
+        // await deleteShoppingSession(userId, sessionId).then().catch()
+        await updateProductInventory(orderId, userId).then().catch()
         return createResult(true)
     } catch (e) {
-        return createException(e)
+        console.log(e)
+        throw createException(e)
     }
 }
 
 export async function updateProductInventory(orderId: number, userId: number) {
     const connection = await new Pool(PostgreSQLConfig)
     try {
+        console.log("UPDATING INVENTORY")
         await connection.query(`begin`)
         let productsId = await connection.query(`select productid, quantity
                                                  from "OrderDetail"
                                                           inner join "OrderItem" OI on "OrderDetail".id = OI.orderid
                                                  where orderid = ${orderId}
                                                    and userid = ${userId};`)
+        console.log(productsId.rows)
         for (let item of productsId.rows) {
-            connection.query(`update "Product"
+            await connection.query(`update "Product"
                               set quantity = quantity - ${item.quantity}
                               where id = ${item.productid}`)
         }
         await connection.query(`commit`)
     } catch (e) {
+        console.log(e)
         await connection.query(`rollback`)
+        throw createException("Không thể cập nhật số luợng sản phẩm trong kho")
     }
 }
 
-async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<APIResponse<number>> {
+async function createOrder(userId: number, sessionId: number, provider: string, phoneNumber: string, address: string, note: string): Promise<number> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
         let orderId = await createEmptyOrder(userId)
         let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address, note)
         await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
-        connection.end()
+        console.log("CREATE ORDER: ", orderId)
         return orderId
     } catch (e) {
         throw createException(e)
@@ -493,7 +498,7 @@ export async function reOrder(userId: number, orderId: number, note: string): Pr
         console.log(orderDetail)
         let info = await createOrder(userId, shoppingSessionId, orderDetail.provider, orderDetail.phoneNumber, orderDetail.address, note)
         await deleteShoppingSession(userId, shoppingSessionId)
-        await updateProductInventory(info.result, userId)
+        await updateProductInventory(info, userId)
         return createResult("Đặt hàng lại thành công!")
     } catch (e) {
         console.log(e)
