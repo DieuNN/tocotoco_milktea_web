@@ -10,6 +10,10 @@ window.addEventListener('DOMContentLoaded', event => {
     if (pendingTable) {
         new simpleDatatables.DataTable(pendingTable)
     }
+    const pendingTable2 = document.getElementById("pendingOrdersTable2")
+    if (pendingTable) {
+        new simpleDatatables.DataTable(pendingTable2)
+    }
     const notificationsTable = document.getElementById("notificationsTable")
     if (notificationsTable) {
         new simpleDatatables.DataTable(notificationsTable)

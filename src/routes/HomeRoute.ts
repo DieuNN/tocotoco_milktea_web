@@ -9,13 +9,8 @@ export function homeRoute(app: Application) {
         if (req.session.userid !== 'admin') {
             res.redirect("/login")
         } else {
-
-            getAllStatistical().then(r => {
-                getOrders(null).then(r1 => {
-                    res.render('index', {data: r.result, orders: r1.result})
-                })
-            }).catch(e => {
-                res.end("Error in get statistical")
+            Promise.all([getAllStatistical(), getOrders(null)]).then(result => {
+                res.render('index', {data: result[0].result, orders: result[1].result})
             })
         }
     });

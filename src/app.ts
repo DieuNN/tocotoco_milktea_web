@@ -37,6 +37,7 @@ import {sendNotification, sendNotificationForAllUser} from "./routes/Notificatio
 import {sendResetPasswordEmail, userResetPassword} from "./routes/AuthenticationRoute";
 import {usersRoute} from "./routes/UsersRoute";
 import {checkActiveStatus} from "./postgre/User";
+import {inventoryRoute} from "./routes/InventoryRoute";
 
 export const app: Application = express();
 const credentials = {
@@ -130,6 +131,9 @@ orderRoutes(app)
 
 /*Users routes*/
 usersRoute(app)
+
+/*Inventory routes*/
+inventoryRoute(app)
 
 /* 404 page */
 app.use((req, res) => {

@@ -13,6 +13,8 @@
         td {
             text-align: center;
             vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         th {
@@ -182,7 +184,7 @@
                                 <%= products[i].productName %>
                             </td>
                             <td>
-                                <%= products[i].productDescription %>
+                                <p style="text-overflow: ellipsis"><%= products[i].productDescription %></p>
                             </td>
                             <td>
                                 <%= products[i].productCategoryName %>
