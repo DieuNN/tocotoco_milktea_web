@@ -10,6 +10,7 @@ export function homeRoute(app: Application) {
             res.redirect("/login")
         } else {
             Promise.all([getAllStatistical(), getOrders(null)]).then(result => {
+                // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
                 res.render('index', {data: result[0].result, orders: result[1].result})
             })
         }

@@ -17,7 +17,7 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         /*Check if session exist?*/
         let _isSessionExist = await getUserSessionId(userId)
         if (!_isSessionExist.isSuccess) {
-            return createException("Gio hang khong ton tai!")
+            return  createException("Gio hang khong ton tai!")
         }
         let userCurrentOrder = await getUserCurrentOrder(userId)
         if (userCurrentOrder.result != null) {
@@ -26,8 +26,8 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         console.log("Enter create order")
         let orderId = await createOrder(userId, sessionId, provider, phoneNumber, address, note)
         console.log("End create order")
-        // await deleteShoppingSession(userId, sessionId).then().catch()
-        await updateProductInventory(orderId, userId).then().catch()
+        await deleteShoppingSession(userId, sessionId)
+        await updateProductInventory(orderId, userId)
         return createResult(true)
     } catch (e) {
         console.log(e)
@@ -66,7 +66,6 @@ async function createOrder(userId: number, sessionId: number, provider: string, 
         let paymentId = await createPaymentDetail(orderId, provider, "Đợi xác nhận", phoneNumber, address, note)
         await updatePaymentId(orderId, paymentId)
         await addCartItemsToOrder(orderId, sessionId, userId)
-        console.log("CREATE ORDER: ", orderId)
         return orderId
     } catch (e) {
         throw createException(e)
@@ -83,6 +82,7 @@ async function updatePaymentId(orderId: number, paymentId: number) {
         await connection.query(`commit`)
     } catch (e) {
         await connection.query(`rollback`)
+        throw createException(e)
     }
 
 }
@@ -278,6 +278,7 @@ export async function createEmptyOrder(userId: number): Promise<any> {
         return result.rows[0].id
     } catch (e) {
         await connection.query(`rollback`)
+        throw createException(e)
         return 0
     }
 }

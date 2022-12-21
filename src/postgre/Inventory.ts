@@ -31,3 +31,16 @@ export async function getRunningOutOfStock(): Promise<APIResponse<any>> {
         throw createException(e)
     }
 }
+
+export async function getLovesProductList(): Promise<APIResponse<any>> {
+    const connection = await new Pool(PostgreSQLConfig)
+    try {
+        return createResult((await connection.query(`select P.id, name, count(P.id) as total
+                                                     from "LovedItems"
+                                                              inner join "Product" P on P.id = "LovedItems".productid
+                                                     group by P.id
+                                                     order by total desc;`)).rows)
+    } catch (e) {
+        return createException(e)
+    }
+}

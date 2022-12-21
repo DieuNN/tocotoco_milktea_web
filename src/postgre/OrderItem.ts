@@ -33,7 +33,8 @@ export async function addCartItemsToOrder(orderId: number, sessionId: number, us
         await updateOrderDetailTotal(orderId, userId)
     } catch (e) {
         await connection.query(`rollback`)
-        console.log(e)
+        throw createException(e)
+
     }
 }
 

@@ -77,6 +77,35 @@
                     <% } %>
                     </tbody>
                 </table>
+                <h4 style="margin-top: 32px;">Các sản phẩm đuợc yêu thích</h4>
+                <table id="pendingOrdersTable3">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã SP</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Luợt thích</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã SP</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Luợt thích</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <% for (let i = 0; i < loves.length; i++) { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td><%= loves[i].id %></td>
+                            <td><%= loves[i].name %></td>
+                            <td><%= loves[i].total %></td>
+                        </tr>
+                    <% } %>
+                    </tbody>
+                </table>
             </div>
         </main>
         <footer class="py-4 bg-light mt-auto">

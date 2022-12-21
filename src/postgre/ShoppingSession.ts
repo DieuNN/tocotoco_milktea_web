@@ -116,11 +116,14 @@ export async function deleteShoppingSession(userId: number, sessionId: number): 
         if (result.rowCount === 1) {
             return createResult(true)
         } else {
-            return createException("Khong tim thay userId " + userId + " va sessionId " + sessionId)
+            await connection.query(`rollback`)
+            // stop here
+            throw createException("Khong tim thay userId " + userId + " va sessionId " + sessionId)
         }
     } catch (e) {
+        console.log(e)
         await connection.query(`rollback`)
-        return createException(e)
+        throw createException(e)
     }
 }
 
