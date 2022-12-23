@@ -13,7 +13,7 @@ export async function getAllStatistical(): Promise<APIResponse<any>> {
             pending: 0,
             completed: 0,
             canceled: 0,
-            delivering : 0
+            delivering: 0
         }
         queryResult.rows.forEach(item => {
             if (item.status == 'Đợi xác nhận')
@@ -63,7 +63,33 @@ export async function getMonthlyChart(): Promise<any> {
             result.data.push(total)
         }
     }
-    console.log("Month: ",result)
+    console.log("Month: ", result)
+    return result
+}
+
+export async function getRangeBarChart(): Promise<any> {
+    const connection = await new Pool(PostgreSQLConfig)
+
+    let orderData = await connection.query(`select to_char(PD.modifiedat::date, 'DD-MM-YYYY') as date,
+                                                   round(sum(total))                          as total
+                                            from "OrderDetail"
+                                                     inner join "PaymentDetails" PD on PD.id = "OrderDetail".paymentid
+                                            where status like 'Hoàn thành'
+                                            group by to_char(PD.modifiedat::date, 'DD-MM-YYYY') order by date`)
+    let result: {
+        labels: [],
+        data: []
+    } = {
+        labels : [],
+        data : []
+    }
+    await orderData.rows.forEach((item: any) => {
+        // @ts-ignore
+        result.labels.push(item.date)
+        // @ts-ignore
+        result.data.push(item.total)
+    })
+    // @ts-ignore
     return result
 }
 

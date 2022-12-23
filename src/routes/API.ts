@@ -35,7 +35,7 @@ import {
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {addLovedItem, deleteLovedItem, isUserLovedProduct} from "../postgre/LovedProducts";
-import {getMonthlyChart, getYearlyChart} from "../postgre/Statistical";
+import {getMonthlyChart, getRangeBarChart, getYearlyChart} from "../postgre/Statistical";
 import {getAllNotifications, getNewsNotifications, getPromotionNotifications} from "../postgre/Notification";
 import {sendResetPasswordEmail, userResetPassword} from "./AuthenticationRoute";
 import {resetPassword} from "../postgre/ResetPassword";
@@ -398,9 +398,9 @@ export function API(app: Application) {
             return
         }
         const userId = (jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload).id
-        reOrder(userId, orderId, note).then(r=> {
+        reOrder(userId, orderId, note).then(r => {
             res.json(r)
-        }).catch(e=> {
+        }).catch(e => {
             res.end(e.toString())
         })
     })
@@ -572,6 +572,11 @@ export function API(app: Application) {
             res.json(r)
         }).catch(e => {
             res.json(createException(e));
+        })
+    })
+    app.get("/api/statistical/bar-chart", (req: Request, res: Response) => {
+        getRangeBarChart().then(result => {
+            res.json(result)
         })
     })
     app.get("/api/statistical/yearly-chart", (req: Request, res: Response) => {
