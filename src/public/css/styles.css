@@ -106,6 +106,10 @@ h1, .h1 {
   }
 }
 
+table, td, th {
+  border: 1px solid black;
+}
+
 h2, .h2 {
   font-size: calc(1.325rem + 0.9vw);
 }

@@ -17,7 +17,7 @@ export async function confirmOrder(userId: number, sessionId: number, provider: 
         /*Check if session exist?*/
         let _isSessionExist = await getUserSessionId(userId)
         if (!_isSessionExist.isSuccess) {
-            return  createException("Gio hang khong ton tai!")
+            return createException("Gio hang khong ton tai!")
         }
         let userCurrentOrder = await getUserCurrentOrder(userId)
         if (userCurrentOrder.result != null) {
@@ -48,8 +48,8 @@ export async function updateProductInventory(orderId: number, userId: number) {
         console.log(productsId.rows)
         for (let item of productsId.rows) {
             await connection.query(`update "Product"
-                              set quantity = quantity - ${item.quantity}
-                              where id = ${item.productid}`)
+                                    set quantity = quantity - ${item.quantity}
+                                    where id = ${item.productid}`)
         }
         await connection.query(`commit`)
     } catch (e) {
@@ -260,7 +260,13 @@ export async function adminGetItemsInOrder(orderId: number): Promise<APIResponse
                                                       inner join "ProductCategory" on P.categoryid = "ProductCategory".id
                                                       inner join "OrderDetail" on "OrderItem".orderid = "OrderDetail".id
                                              where orderid = ${orderId}`)
-        connection.end()
+        const numberFormatter = Intl.NumberFormat('vi-VN', {style: "currency", currency: "VND"})
+        result.rows.map(item => {
+            item.price = numberFormatter.format(Number(item.price))
+            item.priceBeforeDiscount = numberFormatter.format(Number(item.priceBeforeDiscount))
+            item.priceAfterDiscount = numberFormatter.format(Number(item.priceAfterDiscount))
+        });
+        console.log(result.rows)
         return createResult(result.rows)
     } catch (e) {
         return createException(e)
@@ -288,6 +294,7 @@ export async function getOrders(type: string | null): Promise<APIResponse<any>> 
     try {
         if (type == null) type = "%%"
         const connection = await new Pool(PostgreSQLConfig)
+
         let orders = await connection.query(`select "OrderItem".orderid        as "orderId",
                                                     PD.id                      as "paymentId",
                                                     U.name                     as "username",
@@ -314,6 +321,7 @@ export async function getOrders(type: string | null): Promise<APIResponse<any>> 
                                                                                     inner join "OrderItem" on "OrderDetail".id = "OrderItem".orderid)
                                                and status like '${type}'
                                              order by PD.modifiedat desc `)
+        const numberFormatter = Intl.NumberFormat('vi-VN', {style: "currency", currency: "VND"})
         const map = new Map()
         for (let element of orders.rows) {
             if (map.get(element.orderId) == undefined) {
@@ -324,8 +332,8 @@ export async function getOrders(type: string | null): Promise<APIResponse<any>> 
                     productName: [element.productName],
                     orderId: element.orderId,
                     paymentId: element.paymentId,
-                    priceBeforeDiscount: element.priceBeforeDiscount,
-                    priceAfterDiscount: element.priceAfterDiscount,
+                    priceBeforeDiscount: numberFormatter.format(Number(element.priceBeforeDiscount)),
+                    priceAfterDiscount: numberFormatter.format(Number(element.priceAfterDiscount)),
                     quantity: element.quantity,
                     address: element.address,
                     time: element.time,
@@ -363,7 +371,7 @@ export async function getOrders(type: string | null): Promise<APIResponse<any>> 
             tempObj.phoneNumber = value.phoneNumber
             let detail = await adminGetItemsInOrder(key)
             let total = await adminGetOrderDetails(key)
-            tempObj.total = total.result.total
+            tempObj.total = numberFormatter.format(Number(total.result.total))
             tempObj.detail = detail.result
             tempObj.address = value.address
             tempObj.paymentId = value.paymentId
@@ -378,7 +386,7 @@ export async function getOrders(type: string | null): Promise<APIResponse<any>> 
         dumpResult.map(element => {
             element.time = new Date(element.time).toLocaleString("vi-VN")
         })
-
+        console.log(dumpResult)
         return createResult(dumpResult)
     } catch (e) {
         return createException(e)

@@ -67,7 +67,7 @@ export async function getProductCategories(): Promise<APIResponse<ProductCategor
 
 }
 
-export async function editProductCategory(oldId: number, productCategory: ProductCategory): Promise<APIResponse<boolean>> {
+export async function updateProductCategory(oldId: number, productCategory: ProductCategory): Promise<APIResponse<boolean>> {
     const connection = await new Pool(PostgreSQLConfig);
     try {
         await connection.query(`begin`)
@@ -75,6 +75,24 @@ export async function editProductCategory(oldId: number, productCategory: Produc
                                              set name         = '${productCategory.name}',
                                                  description  = '${productCategory.description}',
                                                  displayImage = '${productCategory.displayImage}',
+                                                 modifiedAt   = now()
+                                             where id = ${oldId} `);
+        await connection.query(`commit`)
+        return createResult(result.rowCount === 1)
+    } catch (e) {
+        await connection.query(`rollback`)
+        return createException(e)
+    }
+
+}
+
+export async function updateProductCategoryWithoutImage(oldId: number, productCategory: ProductCategory): Promise<APIResponse<boolean>> {
+    const connection = await new Pool(PostgreSQLConfig);
+    try {
+        await connection.query(`begin`)
+        let result = await connection.query(`update "ProductCategory"
+                                             set name         = '${productCategory.name}',
+                                                 description  = '${productCategory.description}',
                                                  modifiedAt   = now()
                                              where id = ${oldId} `);
         await connection.query(`commit`)

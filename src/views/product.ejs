@@ -44,10 +44,10 @@
             <h1 class="mt-4">Các sản phẩm</h1>
             <div class="top-buttons mt-3"
                  style="display: flex; flex-direction: row; align-content: baseline; justify-content: space-between; gap: 10%">
-                <div class="input-group mb-3 rounded-3" style="gap: 0; max-width: 40%">
+                <div class="input-group mb-3 rounded-3" style="gap: 0; max-width: 40%; visibility: hidden">
                     <span class="input-group-text"><i
                                 class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" class="form-control"
+                    <input type="text" class="form-control" style="display: none; visibility: hidden"
                            placeholder="Tìm kiếm" aria-label="...">
                     <span class="input-group-text"><i
                                 class="fa-solid fa-sliders"></i></span>
@@ -290,14 +290,14 @@
                                                     <label for="name" class="form-label">Tên</label>
                                                     <div class="input-group mb-3">
                                                         <input aria-label="..." type="text" class="form-control"
-                                                               id="basic-url"
+                                                               id="product-name-update"
                                                                value="<%= products[i].productName %>"
                                                                aria-describedby="basic-addon3" name="name" required>
                                                     </div>
                                                     <label for="name" class="form-label">Mô tả</label>
                                                     <div class="input-group mb-3">
                                                         <input aria-label="..." type="text" class="form-control"
-                                                               id="basic-url"
+                                                               id="product-description-update"
                                                                value="<%= products[i].productDescription %>"
                                                                aria-describedby="basic-addon3" name="description"
                                                                required>
@@ -305,11 +305,12 @@
                                                     <div class="input-group mb-3"
                                                          style="display: flex; flex-direction: row">
                                                         <div class="input-group-prepend" style="flex: 2">
-                                                            <label class="input-group-text" for="inputGroupSelect01">Loại
+                                                            <label class="input-group-text"
+                                                                   for="inputGroupSelect01-update">Loại
                                                                 sản
                                                                 phẩm</label>
                                                         </div>
-                                                        <select class="custom-select" id="inputGroupSelect01"
+                                                        <select class="custom-select" id="inputGroupSelect01-update"
                                                                 style="flex: 12"
                                                                 name="productCategory" required>
                                                             <option value="">Chọn ...</option>
@@ -321,7 +322,7 @@
                                                     <label for="quantity" class="form-label">Số luợng</label>
                                                     <div class="input-group mb-3">
                                                         <input aria-label="..." type="number" class="form-control"
-                                                               id="basic-url"
+                                                               id="quantity-update"
                                                                value="<%= products[i].quantity %>"
                                                                aria-describedby="basic-addon3" name="quantity" required
                                                                min="0">
@@ -329,24 +330,9 @@
                                                     <label for="price" class="form-label">Giá</label>
                                                     <div class="input-group mb-3">
                                                         <input aria-label="..." type="number" class="form-control"
-                                                               id="basic-url"
+                                                               id="price-update"
                                                                value="<%= products[i].price %>"
                                                                aria-describedby="basic-addon3" name="price" required>
-                                                    </div>
-                                                    <div class="input-group mb-3"
-                                                         style="display: flex; flex-direction: row">
-                                                        <div class="input-group-prepend" style="flex: 2">
-                                                            <label class="input-group-text" for="inputGroupSelect01">Mã
-                                                                giảm giá</label>
-                                                        </div>
-                                                        <select class="custom-select" id="inputGroupSelect01"
-                                                                name="discount"
-                                                                style="flex: 12">
-                                                            <option value="">Chọn ...</option>
-                                                            <% for (var j = 0; j < discounts.length; j++) { %>
-                                                                <option value="<%= discounts[j].id %>"><%= discounts[j].name %></option>
-                                                            <% } %>
-                                                        </select>
                                                     </div>
                                                     <div class="input-group mb-3"
                                                          style="display: flex; flex-direction: column">
@@ -381,10 +367,11 @@
                                                         </div>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="formFile" class="form-label">Ảnh</label>
+                                                        <label for="formFile" class="form-label">Ảnh (bỏ trống nếu giữ
+                                                            nguyên ảnh cũ)</label>
                                                         <input class="form-control" type="file" name="image"
                                                                accept="image/*"
-                                                               id="formFile" required>
+                                                               id="formFile">
                                                     </div>
                                                 </form>
                                             </div>
@@ -392,7 +379,68 @@
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                     Huỷ
                                                 </button>
-                                                <button type="submit" class="btn btn-primary"
+                                                <button type="button" class="btn btn-primary"
+                                                        onclick="((event)=> {
+                                                                let nameInput = document.getElementById(`product-name-update`)
+                                                                if (nameInput.value.length === 0) {
+                                                                nameInput.addEventListener('invalid', (e)=> {
+                                                                nameInput.setCustomValidity(`Bạn quên chưa nhập rồi này`)
+                                                                })
+                                                                nameInput.reportValidity()
+                                                                return
+                                                                }
+                                                                let descriptionInput = document.getElementById(`product-description-update`)
+                                                                if (descriptionInput.value.length === 0) {
+                                                                descriptionInput.addEventListener('invalid', (e)=> {
+                                                                descriptionInput.setCustomValidity(`Bạn quên chưa nhập rồi này`)
+                                                                })
+                                                                descriptionInput.reportValidity()
+                                                                return;
+                                                                }
+                                                                // ??? i dont even know why my code formatter format my code like this wtf??
+                                                                let productCategoryOptions = document.getElementById(`inputGroupSelect01-update`)
+                                                                // console.log(productCategoryOptions.selectedIndex)
+                                                                if(productCategoryOptions.selectedIndex === 0) {
+                                                                productCategoryOptions.addEventListener('invalid', (e)=> {
+                                                                productCategoryOptions.setCustomValidity(`Bạn quên chưa chọn rồi này`)
+                                                                })
+                                                                productCategoryOptions.reportValidity()
+                                                                return;
+                                                                }
+                                                                let productQuantity = document.getElementById(`quantity-update`)
+                                                                // console.log(productQuantity)
+                                                                if (productQuantity.value.length === 0) {
+                                                                productQuantity.addEventListener('invalid', (e)=> {
+                                                                productQuantity.setCustomValidity(`Bạn quên chưa nhập rồi này`)
+                                                                })
+                                                                productQuantity.reportValidity()
+                                                                return;
+                                                                }
+                                                                let productPrice = document.getElementById(`price-update`)
+                                                                // console.log(productPrice)
+                                                                if (productPrice.value.length === 0) {
+                                                                productPrice.addEventListener('invalid', (e)=> {
+                                                                productPrice.setCustomValidity(`Bạn quên chưa nhập rồi này`)
+                                                                })
+                                                                productPrice.reportValidity()
+                                                                return;
+                                                                }
+
+                                                                let sizeS = document.getElementById('btncheckSby' + `<%= products[i].id %>`)
+                                                                let sizeM = document.getElementById('btncheckMby'+ `<%= products[i].id %>`)
+                                                                let sizeL = document.getElementById('btncheckLby'+ `<%= products[i].id %>`)
+
+                                                                let validated = false;
+                                                                if (sizeS.checked || sizeL.checked || sizeM.checked) {
+                                                                validated = true;
+                                                                }
+                                                                if (!validated) {
+                                                                alert(`Bạn chưa chọn kích thuớc rồi!`)
+                                                                } else {
+                                                                console.log(`validated`)
+                                                                document.getElementById('updateProductForm' + `<%= products[i].id %>`).submit()
+                                                                }
+                                                                })()"
                                                         form="<%= "updateProductForm" + products[i].id %>"
                                                         style="border-color: #FFA500; background-color: #FFA500">Sửa
                                                 </button>

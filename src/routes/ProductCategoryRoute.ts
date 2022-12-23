@@ -1,7 +1,8 @@
-import {Application, Response, Request} from 'express';
+import {Application, Request, Response} from 'express';
 import multer from "multer";
-import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
-import {addProductCategory, deleteProductCategory, editProductCategory, getProductCategories} from "../postgre";
+import {getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
+import {addProductCategory, deleteProductCategory, getProductCategories, updateProductCategory} from "../postgre";
+import {updateProductCategoryWithoutImage} from "../postgre/ProductCategory";
 
 export function productCategoryRoute(app: Application, upload: multer.Multer) {
     app.get('/category', (req: Request, res: Response) => {
@@ -17,11 +18,24 @@ export function productCategoryRoute(app: Application, upload: multer.Multer) {
     })
 
     app.post("/update_product_category", upload.single('image'), (req: Request, res: Response) => {
-        if (!req.file) {
-            res.end("File required")
-        }
+
         // console.log(req.body)
         const {id, name, description} = req.body
+        if (!req.file) {
+            updateProductCategoryWithoutImage(id, {
+                id: null,
+                name: name,
+                description: description,
+                displayImage: null,
+                modifiedAt: null,
+                createAt: null
+            }).then(r => {
+                res.redirect('/category')
+            }).catch(e => {
+                res.end(e.toString())
+            })
+            return
+        }
         const storage = getStorage()
         const metadata = {
             contentType: "image/jpeg"
@@ -45,7 +59,7 @@ export function productCategoryRoute(app: Application, upload: multer.Multer) {
         }, () => {
             getDownloadURL(uploadTask.snapshot.ref).then(r => {
                 // console.log(r)
-                editProductCategory(req.body.id, {
+                updateProductCategory(req.body.id, {
                     id: null,
                     name: name,
                     description: description,

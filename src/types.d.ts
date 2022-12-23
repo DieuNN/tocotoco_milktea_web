@@ -11,7 +11,7 @@ declare type ProductCategory = {
     id: number | null,
     name: string,
     description: string,
-    displayImage: string,
+    displayImage: string | null,
     createAt: string | null,
     modifiedAt: string | null
 }
@@ -28,19 +28,19 @@ declare type Product = {
     discountId: number | null
     discountPercent: number | null,
     priceAfterDiscount: number | null,
-    displayImage: string,
+    displayImage: string | null,
     size: string,
     active: boolean
 }
 
 declare type Discount = {
     id: number | null,
-    name: string,
-    description: string,
-    discountPercent: number,
-    createAt: string,
-    modifiedAt: string,
-    displayImage: string,
+    name: string | null,
+    description: string | null,
+    discountPercent: number | null,
+    createAt: string | null,
+    modifiedAt: string | null,
+    displayImage: string | null,
     active: boolean
 }
 

@@ -2,7 +2,7 @@ import {isAdminLogin} from "./Admin";
 import {
     addProductCategory,
     deleteProductCategory,
-    editProductCategory,
+    updateProductCategory,
     getProductCategories,
     getProductCategory
 } from "./ProductCategory";
@@ -39,7 +39,7 @@ export {
     isAdminLogin,
     addProductCategory,
     getProductCategories,
-    editProductCategory,
+    updateProductCategory,
     deleteProductCategory,
     createDiscount,
     getDiscounts, deleteDiscount,

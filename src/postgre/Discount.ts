@@ -42,6 +42,25 @@ export async function updateDiscount(oldId: number, discount: Discount): Promise
     }
 }
 
+export async function updateDiscountWithoutImage(oldId: number, discount: Discount): Promise<APIResponse<boolean>> {
+    const connect = await new Pool(PostgreSQLConfig)
+    try {
+        await connect.query(`begin`)
+        let result = await connect.query(` update "Discount"
+                                           set name            = '${discount.name}',
+                                               discountpercent = '${discount.discountPercent}',
+                                               description     = '${discount.description}',
+                                               modifiedat      = now()
+                                           where id = ${oldId}
+        `)
+        await connect.query(`commit`)
+        return createResult(result.rowCount === 1)
+    } catch (e) {
+        await connect.query(`rollback`)
+        return createException(e)
+    }
+}
+
 export async function getDiscount(id: number): Promise<APIResponse<Discount>> {
     try {
         const connect = await new Pool(PostgreSQLConfig)
@@ -61,17 +80,17 @@ export async function getDiscount(id: number): Promise<APIResponse<Discount>> {
 }
 
 export async function deleteDiscount(id: number): Promise<APIResponse<boolean>> {
+    console.log(id)
     const connect = await new Pool(PostgreSQLConfig)
     try {
         await connect.query(`begin`)
-        let result = await connect.query(`delete
-                                          from "Discount"
+        let result = await connect.query(`update "Discount" set active = false
                                           where id = ${id}`)
         await connect.query(`commit`)
         return createResult(result.rowCount == 1)
     } catch (e) {
         await connect.query(`rollback`)
-        return createException(e)
+        throw createException(e)
     }
 }
 
@@ -80,7 +99,7 @@ export async function getDiscounts(): Promise<APIResponse<Discount[]>> {
     try {
         await connect.query(`begin`)
         let result = await connect.query(`select *
-                                          from "Discount"`)
+                                          from "Discount" where active = true order by id`)
         result.rows.map(item => {
             item.createat = new Date(item.createat).toLocaleString()
             item.modifiedat = new Date(item.modifiedat).toLocaleString()

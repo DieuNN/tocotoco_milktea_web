@@ -5,11 +5,11 @@ import {
     addProduct,
     addProductCategory,
     deleteProductCategory,
-    editProductCategory,
+    updateProductCategory,
     getDiscounts,
     getProductCategories, getProducts, updateProduct
 } from "../postgre";
-import {deleteProduct} from "../postgre/Product";
+import {deleteProduct, updateProductWithoutImage} from "../postgre/Product";
 
 export function productRoute(app: Application, upload: multer.Multer) {
     app.get("/product", async (req: Request, res: Response) => {
@@ -106,22 +106,40 @@ export function productRoute(app: Application, upload: multer.Multer) {
     })
 
     app.post("/update_product", upload.single('image'), (req: Request, res: Response) => {
-        console.log(req.body)
         const name = req.body.name
         const description = req.body.description
         const productCategory = req.body.productCategory
         const quantity = req.body.quantity
         const price = req.body.price
         const discount = req.body.discount == "" ? null : req.body.discount
-        const sizeS = req.body.sizeS != undefined ? "X" : ""
+        const sizeS = req.body.sizeS != undefined ? "S" : ""
         const sizeM = req.body.sizeM != undefined ? "M" : ""
         const sizeL = req.body.sizeL != undefined ? "L" : ""
         const oldId = req.body.oldId
 
-        console.log(discount)
-
         if (!req.file) {
-            res.end("File required")
+            updateProductWithoutImage({
+                id: null,
+                productName: name,
+                productDescription: description,
+                productCategoryId: productCategory,
+                quantity: quantity,
+                price: price,
+                size: sizeS + "," + sizeM + "," + sizeL,
+                discountId: discount,
+                displayImage: null,
+                productCategoryName : null,
+                discount : null,
+                active : true,
+                discountPercent : null,
+                priceAfterDiscount : null
+            }, oldId).then(()=> {
+                res.redirect("/product")
+                return
+            }).catch(r=> {
+                console.log(r)
+            })
+            return
         }
         const storage = getStorage()
         const metadata = {

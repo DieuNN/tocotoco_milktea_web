@@ -40,11 +40,9 @@
     <div id="layoutSidenav_content">
         <main class="container-fluid px-4">
             <h1 class="mt-4">Các loại sản phẩm</h1>
-            <!--Search form -->
-            <!--TODO: Add search -->
             <div class="top-buttons mt-3"
                  style="display: flex; flex-direction: row; align-content: baseline; justify-content: space-between; gap: 10%">
-                <div class="input-group mb-3 rounded-3" style="gap: 0; max-width: 40%">
+                <div class="input-group mb-3 rounded-3" style="gap: 0; max-width: 40%; visibility: hidden">
                     <span class="input-group-text"><i
                                 class="fa-solid fa-magnifying-glass"></i></span>
                     <input type="text" class="form-control"
@@ -239,10 +237,10 @@
                                                                required>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="formFile" class="form-label">Ảnh</label>
+                                                        <label for="formFile" class="form-label">Ảnh (bỏ trống nếu không đổi)</label>
                                                         <input class="form-control" type="file" name="image"
                                                                accept="image/*"
-                                                               id="formFile" required>
+                                                               id="formFile">
                                                     </div>
                                                 </form>
                                             </div>

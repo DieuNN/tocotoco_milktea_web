@@ -42,7 +42,7 @@
             <h1 class="mt-4">Mã giảm giá</h1>
             <div class="top-buttons mt-3"
                  style="display: flex; flex-direction: row; align-content: baseline; justify-content: space-between; gap: 10%">
-                <div class="input-group mb-3 rounded-3" style="gap: 0; max-width: 40%">
+                <div class="input-group mb-3 rounded-3" style="gap: 0; max-width: 40%; visibility: hidden">
                     <span class="input-group-text"><i
                                 class="fa-solid fa-magnifying-glass"></i></span>
                     <input type="text" class="form-control"
@@ -97,7 +97,7 @@
                                            name="discountPercent"
                                            required>
                                     <div class="mb-3">
-                                        <label for="formFile" class="form-label">Ảnh</label>
+                                        <label for="formFile" class="form-label">Ảnh </label>
                                         <input class="form-control" type="file" name="image"
                                                accept="image/*"
                                                id="formFile" required>
@@ -192,6 +192,10 @@
                                             </div>
                                             <div class="modal-body">
                                                 <p>Xác nhận xoá mã <%= discounts[i].name %>?</p>
+                                                <p>Xóa bỏ mã giảm giá không làm mất các chương trình giảm giá được áp
+                                                    dụng trên các sản phẩm hiện đang được bày bán. Để xoá bỏ mã giảm giá
+                                                    trên sản phẩm, thử xoá và thêm lại sản phẩm nhưng không chọn mã giảm
+                                                    giá</p>
                                             </div>
                                             <div class="modal-footer">
                                                 <form name="<%= "deleteDiscountForm" + discounts[i].id %>"
@@ -231,7 +235,8 @@
                                                 <form method="post" action="/update_discount"
                                                       enctype="multipart/form-data"
                                                       id="<%= "updateModal" + discounts[i].id + "x" %>">
-                                                    <input value="<%= discounts[i].id %>" style="display: none" name="oldId">
+                                                    <input value="<%= discounts[i].id %>" style="display: none"
+                                                           name="oldId">
                                                     <label for="name" class="form-label">Tên</label>
                                                     <div class="input-group mb-3">
                                                         <input aria-label="..." type="text" class="form-control"
@@ -272,10 +277,11 @@
                                                            oninput="this.previousElementSibling.value = `Phần trăm giảm: ` + this.value"
                                                            required>
                                                     <div class="mb-3">
-                                                        <label for="formFile" class="form-label">Ảnh</label>
+                                                        <label for="formFile" class="form-label">Ảnh (bỏ trống nếu giữ
+                                                            nguyên ảnh cũ)</label>
                                                         <input class="form-control" type="file" name="image"
                                                                accept="image/*"
-                                                               id="formFile" required>
+                                                               id="formFile">
                                                     </div>
                                                 </form>
                                             </div>
@@ -285,7 +291,7 @@
                                                 </button>
                                                 <button type="submit" class="btn btn-primary"
                                                         form="<%= "updateModal" + discounts[i].id + "x" %>">
-                                                    Thêm mới
+                                                    Cập nhật
                                                 </button>
                                             </div>
                                         </div>
