@@ -223,8 +223,8 @@ export async function getItemsInOrder(orderId: number, userId: number): Promise<
                                                     "ProductCategory".name       as "productCategoryName",
                                                     P.displayimage               as "displayImage",
                                                     "OrderItem".size             as "size",
-                                                    pricebeforediscount          as "priceBeforeDiscount",
-                                                    priceafterdiscount           as "priceAfterDiscount",
+                                                    round(pricebeforediscount)          as "priceBeforeDiscount",
+                                                    round(priceafterdiscount)           as "priceAfterDiscount",
                                                     note                         as "note"
                                              from "OrderItem"
                                                       inner join "Product" P on P.id = "OrderItem".productid
