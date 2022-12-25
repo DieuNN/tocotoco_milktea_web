@@ -14,6 +14,7 @@ export async function addProductCategory(productCategory: ProductCategory): Prom
                                                      '${productCategory.displayImage}',
                                                      now(),
                                                      now())`)
+        console.log(result)
         await connection.query(`commit`)
         return {
             isSuccess: true,
@@ -22,7 +23,7 @@ export async function addProductCategory(productCategory: ProductCategory): Prom
         }
     } catch (e) {
         await connection.query(`rollback`)
-        return {
+        throw {
             isSuccess: true,
             result: null,
             errorMessage: "Lỗi server: " + e
@@ -40,13 +41,13 @@ export async function getProductCategories(): Promise<APIResponse<ProductCategor
                                                     "ProductCategory".description,
                                                     "ProductCategory".name,
                                                     modifiedat,
-                                                    count("ProductCategory".id)
+                                                    (select count(P.id) filter ( where P.id is not null ) not_nulls) as count
                                              from "ProductCategory"
-                                                      inner join "Product" P on "ProductCategory".id = P.categoryid
+                                                      left outer join "Product" P on "ProductCategory".id = P.categoryid
                                              group by "ProductCategory".id, "ProductCategory".displayimage, createat,
                                                       "ProductCategory".description, "ProductCategory".name, modifiedat
                                              order by id`)
-
+        console.log(result.rows)
         result.rows.map(item => {
             item.createat = new Date(item.createat).toLocaleString("vi-VN", {timeZone: "Asia/Saigon"})
             item.modifiedat = new Date(item.modifiedat).toLocaleString("vi-VN", {timeZone: "Asia/Saigon"})

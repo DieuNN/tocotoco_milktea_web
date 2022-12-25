@@ -45,7 +45,6 @@ export async function updateProductInventory(orderId: number, userId: number) {
                                                           inner join "OrderItem" OI on "OrderDetail".id = OI.orderid
                                                  where orderid = ${orderId}
                                                    and userid = ${userId};`)
-        console.log(productsId.rows)
         for (let item of productsId.rows) {
             await connection.query(`update "Product"
                                     set quantity = quantity - ${item.quantity}
