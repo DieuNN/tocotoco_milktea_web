@@ -509,6 +509,7 @@ export function API(app: Application) {
             res.json(r)
         }).catch(e => {
             res.end(e.toString())
+            throw e
         })
     })
     app.get("/api/user/reset_password/", (req: Request, res: Response) => {

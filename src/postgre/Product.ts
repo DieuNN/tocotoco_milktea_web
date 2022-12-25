@@ -113,7 +113,7 @@ export async function getProduct(productId: number): Promise<APIResponse<Product
                                                       round((coalesce("Discount".discountpercent, 0) * "Product".price) /
                                                             100)                 as "priceAfterDiscount",
                                                       "Product".size             as "size",
-                                                      "Product".displayimage
+                                                      "Product".displayimage as "displayImage"
                                                from "Product"
                                                         inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
                                                         left join "Discount" on "Product".discountid = "Discount".id
