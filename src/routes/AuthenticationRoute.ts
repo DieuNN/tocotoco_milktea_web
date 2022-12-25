@@ -103,7 +103,7 @@ export async function sendResetPasswordEmail(email: string): Promise<APIResponse
         const result = await transport.sendMail(mailOption)
         return createResult("Một email đặt lại mật khẩu đã được gửi tới hòm thư của bạn, kiểm tra hòm thư và làm theo hướng dẫn!")
     } catch (e) {
-        return createException(e)
+        throw createException(e)
     }
 
 }

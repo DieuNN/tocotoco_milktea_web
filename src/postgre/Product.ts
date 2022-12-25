@@ -174,12 +174,40 @@ export async function updateProductWithoutImage(product: Product, productId: num
         throw createException(e)
     }
 }
+
 export async function getProductsByCategoryId(categoryId: number): Promise<APIResponse<Product[]>> {
     try {
         const connection = await new Pool(PostgreSQLConfig)
-        const result = await connection.query(`select *
+        const result = await connection.query(`select "Product".id,
+                                                      "Product".name             as "productName",
+                                                      "Product".description      as "productDescription",
+                                                      "ProductCategory".name     as "productCategoryName",
+                                                      "Product".quantity         as "quantity",
+                                                      "Product".price            as "price",
+                                                      "Discount".name            as "discount",
+                                                      "Discount".discountpercent as "discountPercent",
+                                                      "Product".price -
+                                                      round(("Discount".discountpercent * "Product".price) /
+                                                            100)                 as "priceAfterDiscount",
+                                                      "Product".size             as "size",
+                                                      "Product".displayimage     as "displayImage"
+
                                                from "Product"
-                                               where categoryid = ${categoryId}`)
+                                                        inner join "ProductCategory" on "ProductCategory".id = "Product".categoryid
+                                                        left join "Discount" on "Product".discountid = "Discount".id
+                                               where "Product".active = true
+                                                 and "ProductCategory".id = ${categoryId}
+                                               order by id;
+        `)
+        result.rows.map(item => {
+            item.size = item.size.toString().split(",").filter((it: string) => {
+                return it != "";
+            }).join(",")
+            if (item.discount == null) {
+                item.discount = "Không"
+            }
+        })
+        connection.end()
         return createResult(result.rows)
     } catch (e) {
         return createException(e)
