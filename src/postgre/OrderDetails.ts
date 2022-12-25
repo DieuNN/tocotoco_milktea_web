@@ -385,7 +385,6 @@ export async function getOrders(type: string | null): Promise<APIResponse<any>> 
         dumpResult.map(element => {
             element.time = new Date(element.time).toLocaleString("vi-VN")
         })
-        console.log(dumpResult)
         return createResult(dumpResult)
     } catch (e) {
         return createException(e)
