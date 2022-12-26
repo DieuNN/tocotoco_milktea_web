@@ -72,7 +72,7 @@ export function orderRoutes(app: Application) {
     app.post("/canceled-orders/delete", (req: Request, res: Response) => {
         const {paymentId, orderId} = req.body
         deleteOrder(orderId, paymentId).then(r => {
-            res.redirect("/completed-orders")
+            res.redirect("/canceled-orders")
         })
     })
 
