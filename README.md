@@ -1,1 +1,1 @@
-Email hoặc liên hệ facebook
+Contributions are welcome.
